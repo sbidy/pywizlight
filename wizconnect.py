@@ -1,13 +1,10 @@
 import socket
 import json
-'''
-     * Example Request:
-     * {"method": "setPilot", "id": 24, "params": {"state": 1}}
-'''
 
 class wizlight:
-        
+    
     def __init__ (self, ip):
+        ''' Constructor with ip of the bulb '''
         self.ip = ip
 
     def setColor(self, r=0, g=0, b=0, w=0):
