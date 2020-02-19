@@ -28,61 +28,72 @@ class wizlight:
     '''
         Creates a instance of a WiZ Light Bulb
     '''
+    UDP_PORT = 38899
+
     def __init__ (self, ip):
         ''' Constructor with ip of the bulb '''
         self.ip = ip
 
-    @color.setter
-    def color(self, r=0, g=0, b=0, w=0):
-        ''' set the rgbw color state of the bulb '''
-        message = r'{"method":"setPilot","params":{"r":%i,\
-                                                    "g":%i,\
-                                                    "b":%i,\
-                                                    "w":%i}}' % (r,g,b,w)
-        self.sendUDPMessage(message)
-
     @property
-    def color(self):
-        ''' get the rgb color state of the bulb '''
-        repose = self.getState()
-        if "temp" not in repose:
-            r = repose['result']['r']
-            g = repose['result']['g']
-            b = repose['result']['b']
-            w = repose['result']['w']
+    def getColor(self):
+        ''' get the rgb color state of the bulb and turns it on'''
+        resp = self.getState()
+        if "temp" not in resp['result']:
+            r = resp['result']['r']
+            g = resp['result']['g']
+            b = resp['result']['b']
+            w = resp['result']['w']
             return r, g, b, w
         else:
             # no RGB color value was set
             return None, None, None
 
-    @brightness.setter
-    def brightness(self, percent=100):
+    def setColor(self, r=0, g=0, b=0, w=0):
+        ''' set the rgbw color state of the bulb '''
+        message = r'{"method":"setPilot","params":{"r":%i,"g":%i,"b":%i,"w":%i}}' % (r,g,b,w)
+        self.sendUDPMessage(message)
+
+    @property
+    def getBrightness(self):
+        ''' gets the precentage of the dimming value 0-100% '''
+        return self.getState()['result']['dimming']
+
+    def setBrightness(self, percent=100):
         ''' set the precentage of the dimming value 0-100% '''
         message = r'{"method":"setPilot","params":{"dimming":%i}}' % percent
         self.sendUDPMessage(message)
     
     @property
-    def brightness(self):
-        ''' gets the precentage of the dimming value 0-100% '''
-        return self.getState()['result']['dimming']
+    def getColortemp(self):
+        resp = self.getState()
+        if "temp" in resp['result']:
+            return resp['result']['temp']
+        else:
+            return None
 
-    @colortemp.setter
-    def colortemp(self, kelvin):
+    def setColortemp(self, kelvin):
         ''' sets the color temperature for the white led in the bulb '''
         if kelvin > 2499 and kelvin < 6501:
             message = r'{"method":"setPilot","params":{"temp":%i}}' % kelvin
             self.sendUDPMessage(message)
         else:
             raise ValueError("Value out of range. The value for kelvin must be between 2500 and 6500")
-    
+
     @property
-    def colortemp(self):
-        repose = self.getState()
-        if "temp" in repose:
-            return repose['result']['temp']
-        else:
-            return None
-    
+    def status(self):
+        ''' returns true or false / true = on , false = off '''
+        return self.getState()['result']['state']
+
+    def turn_off(self):
+        ''' turns the light off '''
+        message = r'{"method":"setPilot","params":{"state":false}}'
+        self.sendUDPMessage(message)
+
+    def turn_on(self):
+        message = r'{"method":"setPilot","params":{"state":true}}'
+        self.sendUDPMessage(message)
+
+    ### ---------- Helper Functions ------------
     def getState(self):
         '''
         getPilot - gets the current bulb state - no paramters need to be included
@@ -96,27 +107,25 @@ class wizlight:
         message = r'{"method":"getSystemConfig","params":{}}'
         return self.sendUDPMessage(message)
     
-
     def lightSwitch(self):
         '''
-        turns the light bulb on or off
+        turns the light bulb on or off like a switch
         '''
         # first get the status
-        message = r'{"method":"getPilot","params":{}}'
-        result = self.sendUDPMessage(message)
+        result = self.getState()
         if result['result']['state']:
             # if the light is on - switch off
-            message = r'{"method":"setPilot","params":{"state":false}}'
+            self.turn_off()
         else:
             # if the light is off - turn on
-            message = r'{"method":"setPilot","params":{"state":true}}'
-        self.sendUDPMessage(message)
+            self.turn_on()
+        
 
     def sendUDPMessage(self, message):
         ''' send the udp message to the bulb '''
-        UDP_PORT = 38899 # fix port for Wiz Lights
+         # fix port for Wiz Lights
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) # UDP
-        sock.sendto(bytes(message, "utf-8"), (self.ip, UDP_PORT))
+        sock.sendto(bytes(message, "utf-8"), (self.ip, self.UDP_PORT))
         sock.settimeout(30.0)
         data, addr = sock.recvfrom(1024)
         if len(data) is not None:
