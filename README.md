@@ -4,7 +4,7 @@ Work in progress an only tested with the [SLV Play RGB bulb](https://www.amazon.
 
 
 ## Bulb methodes:
-- getSystemConfig - gets the current system configuration - no paramters need
+- **getSystemConfig** - gets the current system configuration - no paramters need
 - syncPilot - sent by the bulb as heart-beats
 - getPilot - gets the current bulb state - no paramters need to be included
 - setPilot - used to tell the bulb to change color/temp/state
