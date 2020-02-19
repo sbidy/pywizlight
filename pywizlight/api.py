@@ -36,7 +36,7 @@ class wizlight:
 
     @property
     def color(self):
-        ''' get the rgb color state of the bulb and turns it on'''
+        ''' get the rgbW color state of the bulb and turns it on'''
         resp = self.getState()
         if "temp" not in resp['result']:
             r = resp['result']['r']
@@ -46,13 +46,32 @@ class wizlight:
             return r, g, b, w
         else:
             # no RGB color value was set
-            return None, None, None
+            return None, None, None, None
 
     @color.setter
     def color(self, color=(0,0,0,0)):
         ''' set the rgbw color state of the bulb '''
         r, g, b, w = color
         message = r'{"method":"setPilot","params":{"r":%i,"g":%i,"b":%i,"w":%i}}' % (r,g,b,w)
+        self.sendUDPMessage(message)
+    @property
+    def rgb(self):
+        ''' get the rgb color state of the bulb and turns it on'''
+        resp = self.getState()
+        if "temp" not in resp['result']:
+            r = resp['result']['r']
+            g = resp['result']['g']
+            b = resp['result']['b']
+            return r, g, b, w
+        else:
+            # no RGB color value was set
+            return None, None, None
+
+    @rgb.setter
+    def rgb(self, values):
+        ''' set the rgb color state of the bulb '''
+        r, g, b = values
+        message = r'{"method":"setPilot","params":{"r":%i,"g":%i,"b":%i}}' % (r,g,b)
         self.sendUDPMessage(message)
 
     @property
