@@ -6,12 +6,9 @@ def hex_to_percent(hex):
 
 light = wizlight("192.168.178.95")
 
-light.lightSwitch()
+#light.lightSwitch()
 
-light.color = (255, 255, 0, 0)
-print(light.color)
-
-light.brightness = hex_to_percent(127)
-print(light.brightness)
+light.rgb = (255, 255, 0)
+print(light.rgb)
 
 light.turn_off()

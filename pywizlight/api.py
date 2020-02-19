@@ -54,6 +54,7 @@ class wizlight:
         r, g, b, w = color
         message = r'{"method":"setPilot","params":{"r":%i,"g":%i,"b":%i,"w":%i}}' % (r,g,b,w)
         self.sendUDPMessage(message)
+
     @property
     def rgb(self):
         ''' get the rgb color state of the bulb and turns it on'''
@@ -62,7 +63,7 @@ class wizlight:
             r = resp['result']['r']
             g = resp['result']['g']
             b = resp['result']['b']
-            return r, g, b, w
+            return r, g, b
         else:
             # no RGB color value was set
             return None, None, None
@@ -76,13 +77,13 @@ class wizlight:
 
     @property
     def brightness(self):
-        ''' gets the precentage of the dimming value 0-100% '''
-        return self.getState()['result']['dimming']
+        ''' gets the value of the brightness 0-255 '''
+        return self.percent_to_hex(self.getState()['result']['dimming'])
 
     @brightness.setter
-    def brightness(self, percent=100):
-        ''' set the precentage of the dimming value 0-100% '''
-        message = r'{"method":"setPilot","params":{"dimming":%i}}' % percent
+    def brightness(self, value=255):
+        ''' set the value of the brightness 0-255 '''
+        message = r'{"method":"setPilot","params":{"dimming":%i}}' % self.hex_to_percent(value)
         self.sendUDPMessage(message)
     
     @property
