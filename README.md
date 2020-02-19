@@ -25,6 +25,8 @@ Work in progress an only tested with the [SLV Play RGB bulb](https://www.amazon.
 ## Example requests
 Send message to the bulb:
     `{"method":"setPilot","params":{"r":255,"g":255,"b":255,"dimming":50}}`
+Response: `{"method":"setPilot","env":"pro","result":{"success":true}}`
 
 Get state of the bulb:
     `{"method":"getPilot","params":{}}`
+Response: `{"method":"getPilot","env":"pro","result":{"mac":"0000000000","rssi":-65,"src":"","state":false,"sceneId":0,"temp":6500,"dimming":100}}`
