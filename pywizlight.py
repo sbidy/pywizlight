@@ -32,27 +32,57 @@ class wizlight:
         ''' Constructor with ip of the bulb '''
         self.ip = ip
 
-    def setColor(self, r=0, g=0, b=0, w=0):
-        ''' used to tell the bulb to change color/temp/state '''
+    @color.setter
+    def color(self, r=0, g=0, b=0, w=0):
+        ''' set the rgbw color state of the bulb '''
         message = r'{"method":"setPilot","params":{"r":%i,\
                                                     "g":%i,\
                                                     "b":%i,\
                                                     "w":%i}}' % (r,g,b,w)
         self.sendUDPMessage(message)
 
-    def setDimmer(self, percent=100):
+    @property
+    def color(self):
+        ''' get the rgb color state of the bulb '''
+        repose = self.getState()
+        if "temp" not in repose:
+            r = repose['result']['r']
+            g = repose['result']['g']
+            b = repose['result']['b']
+            w = repose['result']['w']
+            return r, g, b, w
+        else:
+            # no RGB color value was set
+            return None, None, None
+
+    @brightness.setter
+    def brightness(self, percent=100):
         ''' set the precentage of the dimming value 0-100% '''
         message = r'{"method":"setPilot","params":{"dimming":%i}}' % percent
         self.sendUDPMessage(message)
+    
+    @property
+    def brightness(self):
+        ''' gets the precentage of the dimming value 0-100% '''
+        return self.getState()['result']['dimming']
 
-    def setColorTemperature(self, kelvin):
+    @colortemp.setter
+    def colortemp(self, kelvin):
         ''' sets the color temperature for the white led in the bulb '''
         if kelvin > 2499 and kelvin < 6501:
             message = r'{"method":"setPilot","params":{"temp":%i}}' % kelvin
             self.sendUDPMessage(message)
         else:
             raise ValueError("Value out of range. The value for kelvin must be between 2500 and 6500")
-
+    
+    @property
+    def colortemp(self):
+        repose = self.getState()
+        if "temp" in repose:
+            return repose['result']['temp']
+        else:
+            return None
+    
     def getState(self):
         '''
         getPilot - gets the current bulb state - no paramters need to be included
@@ -65,6 +95,7 @@ class wizlight:
         ''' returns the configuration from the bulb '''
         message = r'{"method":"getSystemConfig","params":{}}'
         return self.sendUDPMessage(message)
+    
 
     def lightSwitch(self):
         '''
