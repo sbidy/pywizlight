@@ -1,8 +1,8 @@
-import wizconnect 
+import pywizlight 
 
-light = wizconnect.wizlight("192.168.178.95")
+light = pywizlight.wizlight("192.168.178.95")
 #light.setColor(255,255,0,0,50)
-#print(light.getState())
+print(light.getState())
 #light.lightSwitch()
 #light.setDimmer(100)
 #light.setColorTemperature(6500)
