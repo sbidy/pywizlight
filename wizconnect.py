@@ -2,25 +2,39 @@ import socket
 import json
 
 class wizlight:
-    
+    '''
+        Creates a instance of a WiZ Light Bulb
+
+        Bulb methodes:
+            getSystemConfig - gets the current system configuration - no paramters need
+            syncPilot - sent by the bulb as heart-beats
+            getPilot - gets the current bulb state - no paramters need to be included
+            setPilot - used to tell the bulb to change color/temp/state
+            Pulse - uncertain of purpose
+            Registration - used to "register" with the bulb: This notifies the built that
+                            it you want it to send you heartbeat sync packets.
+        Bulb paramters:
+            sceneId - calls one of thr predefined scenes (int from 0 to 12?)
+            speed - sets the color changing speed in precent
+            dimming - sets the dimmer of the bulb in precent
+            r - red color range 0-255
+            g - green color range 0-255
+            b - blue color range 0-255
+            c - ????
+            w - white color range 0-255
+            id - the bulb id
+
+    '''
     def __init__ (self, ip):
         ''' Constructor with ip of the bulb '''
         self.ip = ip
 
     def setColor(self, r=0, g=0, b=0, w=0):
-        ''' used to tell the bulb to change color/temp/state
-            Example Request:
-                {"method": "setPilot", "id": 24, "params": {"state": 1}}
-                "sceneId":6,
-                "speed":100,
-                "dimming":61
-                r":0,
-                "g":240,
-                "b":121,
-                "c":0,
-                "w":255,
-        '''
-        message = r'{"method":"setPilot","params":{"r":%i,"g":%i,"b":%i,"w":%i}}' % (r,g,b,w)
+        ''' used to tell the bulb to change color/temp/state '''
+        message = r'{"method":"setPilot","params":{"r":%i,\
+                                                    "g":%i,\
+                                                    "b":%i,\
+                                                    "w":%i}}' % (r,g,b,w)
         self.sendUDPMessage(message)
 
     def setDimmer(self, percent=100):
