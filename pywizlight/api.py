@@ -83,8 +83,11 @@ class wizlight:
     @brightness.setter
     def brightness(self, value=255):
         ''' set the value of the brightness 0-255 '''
-        message = r'{"method":"setPilot","params":{"dimming":%i}}' % self.hex_to_percent(value)
-        self.sendUDPMessage(message)
+        percent = self.hex_to_percent(value)
+        # lamp doesn't supports lower than 10%
+        if percent > 10:
+            message = r'{"method":"setPilot","params":{"dimming":%i}}' % percent
+            self.sendUDPMessage(message)
     
     @property
     def colortemp(self):
@@ -161,7 +164,7 @@ class wizlight:
                 raise ValueError(resp)
 
     def hex_to_percent(self, hex):
-        return (hex/255)*100
+        return round((hex/255)*100)
 
     def percent_to_hex(self, percent):
-        return (percent / 100)*255
+        return round((percent / 100)*255)
