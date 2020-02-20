@@ -3,7 +3,7 @@ A python connector for WiZ light bulbs.
 Work in progress an only tested with the [SLV Play RGB bulb](https://www.amazon.de/dp/B07PNCDJLW).
 
 ## Bulb paramters:
-- **sceneId** - calls one of thr predefined scenes (int from 0 to 32)
+- **sceneId** - calls one of thr predefined scenes (int from 0 to 32) [Wiki](https://github.com/sbidy/pywizlight/wiki/Light-Scenes)
 - **speed** - sets the color changing speed in precent
 - **dimming** - sets the dimmer of the bulb in precent
 - **r** - red color range 0-255
