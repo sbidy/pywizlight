@@ -22,6 +22,38 @@ Work in progress an only tested with the [SLV Play RGB bulb](https://www.amazon.
 - **w** - white color range 0-255
 - **id** - the bulb id
 
+## Classes
+
+`wizlight(ip)` Creates a instance of a WiZ Light Bulb. Constructor with ip of the bulb
+
+### Instance variables
+`brightness`gets the value of the brightness 0-255
+
+`color` get the rgbW color state of the bulb and turns it on
+
+`colortemp` get the color temperature ot the bulb
+
+`rgb` get the rgb color state of the bulb and turns it on
+
+`status` returns true or false / true = on , false = off
+
+### Methods
+`getBulbConfig(self)` returns the configuration from the bulb
+
+`getState(self)` gets the current bulb state - no paramters need to be included
+
+`hex_to_percent(self, hex)` helper for convertring 0-255 to 0-100
+
+`percent_to_hex(self, percent)` helper for converting 0-100 into 0-255
+
+`lightSwitch(self)` turns the light bulb on or off like a switch
+
+`sendUDPMessage(self, message)` send the udp message to the bulb
+
+`turn_off(self)` turns the light off
+
+`turn_on(self)` turns the light on
+
 ## Example requests
 Send message to the bulb:
     `{"method":"setPilot","params":{"r":255,"g":255,"b":255,"dimming":50}}`
