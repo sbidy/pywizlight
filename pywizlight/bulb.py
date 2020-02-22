@@ -102,7 +102,9 @@ class wizlight:
 
     @speed.setter
     def speed(self, value: int):
-        ''' set the color changing speed in precent (0-100)'''
+        '''
+            set the color changing speed in precent (0-100)
+        '''
         if value > 0 and value < 101:
             message = r'{"method":"setPilot","params":{"speed":%i}}' % (value)
             self.sendUDPMessage(message)
@@ -122,6 +124,9 @@ class wizlight:
 
     @scene.setter
     def scene(self, scene_id: int):
+        '''
+            set the scene by id
+        '''
         if scene_id in self.SCENES:
             message = '{"method":"setPilot","params":{"sceneId":%i}}' % scene_id
             self.sendUDPMessage(message)
@@ -131,7 +136,9 @@ class wizlight:
 
     @property
     def cold_white(self) -> int:
-        ''' get the value of the cold white led '''
+        '''
+            get the value of the cold white led
+        '''
         resp = self.getState()
         if "temp" not in resp['result']:
             return resp['result']['c']
@@ -140,7 +147,9 @@ class wizlight:
 
     @cold_white.setter
     def cold_white(self, value: int):
-        ''' set the value of the cold white led '''
+        '''
+            set the value of the cold white led
+        '''
         if value > 0 and value < 256:
             message = r'{"method":"setPilot","params":{"c":%i}}' % (value)
             self.sendUDPMessage(message)
@@ -149,9 +158,11 @@ class wizlight:
             
     @property
     def rgb(self):
-        ''' get the rgb color state of the bulb and turns it on'''
+        '''
+            get the rgb color state of the bulb and turns it on
+        '''
         resp = self.getState()
-        if "temp" not in resp['result']:
+        if "r" in resp['result'] and "g" in resp['result'] and "b" in resp['result']:
             r = resp['result']['r']
             g = resp['result']['g']
             b = resp['result']['b']
@@ -162,19 +173,25 @@ class wizlight:
 
     @rgb.setter
     def rgb(self, values):
-        ''' set the rgb color state of the bulb '''
+        '''
+            set the rgb color state of the bulb
+        '''
         r, g, b = values
         message = r'{"method":"setPilot","params":{"r":%i,"g":%i,"b":%i}}' % (r,g,b)
         self.sendUDPMessage(message)
 
     @property
     def brightness(self) -> int:
-        ''' gets the value of the brightness 0-255 '''
+        '''
+            gets the value of the brightness 0-255
+        '''
         return self.percent_to_hex(self.getState()['result']['dimming'])
 
     @brightness.setter
     def brightness(self, value: int):
-        ''' set the value of the brightness 0-255 '''
+        '''
+            set the value of the brightness 0-255
+        '''
         percent = self.hex_to_percent(value)
         # lamp doesn't supports lower than 10%
         if percent < 10: percent = 10
@@ -191,7 +208,9 @@ class wizlight:
 
     @colortemp.setter
     def colortemp(self, kelvin: int):
-        ''' sets the color temperature for the white led in the bulb '''
+        '''
+            sets the color temperature for the white led in the bulb
+        '''
         # normalize the kelvin values - should be removed
         if kelvin < 2500: kelvin = 2500
         if kelvin > 6500: kelvin = 6500 
@@ -202,11 +221,15 @@ class wizlight:
     ## ------------------ Non properties --------------
     @property
     def status(self) -> bool:
-        ''' returns true or false / true = on , false = off '''
+        '''
+            returns true or false / true = on , false = off
+        '''
         return self.getState()['result']['state']
 
     def turn_off(self):
-        ''' turns the light off '''
+        '''
+            turns the light off
+        '''
         message = r'{"method":"setPilot","params":{"state":false}}'
         self.sendUDPMessage(message)
 
@@ -217,20 +240,22 @@ class wizlight:
     ### ---------- Helper Functions ------------
     def getState(self):
         '''
-        getPilot - gets the current bulb state - no paramters need to be included
-        {"method": "getPilot", "id": 24}
+            getPilot - gets the current bulb state - no paramters need to be included
+            {"method": "getPilot", "id": 24}
         '''
         message = r'{"method":"getPilot","params":{}}'
         return self.sendUDPMessage(message)
 
     def getBulbConfig(self):
-        ''' returns the configuration from the bulb '''
+        '''
+            returns the configuration from the bulb
+        '''
         message = r'{"method":"getSystemConfig","params":{}}'
         return self.sendUDPMessage(message)
     
     def lightSwitch(self):
         '''
-        turns the light bulb on or off like a switch
+            turns the light bulb on or off like a switch
         '''
         # first get the status
         result = self.getState()
@@ -242,7 +267,9 @@ class wizlight:
             self.turn_on()
     
     def getConnection(self) -> bool:
-        ''' returns true or false and indicates the connection state '''
+        '''
+            returns true or false and indicates the connection state
+        '''
         try:
             self.getState()
             return True
@@ -251,7 +278,9 @@ class wizlight:
 
 
     def sendUDPMessage(self, message):
-        ''' send the udp message to the bulb '''
+        '''
+            send the udp message to the bulb
+        '''
          # fix port for Wiz Lights
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) # UDP
         sock.sendto(bytes(message, "utf-8"), (self.ip, self.UDP_PORT))
