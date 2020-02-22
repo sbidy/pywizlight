@@ -86,6 +86,22 @@ class wizlight:
             self.sendUDPMessage(message)
 
     @property
+    def speed(self):
+        ''' get the color changing speed '''
+        resp = self.getState()
+        if "speed" in resp['result']:
+            return resp['result']['speed']
+        else:
+            return None
+
+    @speed.setter
+    def speed(self, value):
+        ''' set the color changing speed in precent (0-100)'''
+        if value > 0 and value < 101:
+            message = r'{"method":"setPilot","params":{"speed":%i}}' % (value)
+            self.sendUDPMessage(message)
+
+    @property
     def scene(self):
         ''' get the current scene name'''
         id = self.getState()['result']['sceneId']

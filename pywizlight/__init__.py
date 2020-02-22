@@ -1,2 +1,2 @@
-from .api import wizlight 
+from .bulb import wizlight 
 __all__ = ['wizlight']

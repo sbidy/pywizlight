@@ -22,6 +22,10 @@ Work in progress an only tested with the [SLV Play RGB bulb](https://www.amazon.
     # get the current values
     r, g, b = light.rgb
     print("red %i green %i blue %i" % (r, g, b))
+    # start a scene 
+    light.scene = 14 # party
+    # get the name of the current scene
+    print(light.scene)
     # set brightness to 255 = 100%
     light.brightness = 255
     # turns the light off
@@ -29,7 +33,7 @@ Work in progress an only tested with the [SLV Play RGB bulb](https://www.amazon.
 
 ```
 
-## Bulb paramters:
+## Bulb paramters (UDP RAW):
 - **sceneId** - calls one of thr predefined scenes (int from 0 to 32) [Wiki](https://github.com/sbidy/pywizlight/wiki/Light-Scenes)
 - **speed** - sets the color changing speed in precent
 - **dimming** - sets the dimmer of the bulb in precent
