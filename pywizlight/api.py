@@ -28,11 +28,63 @@ class wizlight:
     '''
         Creates a instance of a WiZ Light Bulb
     '''
+
     UDP_PORT = 38899
+    SCENES = {
+                1:"Ocean",
+                2:"Romance",
+                3:"Sunset",
+                4:"Party",
+                5:"Fireplace",
+                6:"Cozy",
+                7:"Forest",
+                8:"Pastel Colors",
+                9:"Wake up",
+                10:"Bedtime",
+                11:"Warm White",
+                12:"Daylight",
+                13:"Cool white",
+                14:"Night light",
+                15:"Focus",
+                16:"Relax",
+                17:"True colors",
+                18:"TV time",
+                19:"Plantgrowth",
+                20:"Spring",
+                21:"Summer",
+                22:"Fall",
+                23:"Deepdive",
+                24:"Jungle",
+                25:"Mojito",
+                26:"Club",
+                27:"Christmas",
+                28:"Halloween",
+                30:"Candlelight",
+                31:"Goldenwhite",
+                32:"Pulse",
+                33:"Steampunk"
+    }
 
     def __init__ (self, ip):
         ''' Constructor with ip of the bulb '''
         self.ip = ip
+
+    @property
+    def scene(self):
+        ''' get the current scene name'''
+        id = self.getState()['result']['sceneId']
+        if id in self.SCENES:
+            return self.SCENES[id]
+        else:
+            return None
+
+    @scene.setter
+    def scene(self, scene_id):
+        if scene_id in self.SCENES:
+            message = '{"method":"setPilot","params":{"sceneId":%i}}' % scene_id
+            self.sendUDPMessage(message)
+        else:
+            pass
 
     @property
     def color(self):
@@ -54,7 +106,7 @@ class wizlight:
         r, g, b, w = color
         message = r'{"method":"setPilot","params":{"r":%i,"g":%i,"b":%i,"w":%i}}' % (r,g,b,w)
         self.sendUDPMessage(message)
-
+        
     @property
     def rgb(self):
         ''' get the rgb color state of the bulb and turns it on'''
@@ -100,12 +152,16 @@ class wizlight:
     @colortemp.setter
     def colortemp(self, kelvin):
         ''' sets the color temperature for the white led in the bulb '''
-        if kelvin > 2499 and kelvin < 6501:
-            message = r'{"method":"setPilot","params":{"temp":%i}}' % kelvin
-            self.sendUDPMessage(message)
-        else:
-            raise ValueError("Value out of range. The value for kelvin must be between 2500 and 6500")
+        # normalize the kelvin values - should be removed
+        if kelvin < 2500: kelvin = 2500
+        if kelvin > 6500: kelvin = 6500 
+        
+        message = r'{"method":"setPilot","params":{"temp":%i}}' % kelvin
+        self.sendUDPMessage(message)
+           
 
+
+    ## ------------------ Non properties --------------
     @property
     def status(self):
         ''' returns true or false / true = on , false = off '''
@@ -146,14 +202,22 @@ class wizlight:
         else:
             # if the light is off - turn on
             self.turn_on()
-        
+    
+    def getConnection(self):
+        ''' returns true or false and indicates the connection state '''
+        try:
+            self.getState()
+            return True
+        except OSError:
+            return False
+
 
     def sendUDPMessage(self, message):
         ''' send the udp message to the bulb '''
          # fix port for Wiz Lights
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) # UDP
         sock.sendto(bytes(message, "utf-8"), (self.ip, self.UDP_PORT))
-        sock.settimeout(30.0)
+        sock.settimeout(10.0)
         data, addr = sock.recvfrom(1024)
         if len(data) is not None:
             resp = json.loads(data.decode())
