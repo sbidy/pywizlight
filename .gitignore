@@ -3,6 +3,10 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# custom removes
+.vscode
+test.py
+
 # C extensions
 *.so
 
