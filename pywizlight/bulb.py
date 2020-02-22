@@ -28,7 +28,7 @@ class wizlight:
     '''
         Creates a instance of a WiZ Light Bulb
     '''
-
+    # default port for WiZ lights
     UDP_PORT = 38899
     SCENES = {
                 1:"Ocean",
@@ -70,8 +70,10 @@ class wizlight:
         self.ip = ip
 
     @property
-    def warm_white(self):
-        ''' get the value of the warm white led '''
+    def warm_white(self) -> int:
+        ''' 
+            get the value of the warm white led 
+        '''
         resp = self.getState()
         if "temp" not in resp['result']:
             return resp['result']['w']
@@ -79,15 +81,19 @@ class wizlight:
             return None
 
     @warm_white.setter
-    def warm_white(self, value):
-        ''' set the value of the cold white led '''
+    def warm_white(self, value: int):
+        '''
+            set the value of the cold white led
+        '''
         if value > 0 and value < 256:
             message = r'{"method":"setPilot","params":{"w":%i}}' % (value)
             self.sendUDPMessage(message)
 
     @property
-    def speed(self):
-        ''' get the color changing speed '''
+    def speed(self) -> int:
+        ''' 
+            get the color changing speed
+        '''
         resp = self.getState()
         if "speed" in resp['result']:
             return resp['result']['speed']
@@ -95,15 +101,19 @@ class wizlight:
             return None
 
     @speed.setter
-    def speed(self, value):
+    def speed(self, value: int):
         ''' set the color changing speed in precent (0-100)'''
         if value > 0 and value < 101:
             message = r'{"method":"setPilot","params":{"speed":%i}}' % (value)
             self.sendUDPMessage(message)
+        else:
+            raise IndexError("Value must be between 0 and 100")
 
     @property
-    def scene(self):
-        ''' get the current scene name'''
+    def scene(self) -> str:
+        '''
+            get the current scene name
+        '''
         id = self.getState()['result']['sceneId']
         if id in self.SCENES:
             return self.SCENES[id]
@@ -111,16 +121,16 @@ class wizlight:
             return None
 
     @scene.setter
-    def scene(self, scene_id):
+    def scene(self, scene_id: int):
         if scene_id in self.SCENES:
             message = '{"method":"setPilot","params":{"sceneId":%i}}' % scene_id
             self.sendUDPMessage(message)
         else:
             # id not in SCENES !
-            pass
+            raise IndexError("Scene is not available - only 0 to 32 are supported")
 
     @property
-    def cold_white(self):
+    def cold_white(self) -> int:
         ''' get the value of the cold white led '''
         resp = self.getState()
         if "temp" not in resp['result']:
@@ -129,11 +139,13 @@ class wizlight:
             return None
 
     @cold_white.setter
-    def cold_white(self, value):
+    def cold_white(self, value: int):
         ''' set the value of the cold white led '''
         if value > 0 and value < 256:
             message = r'{"method":"setPilot","params":{"c":%i}}' % (value)
             self.sendUDPMessage(message)
+        else:
+            raise IndexError("Value must be between 1 and 255")
             
     @property
     def rgb(self):
@@ -156,12 +168,12 @@ class wizlight:
         self.sendUDPMessage(message)
 
     @property
-    def brightness(self):
+    def brightness(self) -> int:
         ''' gets the value of the brightness 0-255 '''
         return self.percent_to_hex(self.getState()['result']['dimming'])
 
     @brightness.setter
-    def brightness(self, value=255):
+    def brightness(self, value: int):
         ''' set the value of the brightness 0-255 '''
         percent = self.hex_to_percent(value)
         # lamp doesn't supports lower than 10%
@@ -170,7 +182,7 @@ class wizlight:
         self.sendUDPMessage(message)
     
     @property
-    def colortemp(self):
+    def colortemp(self) -> int:
         resp = self.getState()
         if "temp" in resp['result']:
             return resp['result']['temp']
@@ -178,7 +190,7 @@ class wizlight:
             return None
 
     @colortemp.setter
-    def colortemp(self, kelvin):
+    def colortemp(self, kelvin: int):
         ''' sets the color temperature for the white led in the bulb '''
         # normalize the kelvin values - should be removed
         if kelvin < 2500: kelvin = 2500
@@ -189,7 +201,7 @@ class wizlight:
            
     ## ------------------ Non properties --------------
     @property
-    def status(self):
+    def status(self) -> bool:
         ''' returns true or false / true = on , false = off '''
         return self.getState()['result']['state']
 
@@ -229,7 +241,7 @@ class wizlight:
             # if the light is off - turn on
             self.turn_on()
     
-    def getConnection(self):
+    def getConnection(self) -> bool:
         ''' returns true or false and indicates the connection state '''
         try:
             self.getState()
