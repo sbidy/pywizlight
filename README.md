@@ -2,6 +2,33 @@
 A python connector for WiZ light bulbs.
 Work in progress an only tested with the [SLV Play RGB bulb](https://www.amazon.de/dp/B07PNCDJLW).
 
+## Example
+```
+    from pywizlight import wizlight
+
+    light = wizlight("<your bulb ip")
+    # turn on the light
+    light.turn_on()
+    # set bulb to warm white color
+    light.warm_white = 255
+    # print the value 
+    print(light.warm_white)
+    # set red to 255 = 100%
+    light.rgb = 255, 0, 0
+    # set green to 255 = 100%
+    light.rgb = 0, 255, 0
+    # set blue to 255 = 100%
+    light.rgb = 0, 0, 255
+    # get the current values
+    r, g, b = light.rgb
+    print("red %i green %i blue %i" % (r, g, b))
+    # set brightness to 255 = 100%
+    light.brightness = 255
+    # turns the light off
+    light.turn_off()
+
+```
+
 ## Bulb paramters:
 - **sceneId** - calls one of thr predefined scenes (int from 0 to 32) [Wiki](https://github.com/sbidy/pywizlight/wiki/Light-Scenes)
 - **speed** - sets the color changing speed in precent
