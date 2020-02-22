@@ -75,7 +75,7 @@ class wizlight:
             get the value of the warm white led 
         '''
         resp = self.getState()
-        if "temp" not in resp['result']:
+        if "w" in resp['result']:
             return resp['result']['w']
         else:
             return None
@@ -140,7 +140,7 @@ class wizlight:
             get the value of the cold white led
         '''
         resp = self.getState()
-        if "temp" not in resp['result']:
+        if "c" in resp['result']:
             return resp['result']['c']
         else:
             return None
