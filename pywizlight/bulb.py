@@ -60,7 +60,7 @@ class wizlight:
                 27:"Christmas",
                 28:"Halloween",
                 30:"Candlelight",
-                31:"Goldenwhite",
+                31:"Golden white",
                 32:"Pulse",
                 33:"Steampunk"
     }
@@ -104,6 +104,7 @@ class wizlight:
     def speed(self, value: int):
         '''
             set the color changing speed in precent (0-100)
+            This applies only to changing effects!
         '''
         if value > 0 and value < 101:
             message = r'{"method":"setPilot","params":{"speed":%i}}' % (value)
@@ -217,14 +218,19 @@ class wizlight:
         
         message = r'{"method":"setPilot","params":{"temp":%i}}' % kelvin
         self.sendUDPMessage(message)
-           
-    ## ------------------ Non properties --------------
+
     @property
     def status(self) -> bool:
         '''
             returns true or false / true = on , false = off
         '''
-        return self.getState()['result']['state']
+        resp = self.getState()
+        if "state" in resp['result']:
+            return resp['result']['state']
+        else:
+            raise ValueError("Cant read response for 'state' from the bulb. Debug:", resp)
+
+    ## ------------------ Non properties --------------
 
     def turn_off(self):
         '''
@@ -234,8 +240,18 @@ class wizlight:
         self.sendUDPMessage(message)
 
     def turn_on(self):
+        '''
+            turns the light on
+        '''
         message = r'{"method":"setPilot","params":{"state":true}}'
         self.sendUDPMessage(message)
+    
+    def get_id_from_scene_name(self, scene: str) -> int: 
+        ''' gets the id from a scene name '''
+        for id in self.SCENES:
+            if self.SCENES[id] == scene:
+                return id
+        raise ValueError("Scene '%s' not in scene list." % scene)
 
     ### ---------- Helper Functions ------------
     def getState(self):
@@ -292,10 +308,13 @@ class wizlight:
                     return resp
             else:
                 # exception should be created
-                raise ValueError(resp)
+                raise ValueError("Cant read response from the bulb. Debug:",resp)
 
     def hex_to_percent(self, hex):
+        ''' converts hex 0-255 values to percent '''
         return round((hex/255)*100)
 
     def percent_to_hex(self, percent):
+        ''' converts percent values 0-100 into hex 0-255'''
         return round((percent / 100)*255)
+    
