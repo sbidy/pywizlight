@@ -29,7 +29,6 @@ class wizlight:
         Creates a instance of a WiZ Light Bulb
     '''
     # default port for WiZ lights
-    UDP_PORT = 38899
     SCENES = {
                 1:"Ocean",
                 2:"Romance",
@@ -59,15 +58,17 @@ class wizlight:
                 26:"Club",
                 27:"Christmas",
                 28:"Halloween",
-                30:"Candlelight",
-                31:"Golden white",
-                32:"Pulse",
-                33:"Steampunk"
+                29:"Candlelight",
+                30:"Golden white",
+                31:"Pulse",
+                32:"Steampunk"
     }
 
-    def __init__ (self, ip):
+    def __init__ (self, ip, port=38899):
         ''' Constructor with ip of the bulb '''
         self.ip = ip
+        self.port = port
+        
 
     @property
     def warm_white(self) -> int:
@@ -299,8 +300,8 @@ class wizlight:
         '''
          # fix port for Wiz Lights
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) # UDP
-        sock.sendto(bytes(message, "utf-8"), (self.ip, self.UDP_PORT))
-        sock.settimeout(10.0)
+        sock.sendto(bytes(message, "utf-8"), (self.ip, self.port))
+        sock.settimeout(20.0)
         data, addr = sock.recvfrom(1024)
         if len(data) is not None:
             resp = json.loads(data.decode())

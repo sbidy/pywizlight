@@ -5,9 +5,11 @@ Work in progress an only tested with the [SLV Play RGB bulb](https://www.amazon.
 ## Example
 ```python
     from pywizlight import wizlight
-
+    # setup a standard light
     light = wizlight("<your bulb ip")
-    # turn on the light
+    # setup the light with a custom port
+    light = wizlight("<your bulb ip",12345)
+     # turn on the light
     light.turn_on()
     # set bulb to warm white color
     light.warm_white = 255
