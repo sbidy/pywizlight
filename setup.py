@@ -27,7 +27,5 @@ setuptools.setup(
      ],
      install_requires=[
           'asyncio',
-          'logging',
-          'json',
       ],
  )
