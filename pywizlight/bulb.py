@@ -27,7 +27,7 @@ import asyncio
 import asyncio_dgram
 import logging
 from time import time
-from .scenes import SCENES
+from pywizlight.scenes import SCENES
 
 _LOGGER = logging.getLogger(__name__)
 
