@@ -65,8 +65,8 @@ Thank you [@angadsingh](https://github.com/angadsingh) for make such incredible 
 
 ## Bulb paramters (UDP RAW):
 - **sceneId** - calls one of thr predefined scenes (int from 0 to 32) [Wiki](https://github.com/sbidy/pywizlight/wiki/Light-Scenes)
-- **speed** - sets the color changing speed in precent
-- **dimming** - sets the dimmer of the bulb in precent
+- **speed** - sets the color changing speed in percent
+- **dimming** - sets the dimmer of the bulb in percent
 - **temp** - sets color temperature in kelvins
 - **r** - red color range 0-255
 - **g** - green color range 0-255
@@ -112,12 +112,12 @@ After that all state can be fetched from `light.state`, which is a `PilotParser`
 
 `turn_off(self)` turns the light off
 
-`turn_on(PilotBuilder)` turns the light on. This take a `PilotBuilder` object, which can be used to set all the parameters programmtically - rgb, color temperature, brightness, etc. To set the light to rhythm mode, create an empty `PilotBuilder`.
+`turn_on(PilotBuilder)` turns the light on. This take a `PilotBuilder` object, which can be used to set all the parameters programmatically - rgb, color temperature, brightness, etc. To set the light to rhythm mode, create an empty `PilotBuilder`.
 
 ## Bulb methods (UDP native):
-- **getSystemConfig** - gets the current system configuration - no paramters need
+- **getSystemConfig** - gets the current system configuration - no parameters need
 - **syncPilot** - sent by the bulb as heart-beats
-- **getPilot** - gets the current bulb state - no paramters need to be included
+- **getPilot** - gets the current bulb state - no parameters need to be included
 - **setPilot** - used to tell the bulb to change color/temp/state
 - **Pulse** - uncertain of purpose
 - **Registration** - used to "register" with the bulb: This notifies the built that
