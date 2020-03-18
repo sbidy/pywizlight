@@ -1,9 +1,10 @@
 # pywizlight
 A python connector for WiZ light bulbs.
 
-Tested with the following lights:
-[Original Phillips Wiz WiFi LEDs](https://www.lighting.philips.co.in/consumer/smart-wifi-led)
-[SLV Play RGB bulb](https://www.amazon.de/dp/B07PNCDJLW)
+Tested with the following smart lights:
+
+* [Original Phillips Wiz WiFi LEDs](https://www.lighting.philips.co.in/consumer/smart-wifi-led)
+* [SLV Play RGB bulb](https://www.amazon.de/dp/B07PNCDJLW)
 
 # Kudos and contributions
 Thank you [@angadsingh](https://github.com/angadsingh) for make such incredible improvements!!
@@ -92,13 +93,13 @@ After that all state can be fetched from `light.state`, which is a `PilotParser`
 
 `PilotParser.get_rgb()` get the rgbW color state of the bulb
 
-`PilotPerson.get_colortemp()` get the color temperature ot the bulb
+`PilotParser.get_colortemp()` get the color temperature ot the bulb
 
-`PilotPerson.get_warm_white/get_cold_white()` get the current warm/cold setting (not supported by original Phillips Wiz bulbs)
+`PilotParser.get_warm_white/get_cold_white()` get the current warm/cold setting (not supported by original Phillips Wiz bulbs)
 
-`PilotPerson.get_scene()` gets the current scene name
+`PilotParser.get_scene()` gets the current scene name
 
-`PilotPerson.get_state()` returns true or false / true = on , false = off
+`PilotParser.get_state()` returns true or false / true = on , false = off
 
 ### Methods
 `getBulbConfig(self)` returns the hardware configuration of the bulb
@@ -113,7 +114,7 @@ After that all state can be fetched from `light.state`, which is a `PilotParser`
 
 `turn_on(PilotBuilder)` turns the light on. This take a `PilotBuilder` object, which can be used to set all the parameters programmtically - rgb, color temperature, brightness, etc. To set the light to rhythm mode, create an empty `PilotBuilder`.
 
-## Bulb methodes (UDP native):
+## Bulb methods (UDP native):
 - **getSystemConfig** - gets the current system configuration - no paramters need
 - **syncPilot** - sent by the bulb as heart-beats
 - **getPilot** - gets the current bulb state - no paramters need to be included
@@ -145,5 +146,5 @@ rhythm mode:
 
 ## Contributors
 
-@sbidy for the entire python library from scratch with complete light control
-@angadsingh for implementing asyncio and non-blocking UDP, rhythm support, performance optimizations (https://github.com/angadsingh/wiz_light/commit/caa90cebd9f8ccb2d588c900e36fbf19277eda9c)
+* [@sbidy](http://github.com/sbidy) for the entire python library from scratch with complete light control
+* [@angadsingh](http://github.com/angadsingh) for implementing asyncio and non-blocking UDP, rhythm support, performance optimizations
