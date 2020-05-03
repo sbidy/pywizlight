@@ -1,4 +1,5 @@
 ![Upload Python Package](https://github.com/sbidy/pywizlight/workflows/Upload%20Python%20Package/badge.svg)
+![Code Quality Check](https://github.com/sbidy/pywizlight/workflows/Lint/badge.svg)
 
 # pywizlight
 A python connector for WiZ light bulbs.
