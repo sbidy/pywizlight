@@ -1,3 +1,4 @@
+"""Definition of the supported bulb effects."""
 SCENES = {
     1: "Ocean",
     2: "Romance",

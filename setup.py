@@ -1,12 +1,15 @@
-import setuptools
+"""Setup for pywizlight."""
 import os
 import re
+
+import setuptools
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
 
 def get_version() -> str:
+    """Define the version number."""
     version_file = open(os.path.join("pywizlight", "_version.py"))
     version_contents = version_file.read()
     return re.search("__version__ = '(.*?)'", version_contents).group(1)
@@ -27,5 +30,5 @@ setuptools.setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    install_requires=["asyncio", "asyncio-dgram",],
+    install_requires=["asyncio", "asyncio-dgram"],
 )

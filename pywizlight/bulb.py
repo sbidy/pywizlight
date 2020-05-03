@@ -1,38 +1,19 @@
-"""
-     MIT License
-
-     Copyright (c) 2020 Stephan Traub
-
-     Permission is hereby granted, free of charge, to any person obtaining a copy
-     of this software and associated documentation files (the "Software"), to deal
-     in the Software without restriction, including without limitation the rights
-     to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-     copies of the Software, and to permit persons to whom the Software is
-     furnished to do so, subject to the following conditions:
-
-     The above copyright notice and this permission notice shall be included in all
-     copies or substantial portions of the Software.
-
-     THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-     IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-     FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-     AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-     LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-     SOFTWARE.
-"""
-import socket
-import json
+"""pywizlight integration."""
 import asyncio
-import asyncio_dgram
+import json
 import logging
 from time import time
+
+import asyncio_dgram
+
 from pywizlight.scenes import SCENES
 
 _LOGGER = logging.getLogger(__name__)
 
 
 class PilotBuilder:
+    """Get information from the bulb."""
+
     def __init__(
         self,
         warm_white=None,
@@ -43,57 +24,49 @@ class PilotBuilder:
         brightness=None,
         colortemp=None,
     ):
-
+        """Set the parameter."""
         self.pilot_params = {"state": True}
 
-        if warm_white != None:
+        if warm_white is not None:
             self._set_warm_white(warm_white)
-        if cold_white != None:
+        if cold_white is not None:
             self._set_cold_white(cold_white)
-        if speed != None:
+        if speed is not None:
             self._set_speed(speed)
-        if scene != None:
+        if scene is not None:
             self._set_scene(scene)
-        if rgb != None:
+        if rgb is not None:
             self._set_rgb(rgb)
-        if brightness != None:
+        if brightness is not None:
             self._set_brightness(brightness)
-        if colortemp != None:
+        if colortemp is not None:
             self._set_colortemp(colortemp)
 
     def get_pilot_message(self):
+        """Retrun the pilot message."""
         return json.dumps({"method": "setPilot", "params": self.pilot_params})
 
     def _set_warm_white(self, value: int):
-        """
-            set the value of the cold white led
-        """
+        """Set the value of the cold white led."""
         if value > 0 and value < 256:
             self.pilot_params["w"] = value
 
     def _set_cold_white(self, value: int):
-        """
-            set the value of the cold white led
-        """
+        """Set the value of the cold white led."""
         if value > 0 and value < 256:
             self.pilot_params["c"] = value
         else:
             raise IndexError("Value must be between 1 and 255")
 
     def _set_speed(self, value: int):
-        """
-            set the color changing speed in precent (0-100)
-            This applies only to changing effects!
-        """
+        """Set the color changing speed in precent (0-100).This applies only to changing effects."""
         if value > 0 and value < 101:
             self.pilot_params["speed"] = value
         else:
             raise IndexError("Value must be between 0 and 100")
 
     def _set_scene(self, scene_id: int):
-        """
-            set the scene by id
-        """
+        """Set the scene by id."""
         if scene_id in SCENES:
             self.pilot_params["sceneId"] = scene_id
         else:
@@ -101,18 +74,14 @@ class PilotBuilder:
             raise IndexError("Scene is not available - only 0 to 32 are supported")
 
     def _set_rgb(self, values):
-        """
-            set the rgb color state of the bulb
-        """
+        """Set the rgb color state of the bulb."""
         r, g, b = values
         self.pilot_params["r"] = r
         self.pilot_params["g"] = g
         self.pilot_params["b"] = b
 
     def _set_brightness(self, value: int):
-        """
-            set the value of the brightness 0-255
-        """
+        """Set the value of the brightness 0-255."""
         percent = self.hex_to_percent(value)
         # lamp doesn't supports lower than 10%
         if percent < 10:
@@ -120,9 +89,7 @@ class PilotBuilder:
         self.pilot_params["dimming"] = percent
 
     def _set_colortemp(self, kelvin: int):
-        """
-            sets the color temperature for the white led in the bulb
-        """
+        """Set the color temperature for the white led in the bulb."""
         # normalize the kelvin values - should be removed
         if kelvin < 2500:
             kelvin = 2500
@@ -132,39 +99,37 @@ class PilotBuilder:
         self.pilot_params["temp"] = kelvin
 
     def hex_to_percent(self, hex):
-        """ converts hex 0-255 values to percent """
+        """Convert hex 0-255 values to percent."""
         return round((hex / 255) * 100)
 
 
 class PilotParser:
+    """PilotParser Class - interprets the mesage from the bulb."""
+
     def __init__(self, pilotResult):
+        """Init the class."""
         self.pilotResult = pilotResult
 
     def get_state(self) -> str:
+        """Return the state of the bulb."""
         return self.pilotResult["state"]
 
     def get_warm_white(self) -> int:
-        """ 
-            get the value of the warm white led 
-        """
+        """Get the value of the warm white led."""
         if "w" in self.pilotResult:
             return self.pilotResult["w"]
         else:
             return None
 
     def get_speed(self) -> int:
-        """ 
-            get the color changing speed
-        """
+        """Get the color changing speed."""
         if "speed" in self.pilotResult:
             return self.pilotResult["speed"]
         else:
             return None
 
     def get_scene(self) -> str:
-        """
-            get the current scene name
-        """
+        """Get the current scene name."""
         if "schdPsetId" in self.pilotResult:  # rhythm
             return SCENES[1000]
 
@@ -175,18 +140,14 @@ class PilotParser:
             return None
 
     def get_cold_white(self) -> int:
-        """
-            get the value of the cold white led
-        """
+        """Get the value of the cold white led."""
         if "c" in self.pilotResult:
             return self.pilotResult["c"]
         else:
             return None
 
     def get_rgb(self):
-        """
-            get the rgb color state of the bulb and turns it on
-        """
+        """Get the rgb color state of the bulb and turns it on."""
         if (
             "r" in self.pilotResult
             and "g" in self.pilotResult
@@ -201,70 +162,62 @@ class PilotParser:
             return None, None, None
 
     def get_brightness(self) -> int:
-        """
-            gets the value of the brightness 0-255
-        """
+        """Get the value of the brightness 0-255."""
         return self.percent_to_hex(self.pilotResult["dimming"])
 
     def get_colortemp(self) -> int:
+        """Get the color temperatur from the bulb."""
         if "temp" in self.pilotResult:
             return self.pilotResult["temp"]
         else:
             return None
 
     def percent_to_hex(self, percent):
-        """ converts percent values 0-100 into hex 0-255"""
+        """Convert percent values 0-100 into hex 0-255."""
         return round((percent / 100) * 255)
 
 
 class wizlight:
-    """
-        Creates a instance of a WiZ Light Bulb
-    """
+    """Create a instance of a WiZ Light Bulb."""
 
     # default port for WiZ lights
 
     def __init__(self, ip, port=38899):
-        """ Constructor with ip of the bulb """
+        """Create instance with ip of the bulb."""
         self.ip = ip
         self.port = port
         self.state = None
 
     @property
     def status(self) -> bool:
-        """
-            returns true or false / true = on , false = off
-        """
-        if self.state == None:
+        """Return true or false / true = on , false = off."""
+        if self.state is None:
             return None
         return self.state.get_state()
 
-    ## ------------------ Non properties --------------
+    # ------------------ Non properties --------------
 
     async def turn_off(self):
-        """
-            turns the light off
-        """
+        """Turn the light off."""
         message = r'{"method":"setPilot","params":{"state":false}}'
         await self.sendUDPMessage(message)
 
     async def turn_on(self, pilot_builder=PilotBuilder()):
-        """
-            turns the light on
-        """
+        """Turn the light on."""
         await self.sendUDPMessage(
             pilot_builder.get_pilot_message(), max_send_datagrams=10
         )
 
     def get_id_from_scene_name(self, scene: str) -> int:
-        """ gets the id from a scene name """
+        """Get the id from a scene name."""
         for id in SCENES:
             if SCENES[id] == scene:
                 return id
         raise ValueError("Scene '%s' not in scene list." % scene)
 
-    ### ---------- Helper Functions ------------
+    # ---------- Helper Functions ------------
     async def updateState(self):
+        """Update the bulb state."""
         """
             Note: Call this method before getting any other property
             Also, call this method to update the current value for any property
@@ -273,23 +226,19 @@ class wizlight:
         """
         message = r'{"method":"getPilot","params":{}}'
         resp = await self.sendUDPMessage(message)
-        if resp != None and "result" in resp:
+        if resp is not None and "result" in resp:
             self.state = PilotParser(resp["result"])
         else:
             self.state = None
         return self.state
 
     async def getBulbConfig(self):
-        """
-            returns the configuration from the bulb
-        """
+        """Return the configuration from the bulb."""
         message = r'{"method":"getSystemConfig","params":{}}'
         return await self.sendUDPMessage(message)
 
     async def lightSwitch(self):
-        """
-            turns the light bulb on or off like a switch
-        """
+        """Turn the light bulb on or off like a switch."""
         # first get the status
         state = await self.updateState()
         if state.get_state():
@@ -300,15 +249,14 @@ class wizlight:
             await self.turn_on()
 
     async def receiveUDPwithTimeout(self, stream, timeout):
+        """Get messtage with timout value."""
         data, remote_addr = await asyncio.wait_for(stream.recv(), timeout)
         return data
 
     async def sendUDPMessage(
         self, message, timeout=60, send_interval=0.5, max_send_datagrams=100
     ):
-        """
-            send the udp message to the bulb
-        """
+        """Send the udp message to the bulb."""
         connid = hex(int(time() * 10000000))[2:]
         data = None
 
@@ -355,7 +303,7 @@ class wizlight:
         finally:
             stream.close()
 
-        if data != None and len(data) is not None:
+        if data is not None and len(data) is not None:
             resp = json.loads(data.decode())
             if "error" not in resp:
                 _LOGGER.debug(
