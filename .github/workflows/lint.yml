@@ -26,6 +26,6 @@ jobs:
           # Enable linters
           black: true
           flake8: true
-          flake8_args: "--exclude test.py --max-line-length=120"
+          flake8_args: "--exclude='test.py __init__.py' --max-line-length=120"
           auto_fix: true
           git_email: "sbidy@hotmail.com"
