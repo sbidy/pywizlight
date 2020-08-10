@@ -12,7 +12,7 @@ def get_version() -> str:
     """Define the version number."""
     version_file = open(os.path.join("pywizlight", "_version.py"))
     version_contents = version_file.read()
-    return re.search("__version__ = \"(.*?)\"", version_contents).group(1)
+    return re.search('__version__ = "(.*?)"', version_contents).group(1)
 
 
 setuptools.setup(
