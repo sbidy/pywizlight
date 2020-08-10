@@ -10,7 +10,7 @@ Tested with the following smart lights:
 * [SLV Play RGB bulb](https://www.amazon.de/dp/B07PNCDJLW)
 
 ## Install
-`pip install pywizlight'
+`pip install pywizlight`
 
 ## Kudos
 Thank you [@angadsingh](https://github.com/angadsingh) for make such incredible improvements!!
