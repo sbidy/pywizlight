@@ -91,10 +91,10 @@ class PilotBuilder:
     def _set_colortemp(self, kelvin: int):
         """Set the color temperature for the white led in the bulb."""
         # normalize the kelvin values - should be removed
-        if kelvin < 2500:
-            kelvin = 2500
-        if kelvin > 6500:
-            kelvin = 6500
+        if kelvin < 1000:
+            kelvin = 1000
+        if kelvin > 10000:
+            kelvin = 10000
 
         self.pilot_params["temp"] = kelvin
 
