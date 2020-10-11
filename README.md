@@ -17,7 +17,7 @@ Thank you [@angadsingh](https://github.com/angadsingh) for make such incredible 
 
 ## Example
 ```python
-    from pywizlight.bulb import wizlight, PilotBuilder
+    from pywizlight.bulb import wizlight, PilotBuilder, discovery
     # create/get the current thread's asyncio loop
     loop = asyncio.get_event_loop()
     # setup a standard light
@@ -66,6 +66,15 @@ Thank you [@angadsingh](https://github.com/angadsingh) for make such incredible 
     bulb2 = wizlight("<your bulb2 ip>")
     await asyncio.gather(bulb1.turn_on(PilotBuilder(brightness = 255),
         bulb2.turn_on(PilotBuilder(warm_white = 255), loop = loop)
+    
+    # Discover all bulbs in the network via broadcast datagram (UDP)
+    # function takes the discovery object and returns a list with wizlight objects.
+    bulbs = await discovery.find_wizlights(discovery)
+    # print the ip of the bulb on index 0
+    print(bulbretrun[0].ip)
+    # iterate over all returned bulbs
+    for bulb in bulbs:
+        await bulb.turn_off()
 
 ```
 
@@ -113,6 +122,8 @@ After that all state can be fetched from `light.state`, which is a `PilotParser`
 `updateState(self)` gets the current bulb state from the light using `sendUDPMessage` and sets it to `self.state`
 
 `lightSwitch(self)` turns the light bulb on or off like a switch
+
+`getMAC(self)` returns the MAC address of the bulb. Can be used as unique ID.
 
 `sendUDPMessage(self, message, timeout = 60, send_interval = 0.5, max_send_datagrams = 100):` sends the udp message to the bulb. Since UDP can loose packets, and your light might be a long distance away from the router, we continuously keep sending the UDP command datagram until there is a response from the light. This has in tests worked way better than just sending once and just waiting for a timeout. You can set the async operation timeout using `timeout`, the time interval to sleep between continuous UDP sends using `send_interval` and the maximum number of continuous pings to send using `max_send_datagrams`. It is already hard coded to a lower value for `setPilot` (set light state) vs `getPilot` (fetch light state) so as to avoid flickering the light.
 
