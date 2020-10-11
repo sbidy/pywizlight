@@ -73,8 +73,7 @@ class PilotBuilder:
             self.pilot_params["sceneId"] = scene_id
         else:
             # id not in SCENES !
-            raise IndexError(
-                "Scene is not available - only 0 to 32 are supported")
+            raise IndexError("Scene is not available - only 0 to 32 are supported")
 
     def _set_rgb(self, values):
         """Set the rgb color state of the bulb."""
@@ -317,8 +316,7 @@ class wizlight:
                 return resp
             else:
                 # exception should be created
-                raise ValueError(
-                    "Cant read response from the bulb. Debug:", resp)
+                raise ValueError("Cant read response from the bulb. Debug:", resp)
 
 
 class discovery:
@@ -339,18 +337,16 @@ class discovery:
 
         def broadcast_registration(self):
             """Send a registration method as UDP broadcast."""
-            '''Note: The ip and mac we give the bulb here don't seem to matter for our
-            intents and purposes, so they're hardcoded to technically valid dummy data.'''
+            """Note: The ip and mac we give the bulb here don't seem to matter for our
+            intents and purposes, so they're hardcoded to technically valid dummy data."""
             register_method = r'{"method":"registration","params":{"phoneMac":"AAAAAAAAAAAA","register":false,"phoneIp":"1.2.3.4","id":"1"}}'  # noqa: E501
-            self.transport.sendto(register_method.encode(),
-                                  ("255.255.255.255", 38899))
+            self.transport.sendto(register_method.encode(), ("255.255.255.255", 38899))
             self.loop.call_later(1, self.broadcast_registration)
 
         def datagram_received(self, data, addr):
             """Receive data from broadcast."""
             _LOGGER.debug(
-                "received data {} from addr {} on UPD discovery port".format(
-                    data, addr)
+                "received data {} from addr {} on UPD discovery port".format(data, addr)
             )
             if """"success":true""" in data.decode():
                 ip = addr[0]
