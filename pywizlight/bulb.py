@@ -340,14 +340,15 @@ class discovery:
         def broadcast_registration(self):
             """Send a registration method as UDP broadcast."""
 
-            '''Note: The ip and mac we give the bulb here don't seem to matter for our
-            intents and purposes, so they're hardcoded to technically valid dummy data.'''
+            """Note: The ip and mac we give the bulb here don't seem to matter for our
+            intents and purposes, so they're hardcoded to technically valid dummy data."""
 
             """Fix for async problems if boardcast_registration is called twice!"""
-            if (self.transport is not None):
+            if self.transport is not None:
                 register_method = r'{"method":"registration","params":{"phoneMac":"AAAAAAAAAAAA","register":false,"phoneIp":"1.2.3.4","id":"1"}}'  # noqa: E501
-                self.transport.sendto(register_method.encode(),
-                                      ("255.255.255.255", 38899))
+                self.transport.sendto(
+                    register_method.encode(), ("255.255.255.255", 38899)
+                )
                 self.loop.call_later(1, self.broadcast_registration)
 
         def datagram_received(self, data, addr):
