@@ -357,13 +357,13 @@ class discovery:
             intents and purposes, so they're hardcoded to technically valid dummy data."""
 
             """Fix for async problems if boardcast_registration is called twice! See #13."""
+            """dirty dirty hack."""
             try:
                 register_method = r'{"method":"registration","params":{"phoneMac":"AAAAAAAAAAAA","register":false,"phoneIp":"1.2.3.4","id":"1"}}'  # noqa: E501
                 self.transport.sendto(
                     register_method.encode(), ("255.255.255.255", 38899)
                 )
                 self.loop.call_later(1, self.broadcast_registration)
-            """dirty dirty hack."""
             except AttributeError:
                 pass
 

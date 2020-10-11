@@ -114,6 +114,8 @@ After that all state can be fetched from `light.state`, which is a `PilotParser`
 
 `lightSwitch(self)` turns the light bulb on or off like a switch
 
+`getMAC(self)` returns the MAC address of the bulb. Can be used as unique ID.
+
 `sendUDPMessage(self, message, timeout = 60, send_interval = 0.5, max_send_datagrams = 100):` sends the udp message to the bulb. Since UDP can loose packets, and your light might be a long distance away from the router, we continuously keep sending the UDP command datagram until there is a response from the light. This has in tests worked way better than just sending once and just waiting for a timeout. You can set the async operation timeout using `timeout`, the time interval to sleep between continuous UDP sends using `send_interval` and the maximum number of continuous pings to send using `max_send_datagrams`. It is already hard coded to a lower value for `setPilot` (set light state) vs `getPilot` (fetch light state) so as to avoid flickering the light.
 
 `turn_off(self)` turns the light off
