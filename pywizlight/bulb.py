@@ -73,8 +73,7 @@ class PilotBuilder:
             self.pilot_params["sceneId"] = scene_id
         else:
             # id not in SCENES !
-            raise IndexError(
-                "Scene is not available - only 0 to 32 are supported")
+            raise IndexError("Scene is not available - only 0 to 32 are supported")
 
     def _set_rgb(self, values):
         """Set the rgb color state of the bulb."""
@@ -317,8 +316,7 @@ class wizlight:
                 return resp
             else:
                 # exception should be created
-                raise ValueError(
-                    "Cant read response from the bulb. Debug:", resp)
+                raise ValueError("Cant read response from the bulb. Debug:", resp)
 
 
 class discovery:
@@ -341,6 +339,7 @@ class discovery:
 
         def broadcast_registration(self):
             """Send a registration method as UDP broadcast."""
+
             '''Note: The ip and mac we give the bulb here don't seem to matter for our
             intents and purposes, so they're hardcoded to technically valid dummy data.'''
 
@@ -354,8 +353,7 @@ class discovery:
         def datagram_received(self, data, addr):
             """Receive data from broadcast."""
             _LOGGER.debug(
-                "received data {} from addr {} on UPD discovery port".format(
-                    data, addr)
+                "received data {} from addr {} on UPD discovery port".format(data, addr)
             )
             if """"success":true""" in data.decode():
                 ip = addr[0]
