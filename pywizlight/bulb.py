@@ -322,6 +322,8 @@ class wizlight:
 
 
 class discovery:
+    """Discover bulbs via network broadcast."""
+
     class BroadcastProtocol(object):
         """asyncio Protocol that sends a UDP broadcast message for bulb discovery."""
 
@@ -341,10 +343,13 @@ class discovery:
             """Send a registration method as UDP broadcast."""
             '''Note: The ip and mac we give the bulb here don't seem to matter for our
             intents and purposes, so they're hardcoded to technically valid dummy data.'''
-            register_method = r'{"method":"registration","params":{"phoneMac":"AAAAAAAAAAAA","register":false,"phoneIp":"1.2.3.4","id":"1"}}'  # noqa: E501
-            self.transport.sendto(register_method.encode(),
-                                  ("255.255.255.255", 38899))
-            self.loop.call_later(1, self.broadcast_registration)
+
+            """Fix for async problems if boardcast_registration is called twice!"""
+            if (self.transport is not None):
+                register_method = r'{"method":"registration","params":{"phoneMac":"AAAAAAAAAAAA","register":false,"phoneIp":"1.2.3.4","id":"1"}}'  # noqa: E501
+                self.transport.sendto(register_method.encode(),
+                                      ("255.255.255.255", 38899))
+                self.loop.call_later(1, self.broadcast_registration)
 
         def datagram_received(self, data, addr):
             """Receive data from broadcast."""
@@ -363,7 +368,7 @@ class discovery:
             """Retrun connection error."""
             _LOGGER.debug("closing udp discovery")
 
-    async def find_wizlights(self, wait_time=5) -> wizlight:
+    async def find_wizlights(self, wait_time=5) -> list:
         """Start discovery."""
         loop = asyncio.get_event_loop()
         transport, protocol = await loop.create_datagram_endpoint(
