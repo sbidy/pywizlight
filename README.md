@@ -17,7 +17,7 @@ Thank you [@angadsingh](https://github.com/angadsingh) for make such incredible 
 
 ## Example
 ```python
-    from pywizlight.bulb import wizlight, PilotBuilder
+    from pywizlight.bulb import wizlight, PilotBuilder, discovery
     # create/get the current thread's asyncio loop
     loop = asyncio.get_event_loop()
     # setup a standard light
@@ -66,6 +66,15 @@ Thank you [@angadsingh](https://github.com/angadsingh) for make such incredible 
     bulb2 = wizlight("<your bulb2 ip>")
     await asyncio.gather(bulb1.turn_on(PilotBuilder(brightness = 255),
         bulb2.turn_on(PilotBuilder(warm_white = 255), loop = loop)
+    
+    # Discover all bulbs in the network via broadcast datagram (UDP)
+    # function takes the discovery object and returns a list with wizlight objects.
+    bulbs = await discovery.find_wizlights(discovery)
+    # print the ip of the bulb on index 0
+    print(bulbretrun[0].ip)
+    # iterate over all returned bulbs
+    for bulb in bulbs:
+        await bulb.turn_off()
 
 ```
 
