@@ -116,6 +116,10 @@ class PilotParser:
         """Return the state of the bulb."""
         return self.pilotResult["state"]
 
+    def get_mac(self) -> str:
+        """Retrun MAC from the bulb."""
+        return self.pilotResult["mac"]
+
     def get_warm_white(self) -> int:
         """Get the value of the warm white led."""
         if "w" in self.pilotResult:
@@ -189,6 +193,7 @@ class wizlight:
         self.ip = ip
         self.port = port
         self.state = None
+        self.mac = None
 
     @property
     def status(self) -> bool:
@@ -233,6 +238,15 @@ class wizlight:
         else:
             self.state = None
         return self.state
+
+    async def getMac(self):
+        """Read the MAC from the bulb."""
+        resp = await self.getBulbConfig()
+        if resp is not None and "result" in resp:
+            self.mac = PilotParser(resp["result"]).get_mac()
+        else:
+            self.mac = None
+        return self.mac
 
     async def getBulbConfig(self):
         """Return the configuration from the bulb."""
@@ -342,13 +356,16 @@ class discovery:
             """Note: The ip and mac we give the bulb here don't seem to matter for our
             intents and purposes, so they're hardcoded to technically valid dummy data."""
 
-            """Fix for async problems if boardcast_registration is called twice!"""
-            if self.transport is not None:
+            """Fix for async problems if boardcast_registration is called twice! See #13."""
+            try:
                 register_method = r'{"method":"registration","params":{"phoneMac":"AAAAAAAAAAAA","register":false,"phoneIp":"1.2.3.4","id":"1"}}'  # noqa: E501
                 self.transport.sendto(
                     register_method.encode(), ("255.255.255.255", 38899)
                 )
                 self.loop.call_later(1, self.broadcast_registration)
+            """dirty dirty hack."""
+            except AttributeError:
+                pass
 
         def datagram_received(self, data, addr):
             """Receive data from broadcast."""
@@ -367,7 +384,7 @@ class discovery:
             _LOGGER.debug("closing udp discovery")
 
     async def find_wizlights(self, wait_time=5) -> list:
-        """Start discovery."""
+        """Start discovery and return list of wizlight objects."""
         loop = asyncio.get_event_loop()
         transport, protocol = await loop.create_datagram_endpoint(
             lambda: self.BroadcastProtocol(loop), local_addr=("0.0.0.0", 38899)
