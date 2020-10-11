@@ -318,8 +318,8 @@ class wizlight:
                 # exception should be created
                 raise ValueError("Cant read response from the bulb. Debug:", resp)
 
-class discovery:
 
+class discovery:
     class BroadcastProtocol(object):
         """asyncio Protocol that sends a UDP broadcast message for bulb discovery."""
 
@@ -337,24 +337,18 @@ class discovery:
             """Sends a registration method as UDP broadcast. Bulbs should respond by sending a method response"""
             """Note: The ip and mac we give the bulb here don't seem to matter for our intents and purposes, so they're hardcoded to technically valid dummy data."""
             register_method = """{"method":"registration","params":{"phoneMac":"AAAAAAAAAAAA","register":false,"phoneIp":"1.2.3.4","id":"1"}}"""
-            self.transport.sendto(register_method.encode(), ('255.255.255.255', 38899))
+            self.transport.sendto(register_method.encode(), ("255.255.255.255", 38899))
             self.loop.call_later(1, self.broadcast_registration)
 
         def datagram_received(self, data, addr):
             _LOGGER.debug(
-                "received data {} from addr {} on UPD discovery port".format(
-                    data, addr
-                )
+                "received data {} from addr {} on UPD discovery port".format(data, addr)
             )
             if """"success":true""" in data.decode():
                 ip = addr[0]
                 global FOUND_BULB_IPS
                 if ip not in FOUND_BULB_IPS:
-                    _LOGGER.debug(
-                        "Found bulb at IP: {}".format(
-                            ip
-                        )
-                    )
+                    _LOGGER.debug("Found bulb at IP: {}".format(ip))
                     FOUND_BULB_IPS.append(ip)
 
         def connection_lost(self, exc):
@@ -363,7 +357,8 @@ class discovery:
     async def find_wizlights(self, wait_time=5):
         loop = asyncio.get_event_loop()
         transport, protocol = await loop.create_datagram_endpoint(
-            lambda: self.BroadcastProtocol(loop), local_addr=('0.0.0.0', 38899))
+            lambda: self.BroadcastProtocol(loop), local_addr=("0.0.0.0", 38899)
+        )
         try:
             await asyncio.sleep(wait_time)
         finally:
