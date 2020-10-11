@@ -339,7 +339,6 @@ class discovery:
 
         def broadcast_registration(self):
             """Send a registration method as UDP broadcast."""
-
             """Note: The ip and mac we give the bulb here don't seem to matter for our
             intents and purposes, so they're hardcoded to technically valid dummy data."""
 
