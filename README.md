@@ -77,6 +77,9 @@ Thank you [@angadsingh](https://github.com/angadsingh) for make such incredible 
         await bulb.turn_off()
 
 ```
+## Discovery
+The discovery works with an UDP Broadcast request and collects all bulbs in the network.
+
 
 ## Bulb paramters (UDP RAW):
 - **sceneId** - calls one of thr predefined scenes (int from 0 to 32) [Wiki](https://github.com/sbidy/pywizlight/wiki/Light-Scenes)
