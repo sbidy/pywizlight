@@ -45,7 +45,7 @@ class PilotBuilder:
             self._set_colortemp(colortemp)
 
     def get_pilot_message(self):
-        """Retrun the pilot message."""
+        """Return the pilot message."""
         return json.dumps({"method": "setPilot", "params": self.pilot_params})
 
     def _set_warm_white(self, value: int):
@@ -61,7 +61,10 @@ class PilotBuilder:
             raise IndexError("Value must be between 1 and 255")
 
     def _set_speed(self, value: int):
-        """Set the color changing speed in precent (0-100).This applies only to changing effects."""
+        """Set the color changing speed in precent (0-100).
+        
+        This applies only to changing effects.
+        """
         if value > 0 and value < 101:
             self.pilot_params["speed"] = value
         else:
@@ -73,14 +76,14 @@ class PilotBuilder:
             self.pilot_params["sceneId"] = scene_id
         else:
             # id not in SCENES !
-            raise IndexError("Scene is not available - only 0 to 32 are supported")
+            raise IndexError("Scene is not available. Only 0 to 32 are supported")
 
     def _set_rgb(self, values):
-        """Set the rgb color state of the bulb."""
-        r, g, b = values
-        self.pilot_params["r"] = r
-        self.pilot_params["g"] = g
-        self.pilot_params["b"] = b
+        """Set the RGB color state of the bulb."""
+        red, green, blue = values
+        self.pilot_params["r"] = red
+        self.pilot_params["g"] = green
+        self.pilot_params["b"] = blue
 
     def _set_brightness(self, value: int):
         """Set the value of the brightness 0-255."""
@@ -106,7 +109,7 @@ class PilotBuilder:
 
 
 class PilotParser:
-    """PilotParser Class - interprets the mesage from the bulb."""
+    """Interpret the message from the bulb."""
 
     def __init__(self, pilotResult):
         """Init the class."""
@@ -117,7 +120,7 @@ class PilotParser:
         return self.pilotResult["state"]
 
     def get_mac(self) -> str:
-        """Retrun MAC from the bulb."""
+        """Return MAC from the bulb."""
         return self.pilotResult["mac"]
 
     def get_warm_white(self) -> int:
@@ -153,7 +156,7 @@ class PilotParser:
             return None
 
     def get_rgb(self):
-        """Get the rgb color state of the bulb and turns it on."""
+        """Get the RGB color state of the bulb and turns it on."""
         if (
             "r" in self.pilotResult
             and "g" in self.pilotResult
@@ -184,12 +187,12 @@ class PilotParser:
 
 
 class wizlight:
-    """Create a instance of a WiZ Light Bulb."""
+    """Create an instance of a WiZ Light Bulb."""
 
     # default port for WiZ lights
 
     def __init__(self, ip, port=38899):
-        """Create instance with ip of the bulb."""
+        """Create instance with the IP address of the bulb."""
         self.ip = ip
         self.port = port
         self.state = None
@@ -197,7 +200,7 @@ class wizlight:
 
     @property
     def status(self) -> bool:
-        """Return true or false / true = on , false = off."""
+        """Return the status of the bulb: true = on, false = off."""
         if self.state is None:
             return None
         return self.state.get_state()
@@ -224,12 +227,12 @@ class wizlight:
 
     # ---------- Helper Functions ------------
     async def updateState(self):
-        """Update the bulb state."""
-        """
-            Note: Call this method before getting any other property
-            Also, call this method to update the current value for any property
-            getPilot - gets the current bulb state - no paramters need to be included
-            {"method": "getPilot", "id": 24}
+        """Update the bulb state.
+
+        Note: Call this method before getting any other property.
+        Also, call this method to update the current value for any property.
+        getPilot - gets the current bulb state - no paramters need to be included
+        {"method": "getPilot", "id": 24}
         """
         message = r'{"method":"getPilot","params":{}}'
         resp = await self.sendUDPMessage(message)
@@ -272,7 +275,7 @@ class wizlight:
     async def sendUDPMessage(
         self, message, timeout=60, send_interval=0.5, max_send_datagrams=100
     ):
-        """Send the udp message to the bulb."""
+        """Send the UDP message to the bulb."""
         connid = hex(int(time() * 10000000))[2:]
         data = None
 
@@ -380,8 +383,8 @@ class discovery:
                     FOUND_BULB_IPS.append(ip)
 
         def connection_lost(self, exc):
-            """Retrun connection error."""
-            _LOGGER.debug("closing udp discovery")
+            """Return connection error."""
+            _LOGGER.debug("closing UDP discovery")
 
     async def find_wizlights(self, wait_time=5) -> list:
         """Start discovery and return list of wizlight objects."""
