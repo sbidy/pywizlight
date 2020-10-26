@@ -84,7 +84,7 @@ async def main():
 
     # Do operations on multiple lights parallely
     #bulb1 = wizlight("<your bulb1 ip>")
-    #ulb2 = wizlight("<your bulb2 ip>")
+    #bulb2 = wizlight("<your bulb2 ip>")
     #await asyncio.gather(bulb1.turn_on(PilotBuilder(brightness = 255)),
     #    bulb2.turn_on(PilotBuilder(warm_white = 255)), loop = loop)
 
