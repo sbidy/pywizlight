@@ -12,6 +12,14 @@ Tested with the following smart lights:
 ## Install
 `pip install pywizlight`
 
+On a Fedora-based system or on a CentOS/RHEL 8 machine which has EPEL enabled, as 
+[`pywizlight`](https://src.fedoraproject.org/rpms/python-pywizlight) is present in the 
+Fedora Package Collection.
+
+```bash
+sudo dnf -y install python3-pywizlight
+```
+
 ## Kudos
 Thank you [@angadsingh](https://github.com/angadsingh) for make such incredible improvements!!
 
