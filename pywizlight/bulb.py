@@ -324,7 +324,9 @@ class wizlight:
             try:
                 stream.close()
             except UnboundLocalError:
-                raise WizLightConnectionError("Bulb is offline or IP address is not correct")
+                raise WizLightConnectionError(
+                    "Bulb is offline or IP address is not correct"
+                )
 
         if data is not None and len(data) is not None:
             resp = json.loads(data.decode())
