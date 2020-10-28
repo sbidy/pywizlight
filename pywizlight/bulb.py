@@ -62,7 +62,7 @@ class PilotBuilder:
 
     def _set_speed(self, value: int):
         """Set the color changing speed in precent (0-100).
-        
+
         This applies only to changing effects.
         """
         if value > 0 and value < 101:
