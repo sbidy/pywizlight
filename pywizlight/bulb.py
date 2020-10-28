@@ -8,6 +8,7 @@ from time import time
 import asyncio_dgram
 
 from pywizlight.scenes import SCENES
+from pywizlight.exceptions import WizLightConnectionError
 
 _LOGGER = logging.getLogger(__name__)
 FOUND_BULB_IPS = []
@@ -320,7 +321,10 @@ class wizlight:
                 exc_info=False,
             )
         finally:
-            stream.close()
+            try:
+                stream.close()
+            except UnboundLocalError:
+                raise WizLightConnectionError("Bulb is offline or IP address is not correct")
 
         if data is not None and len(data) is not None:
             resp = json.loads(data.decode())
@@ -333,7 +337,7 @@ class wizlight:
                 return resp
             else:
                 # exception should be created
-                raise ValueError("Cant read response from the bulb. Debug:", resp)
+                raise ValueError("Can't read response from the bulb. Debug:", resp)
 
 
 class discovery:
