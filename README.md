@@ -2,7 +2,8 @@
 ![Code Quality Check](https://github.com/sbidy/pywizlight/workflows/Lint/badge.svg)
 
 # pywizlight
-A python connector for WiZ light bulbs.
+
+A Python connector for WiZ light bulbs.
 
 Tested with the following smart lights:
 
@@ -10,78 +11,93 @@ Tested with the following smart lights:
 * [SLV Play RGB bulb](https://www.amazon.de/dp/B07PNCDJLW)
 
 ## Install
-`pip install pywizlight`
+
+```bash
+pip install pywizlight
+```
 
 ## Kudos
+
 Thank you [@angadsingh](https://github.com/angadsingh) for make such incredible improvements!!
 
 ## Example
+
 ```python
-    from pywizlight.bulb import wizlight, PilotBuilder, discovery
-    # create/get the current thread's asyncio loop
-    loop = asyncio.get_event_loop()
-    # setup a standard light
-    light = wizlight("<your bulb ip")
-    # setup the light with a custom port
-    light = wizlight("<your bulb ip",12345)
+import asyncio
 
-    #the following calls need to be done inside an asyncio coroutine
-    #to run them fron normal synchronous code, you can wrap them with asyncio.run(..)
-    #see test.py for examples
+from pywizlight.bulb import wizlight, PilotBuilder, discovery
 
-     # turn on the light into "rhythm mode"
-    await light.turn_on(PilotBuilder())
-    # set bulb brightness
-    await light.turn_on(PilotBuilder(brightness = 255)
-
-    # set bulb brightness (with async timeout)
-    timeout_secs=10
-    await asyncio.wait_for(light.turn_on(PilotBuilder(brightness = 255)), wait_secs)
-
-    # set bulb to warm white
-    await light.turn_on(PilotBuilder(warm_white = 255)
-
-    # set rbb values
-    # red to 0 = 0%, green to 128 = 50%, blue to 255 = 100%
-    await light.turn_on(PilotBuilder(rgb = (0, 128, 255))
-    
-    # get the current color temperature, rgb values
-    state = await light.updateState()
-    print(state.get_colortemp())
-    r, g, b = state.get_rgb()
-    print("red %i green %i blue %i" % (r, g, b))
-
-    # start a scene 
-    await light.turn_on(PilotBuilder(scene = 14)) # party
-
-    # get the name of the current scene
-    state = await light.updateState()
-    print(state.get_scene())
-
-    # turns the light off
-    await light.turn_off()
-
-    # do operations on multiple lights parallely
-    bulb1 = wizlight("<your bulb1 ip>")
-    bulb2 = wizlight("<your bulb2 ip>")
-    await asyncio.gather(bulb1.turn_on(PilotBuilder(brightness = 255),
-        bulb2.turn_on(PilotBuilder(warm_white = 255), loop = loop)
-    
+async def main():
+    """Sample code to work with bulbs."""
     # Discover all bulbs in the network via broadcast datagram (UDP)
     # function takes the discovery object and returns a list with wizlight objects.
     bulbs = await discovery.find_wizlights(discovery)
-    # print the ip of the bulb on index 0
-    print(bulbretrun[0].ip)
-    # iterate over all returned bulbs
-    for bulb in bulbs:
-        await bulb.turn_off()
+    # Print the IP address of the bulb on index 0
+    print(f"Bulb IP address: {bulbs[0].ip}")
 
+    # Iterate over all returned bulbs
+    for bulb in bulbs:
+        print(bulb.__dict__)
+        # Turn off all available bulbs
+        # await bulb.turn_off()
+
+    # Set up a standard light
+    light = wizlight("192.168.0.170")
+    # Set up the light with a custom port
+    #light = wizlight("your bulb's IP address", 12345)
+
+    # The following calls need to be done inside an asyncio coroutine
+    # to run them fron normal synchronous code, you can wrap them with
+    # asyncio.run(..).
+
+    # Turn on the light into "rhythm mode"
+    await light.turn_on(PilotBuilder())
+    # Set bulb brightness
+    await light.turn_on(PilotBuilder(brightness = 255))
+
+    # Set bulb brightness (with async timeout)
+    timeout = 10
+    await asyncio.wait_for(light.turn_on(PilotBuilder(brightness = 255)), timeout)
+
+    # Set bulb to warm white
+    await light.turn_on(PilotBuilder(warm_white = 255))
+
+    # Set RGB values
+    # red to 0 = 0%, green to 128 = 50%, blue to 255 = 100%
+    await light.turn_on(PilotBuilder(rgb = (0, 128, 255)))
+
+    # Get the current color temperature, RGB values
+    state = await light.updateState()
+    print(state.get_colortemp())
+    red, green, blue = state.get_rgb()
+    print(f"red {red}, green {green}, blue {blue}")
+
+    # Start a scene 
+    await light.turn_on(PilotBuilder(scene = 14)) # party
+
+    # Get the name of the current scene
+    state = await light.updateState()
+    print(state.get_scene())
+
+    # Turns the light off
+    await light.turn_off()
+
+    # Do operations on multiple lights parallely
+    #bulb1 = wizlight("<your bulb1 ip>")
+    #bulb2 = wizlight("<your bulb2 ip>")
+    #await asyncio.gather(bulb1.turn_on(PilotBuilder(brightness = 255)),
+    #    bulb2.turn_on(PilotBuilder(warm_white = 255)), loop = loop)
+
+loop = asyncio.get_event_loop()
+loop.run_until_complete(main())
 ```
+
 ## Discovery
+
 The discovery works with an UDP Broadcast request and collects all bulbs in the network.
 
+## Bulb paramters (UDP RAW)
 
-## Bulb paramters (UDP RAW):
 - **sceneId** - calls one of thr predefined scenes (int from 0 to 32) [Wiki](https://github.com/sbidy/pywizlight/wiki/Light-Scenes)
 - **speed** - sets the color changing speed in percent
 - **dimming** - sets the dimmer of the bulb in percent
@@ -96,16 +112,17 @@ The discovery works with an UDP Broadcast request and collects all bulbs in the 
 - **schdPsetId** - rhythm id of the room
 
 ## Async I/O
+
 For async I/O this component uses https://github.com/jsbronder/asyncio-dgram, which internally uses asyncio DatagramTransport, which allows completely non-blocking UDP transport
 
 ## Classes
 
-`wizlight(ip)` Creates a instance of a WiZ Light Bulb. Constructor with ip of the bulb
+`wizlight(ip)`: Creates a instance of a WiZ Light Bulb. Constructed with the IP address of the bulb.
 
 ### Instance variables
 
-You need to first fetch the state by calling `light.updateState()`
-After that all state can be fetched from `light.state`, which is a `PilotParser` object
+You need to first fetch the state by calling `light.updateState()`.
+After that all state can be fetched from `light.state`, which is a `PilotParser` object.
 
 `PilotParser.get_brightness()`gets the value of the brightness 0-255
 
@@ -120,6 +137,7 @@ After that all state can be fetched from `light.state`, which is a `PilotParser`
 `PilotParser.get_state()` returns true or false / true = on , false = off
 
 ### Methods
+
 `getBulbConfig(self)` returns the hardware configuration of the bulb
 
 `updateState(self)` gets the current bulb state from the light using `sendUDPMessage` and sets it to `self.state`
