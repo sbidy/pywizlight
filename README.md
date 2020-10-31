@@ -106,7 +106,7 @@ The discovery works with an UDP Broadcast request and collects all bulbs in the 
 
 ## Bulb paramters (UDP RAW)
 
-- **sceneId** - calls one of thr predefined scenes (int from 0 to 32) [Wiki](https://github.com/sbidy/pywizlight/wiki/Light-Scenes)
+- **sceneId** - calls one of thr predefined scenes (int from 0 to 32) [List of names in code](https://github.com/sbidy/pywizlight/blob/master/pywizlight/scenes.py)
 - **speed** - sets the color changing speed in percent
 - **dimming** - sets the dimmer of the bulb in percent
 - **temp** - sets color temperature in kelvins
