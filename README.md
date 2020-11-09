@@ -100,6 +100,27 @@ loop = asyncio.get_event_loop()
 loop.run_until_complete(main())
 ```
 
+## CLI
+
+`wizlight` is a command-line tool to perform basic interactions with bulbs.
+
+```bash
+$ wizlight
+Usage: wizlight [OPTIONS] COMMAND [ARGS]...
+
+  Simple command-line tool to interact with Wizlight bulbs.
+
+Options:
+  --version  Show the version and exit.
+  --help     Show this message and exit.
+
+Commands:
+  discover  Disocver bulb in the local network.
+  off       Turn the bulb off.
+  on        Turn the bulb on.
+  state     Get the current state from the given bulb.
+```
+
 ## Discovery
 
 The discovery works with an UDP Broadcast request and collects all bulbs in the network.
