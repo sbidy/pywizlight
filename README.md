@@ -16,6 +16,8 @@ Tested with the following smart lights:
 pip install pywizlight
 ```
 
+**Note:** Requires Python version `>=3.7`.
+
 On a Fedora-based system or on a CentOS/RHEL 8 machine which has EPEL enabled, as 
 [`pywizlight`](https://src.fedoraproject.org/rpms/python-pywizlight) is present in the 
 Fedora Package Collection.
