@@ -23,6 +23,7 @@ setuptools.setup(
     description="A python connector for WiZ light bulbs (e.g SLV Play)",
     long_description=long_description,
     long_description_content_type="text/markdown",
+    license="MIT",
     url="https://github.com/sbidy/pywizlight",
     packages=setuptools.find_packages(exclude=["test.py"]),
     entry_points={"console_scripts": ["wizlight = pywizlight.cli:main"]},
