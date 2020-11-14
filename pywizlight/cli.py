@@ -3,7 +3,7 @@ import asyncio
 from functools import wraps
 
 import click
-from pywizlight.bulb import wizlight, PilotBuilder, discovery
+from pywizlight.bulb import wizlight, discovery
 
 
 def coro(f):
