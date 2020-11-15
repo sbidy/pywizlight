@@ -83,7 +83,7 @@ async def main():
     print(f"red {red}, green {green}, blue {blue}")
 
     # Start a scene 
-    await light.turn_on(PilotBuilder(scene = 14)) # party
+    await light.turn_on(PilotBuilder(scene = 4)) # party
 
     # Get the name of the current scene
     state = await light.updateState()
