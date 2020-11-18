@@ -49,7 +49,7 @@ class BulbRegistry(object):
 class BroadcastProtocol(object):
     """Protocol that sends an UDP broadcast message for bulb discovery."""
 
-    def __init__(self, loop, registry, broadcast_address="255.255.255.255"):
+    def __init__(self, loop, registry, broadcast_address):
         """Init discovery function."""
         self.loop = loop
         self.registry = registry
@@ -91,12 +91,12 @@ class BroadcastProtocol(object):
         _LOGGER.debug("Closing UDP discovery")
 
 
-async def find_wizlights(wait_time=5) -> list:
+async def find_wizlights(wait_time=5, broadcast_address="255.255.255.255") -> list:
     """Start discovery and return list of wizlight bulbs."""
     registry = BulbRegistry()
     loop = asyncio.get_event_loop()
     transport, protocol = await loop.create_datagram_endpoint(
-        lambda: BroadcastProtocol(loop, registry), local_addr=("0.0.0.0", 38899)
+        lambda: BroadcastProtocol(loop, registry, broadcast_address), local_addr=("0.0.0.0", 38899)
     )
     try:
         await asyncio.sleep(wait_time)
