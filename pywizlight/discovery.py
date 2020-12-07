@@ -96,7 +96,8 @@ async def find_wizlights(wait_time=5, broadcast_address="255.255.255.255") -> li
     registry = BulbRegistry()
     loop = asyncio.get_event_loop()
     transport, protocol = await loop.create_datagram_endpoint(
-        lambda: BroadcastProtocol(loop, registry, broadcast_address), local_addr=("0.0.0.0", 38899)
+        lambda: BroadcastProtocol(loop, registry, broadcast_address),
+        local_addr=("0.0.0.0", 38899),
     )
     try:
         await asyncio.sleep(wait_time)
