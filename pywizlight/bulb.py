@@ -1,8 +1,8 @@
 """pywizlight integration."""
 import asyncio
+import asyncio_dgram
 import json
 import logging
-import socket
 from time import time
 
 from pywizlight.scenes import SCENES
