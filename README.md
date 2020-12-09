@@ -1,6 +1,6 @@
 ![Upload Python Package](https://github.com/sbidy/pywizlight/workflows/Upload%20Python%20Package/badge.svg)
 ![Code Quality Check](https://github.com/sbidy/pywizlight/workflows/Lint/badge.svg)
-![Updated Docs](https://github.com/sbidy/pywizlight/workflows/CI/badge.svg)
+![Update Docs](https://github.com/sbidy/pywizlight/workflows/Update%20Docs/badge.svg)
 
 # pywizlight
 
