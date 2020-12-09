@@ -3,9 +3,6 @@ import asyncio
 import json
 import logging
 import socket
-from typing import List, Optional
-
-import asyncio_dgram
 
 _LOGGER = logging.getLogger(__name__)
 
