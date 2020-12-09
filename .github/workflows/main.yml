@@ -23,11 +23,10 @@ jobs:
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       - name: Code Documentation
-        # You may pin to the exact commit or the version.
-        # uses: jbheard/markdown-docs@c97b542c3d24257d97d55179445e339251618220
-        uses: jbheard/markdown-docs@v0.1
+      - uses: actions/checkout@v2
+      - name: Generate Python Docs
+        uses: jbheard/markdown-docs@v1
+      - name: Open docs update PR
+        uses: peter-evans/create-pull-request@v2
         with:
-          # Path to the source folder containing python code
-          src_path: .
-          # Directory to create markdown documents in
-          #dst_path: # optional, default is docs
+          token: ${{ secrets.GITHUB_TOKEN }}
