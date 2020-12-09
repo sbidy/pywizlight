@@ -17,11 +17,11 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-      - name: Generate Python Docs
-        uses: jbheard/markdown-docs@v1
-      - name: Open docs update PR
-        uses: peter-evans/create-pull-request@v2
+      - name: Checkout repo
+        uses: actions/checkout@v2.3.4
+      - name: Python Markdown Documentation
+        uses: jbheard/markdown-docs@v0.1
+      - name: GitHub Commit & Push
+        uses: actions-js/push@v1.2
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          github_token: $\{{ secrets.GITHUB_TOKEN }}
