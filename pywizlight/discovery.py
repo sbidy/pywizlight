@@ -38,7 +38,7 @@ class BulbRegistry(object):
         """Register a new bulb."""
         self.bulbs_by_mac[bulb.mac_address] = bulb
 
-    def bulbs(self):
+    def bulbs(self) -> list:
         """Get all present bulbs."""
         return list(self.bulbs_by_mac.values())
 
