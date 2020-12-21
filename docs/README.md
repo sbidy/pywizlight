@@ -2,6 +2,10 @@
 
 ## Classes
 
+**[WizLightError](WizLightError.md)**: General WizLightError exception occurred. 
+
+**[WizLightConnectionError](WizLightConnectionError.md)**: When a connection error is encountered. 
+
 **[DiscoveredBulb](DiscoveredBulb.md)**: Representation of discovered bulb. 
 
 **[BulbRegistry](BulbRegistry.md)**: Representation of the bulb registry. 
@@ -13,10 +17,6 @@
 **[PilotParser](PilotParser.md)**: Interpret the message from the bulb. 
 
 **[wizlight](wizlight.md)**: Create an instance of a WiZ Light Bulb. 
-
-**[WizLightError](WizLightError.md)**: General WizLightError exception occurred. 
-
-**[WizLightConnectionError](WizLightConnectionError.md)**: When a connection error is encountered. 
 
 
 ## Functions
