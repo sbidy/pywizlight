@@ -36,7 +36,7 @@ Thank you [@angadsingh](https://github.com/angadsingh) for make such incredible 
 ```python
 import asyncio
 
-from pywizlight.bulb import wizlight, PilotBuilder, discovery
+from pywizlight import wizlight, PilotBuilder, discovery
 
 async def main():
     """Sample code to work with bulbs."""
