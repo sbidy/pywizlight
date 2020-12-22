@@ -170,7 +170,8 @@ class PilotParser:
 
     def get_brightness(self) -> int:
         """Get the value of the brightness 0-255."""
-        return self.percent_to_hex(self.pilotResult["dimming"])
+        if 'dimming' in self.pilotResult:
+            return self.percent_to_hex(self.pilotResult['dimming'])
 
     def get_colortemp(self) -> int:
         """Get the color temperatur from the bulb."""
