@@ -115,11 +115,17 @@ class PilotParser:
 
     def get_state(self) -> str:
         """Return the state of the bulb."""
-        return self.pilotResult["state"]
+        if "state" in self.pilotResult:
+            return self.pilotResult["state"]
+        else:
+            return None
 
     def get_mac(self) -> str:
         """Return MAC from the bulb."""
-        return self.pilotResult["mac"]
+        if "mac" in self.pilotResult:
+            return self.pilotResult["mac"]
+        else:
+            return None
 
     def get_warm_white(self) -> int:
         """Get the value of the warm white led."""
