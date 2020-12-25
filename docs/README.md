@@ -6,6 +6,8 @@
 
 **[WizLightConnectionError](WizLightConnectionError.md)**: When a connection error is encountered. 
 
+**[WizLightTimeOutError](WizLightTimeOutError.md)**: When a connection error is encountered. 
+
 **[DiscoveredBulb](DiscoveredBulb.md)**: Representation of discovered bulb. 
 
 **[BulbRegistry](BulbRegistry.md)**: Representation of the bulb registry. 
