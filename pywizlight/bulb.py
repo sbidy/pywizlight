@@ -278,7 +278,7 @@ class wizlight:
         return data
 
     async def sendUDPMessage(
-        self, message, timeout=60, send_interval=0.5, max_send_datagrams=100
+        self, message, timeout=30, send_interval=0.5, max_send_datagrams=100
     ):
         """Send the UDP message to the bulb."""
         connid = hex(int(time() * 10000000))[2:]
