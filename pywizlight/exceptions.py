@@ -11,3 +11,9 @@ class WizLightConnectionError(WizLightError):
     """When a connection error is encountered."""
 
     pass
+
+
+class WizLightTimeOutError(WizLightError):
+    """When a connection error is encountered."""
+
+    pass

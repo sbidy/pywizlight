@@ -6,7 +6,7 @@ import logging
 from time import time
 
 from pywizlight.scenes import SCENES
-from pywizlight.exceptions import WizLightConnectionError
+from pywizlight.exceptions import WizLightConnectionError, WizLightTimeOutError
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -319,11 +319,12 @@ class wizlight:
 
         except asyncio.TimeoutError:
             _LOGGER.exception(
-                "[wizlight {}, connid {}] Failed to do UDP call(s) to wiz light".format(
+                "[wizlight {}, connid {}] Failed to do UDP call(s) to wiz light - Timeout Error!".format(
                     self.ip, connid
                 ),
                 exc_info=False,
             )
+            raise WizLightTimeOutError("The request to the bulb timted out")
         finally:
             try:
                 stream.close()
