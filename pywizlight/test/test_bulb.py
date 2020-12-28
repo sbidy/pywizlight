@@ -1,11 +1,8 @@
-from pywizlight.cli import state
+"""Tests for the Bulb API."""
 import pytest
-import asyncio
-
-from asyncio import TimeoutError
 
 from pywizlight import wizlight, PilotBuilder, SCENES
-from pywizlight.exceptions import WizLightTimeOutError, WizLightConnectionError
+from pywizlight.exceptions import WizLightTimeOutError
 
 
 def pytest_namespace():
@@ -88,7 +85,7 @@ async def test_PilotBuilder_rgb(data):
 
 @pytest.mark.asyncio
 async def test_PilotBuilder_scene(data):
-    """Test Screen"""
+    """Test Screen."""
     await pytest.correct_bulb.turn_on(PilotBuilder(scene=1))
     state = await pytest.correct_bulb.updateState()
 
@@ -96,7 +93,7 @@ async def test_PilotBuilder_scene(data):
     await pytest.correct_bulb.turn_off()
 
 
-# ------ Error states ---------------------------------------------------------------------
+# ------ Error states -------------------------------------
 @pytest.mark.asyncio
 async def test_error_PilotBuilder_brightness(data):
     """Error Brightness."""
