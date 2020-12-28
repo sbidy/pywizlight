@@ -20,6 +20,14 @@
 
 **[wizlight](wizlight.md)**: Create an instance of a WiZ Light Bulb. 
 
+**[Features](Features.md)**: Defines the supported features. 
+
+**[KelvinRange](KelvinRange.md)**: Deines the kelvin range. 
+
+**[BulbType](BulbType.md)**: BulbType object to define functions and features of the bulb. 
+
+**[BulbLib](BulbLib.md)**: Provides all existing bulbs. 
+
 
 ## Functions
 
