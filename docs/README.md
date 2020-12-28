@@ -61,3 +61,19 @@ Simple command-line tool to interact with Wizlight bulbs.
 
 
 
+
+### pytest_namespace
+
+
+Define the global var. 
+
+
+
+
+### data
+
+
+Init the bad and good bulbs. 
+
+
+
