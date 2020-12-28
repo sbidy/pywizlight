@@ -220,7 +220,7 @@ class wizlight:
         Retrun the bulb type as BulbType object.
 
         name: get_bulbtype
-        description: Used for returning the BulbType for defining the functions and features of the bulb 
+        description: Used for returning the BulbType for defining the functions and features of the bulb
         return: ["BulbType", "None"]
         authors: ["@sbidy"]
         """
