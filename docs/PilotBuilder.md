@@ -22,6 +22,7 @@ scene |  | None
 rgb |  | None
 brightness |  | None
 colortemp |  | None
+state |  | True
 
 
 
