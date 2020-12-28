@@ -14,4 +14,3 @@ def getSystemConfig():
     return '{"method":"getSystemConfig","env":"pro","result": \
     {"mac":"ABCABCABCABC","homeId":653906,"roomId":989983,"moduleName":"ESP01_SHRGB_03",\
     "fwVersion":"1.21.0","groupId":0,"drvConf":[20,2],"ewf":[255,0,255,255,0,0,0],"ewfHex":"ff00ffff000000","ping":0}}'
-
