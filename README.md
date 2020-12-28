@@ -8,8 +8,8 @@ A Python connector for WiZ light bulbs.
 
 Tested with the following smart lights:
 
-* [Original Phillips Wiz WiFi LEDs](https://www.lighting.philips.co.in/consumer/smart-wifi-led)
-* [SLV Play RGB bulb](https://www.amazon.de/dp/B07PNCDJLW)
+- [Original Phillips Wiz WiFi LEDs](https://www.lighting.philips.co.in/consumer/smart-wifi-led)
+- [SLV Play RGB bulb](https://www.amazon.de/dp/B07PNCDJLW)
 
 ## Install
 
@@ -19,8 +19,8 @@ pip install pywizlight
 
 **Note:** Requires Python version `>=3.7`.
 
-On a Fedora-based system or on a CentOS/RHEL 8 machine which has EPEL enabled, as 
-[`pywizlight`](https://src.fedoraproject.org/rpms/python-pywizlight) is present in the 
+On a Fedora-based system or on a CentOS/RHEL 8 machine which has EPEL enabled, as
+[`pywizlight`](https://src.fedoraproject.org/rpms/python-pywizlight) is present in the
 Fedora Package Collection.
 
 ```bash
@@ -55,7 +55,7 @@ async def main():
     # Set up a standard light
     light = wizlight("192.168.0.170")
     # Set up the light with a custom port
-    #light = wizlight("your bulb's IP address", 12345)
+    #light = wizlight("your bulb's IP address", port=12345)
 
     # The following calls need to be done inside an asyncio coroutine
     # to run them fron normal synchronous code, you can wrap them with
@@ -83,7 +83,7 @@ async def main():
     red, green, blue = state.get_rgb()
     print(f"red {red}, green {green}, blue {blue}")
 
-    # Start a scene 
+    # Start a scene
     await light.turn_on(PilotBuilder(scene = 4)) # party
 
     # Get the name of the current scene
@@ -185,21 +185,23 @@ After that all state can be fetched from `light.state`, which is a `PilotParser`
 `turn_on(PilotBuilder)` turns the light on. This take a `PilotBuilder` object, which can be used to set all the parameters programmatically - rgb, color temperature, brightness, etc. To set the light to rhythm mode, create an empty `PilotBuilder`.
 
 ## Bulb methods (UDP native):
+
 - **getSystemConfig** - gets the current system configuration - no parameters need
 - **syncPilot** - sent by the bulb as heart-beats
 - **getPilot** - gets the current bulb state - no parameters need to be included
 - **setPilot** - used to tell the bulb to change color/temp/state
 - **Pulse** - uncertain of purpose
 - **Registration** - used to "register" with the bulb: This notifies the built that
-                            it you want it to send you heartbeat sync packets.
+  it you want it to send you heartbeat sync packets.
 
 ## Example UDP requests
+
 Send message to the bulb:
-    `{"method":"setPilot","params":{"r":255,"g":255,"b":255,"dimming":50}}`
+`{"method":"setPilot","params":{"r":255,"g":255,"b":255,"dimming":50}}`
 Response: `{"method":"setPilot","env":"pro","result":{"success":true}}`
 
 Get state of the bulb:
-    `{"method":"getPilot","params":{}}`
+`{"method":"getPilot","params":{}}`
 Responses:
 
 custom color mode:
@@ -216,5 +218,5 @@ rhythm mode:
 
 ## Contributors
 
-* [@sbidy](http://github.com/sbidy) for the entire python library from scratch with complete light control
-* [@angadsingh](http://github.com/angadsingh) for implementing asyncio and non-blocking UDP, rhythm support, performance optimizations
+- [@sbidy](http://github.com/sbidy) for the entire python library from scratch with complete light control
+- [@angadsingh](http://github.com/angadsingh) for implementing asyncio and non-blocking UDP, rhythm support, performance optimizations

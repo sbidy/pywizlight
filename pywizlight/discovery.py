@@ -4,6 +4,7 @@ import json
 import logging
 import socket
 
+
 _LOGGER = logging.getLogger(__name__)
 
 
@@ -89,7 +90,7 @@ class BroadcastProtocol(object):
 
 
 async def find_wizlights(wait_time=5, broadcast_address="255.255.255.255") -> list:
-    """Start discovery and return list of wizlight bulbs."""
+    """Start discovery and return list of IPs of the bulbs."""
     registry = BulbRegistry()
     loop = asyncio.get_event_loop()
     transport, protocol = await loop.create_datagram_endpoint(

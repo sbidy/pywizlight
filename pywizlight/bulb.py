@@ -6,6 +6,8 @@ import logging
 from time import time
 
 from pywizlight.scenes import SCENES
+from pywizlight import discovery
+from pywizlight.static.bulblibrary import BulbLib, BulbType
 from pywizlight.exceptions import WizLightConnectionError, WizLightTimeOutError
 
 _LOGGER = logging.getLogger(__name__)
@@ -196,12 +198,13 @@ class wizlight:
 
     # default port for WiZ lights
 
-    def __init__(self, ip, port=38899):
+    def __init__(self, ip, port=38899, mac=None):
         """Create instance with the IP address of the bulb."""
         self.ip = ip
         self.port = port
         self.state = None
-        self.mac = None
+        self.mac = mac
+        self.bulbtype = None
 
     @property
     def status(self) -> bool:
@@ -211,6 +214,26 @@ class wizlight:
         return self.state.get_state()
 
     # ------------------ Non properties --------------
+
+    async def get_bulbtype(self) -> BulbType:
+        """
+        Retrun the bulb type as BulbType object.
+
+        name: get_bulbtype
+        description: Used for returning the BulbType for defining the functions and features of the bulb 
+        return: ["BulbType", "None"]
+        authors: ["@sbidy"]
+        """
+        if self.bulbtype is None:
+            bulb_config = await self.getBulbConfig()
+            if "moduleName" in bulb_config["result"]:
+                _bulbtype = bulb_config["result"]["moduleName"]
+                # look for match in known bulbs
+                for known_bulb in BulbLib.BULBLIST:
+                    if known_bulb.name == _bulbtype:
+                        # retrun the BulbType object
+                        return known_bulb
+        return None
 
     async def turn_off(self):
         """Turn the light off."""
@@ -345,3 +368,18 @@ class wizlight:
             else:
                 # exception should be created
                 raise ValueError("Can't read response from the bulb. Debug:", resp)
+
+    # ------------ Statics Should be moved to discovery !! ---------
+    @staticmethod
+    async def discover_lights(broadcast_space="255.255.255.255") -> list:
+        """Find lights and return list with wizlight objects."""
+        discovered_IPs = await discovery.find_wizlights(
+            broadcast_address=broadcast_space
+        )
+        # empty list for adding bulbs
+        bulbs = []
+        # create light entities from register
+        for entries in discovered_IPs:
+            bulbs.append(wizlight(ip=entries.ip_address, mac=entries.mac_address))
+
+        return bulbs
