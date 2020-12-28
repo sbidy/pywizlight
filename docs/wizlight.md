@@ -17,6 +17,7 @@ name | description | default
 self |  | 
 ip |  | 
 port |  | 38899
+mac |  | None
 
 
 
