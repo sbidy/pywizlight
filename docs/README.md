@@ -8,6 +8,8 @@
 
 **[WizLightTimeOutError](WizLightTimeOutError.md)**: When a connection error is encountered. 
 
+**[WizLightNotKnownBulb](WizLightNotKnownBulb.md)**: The bulb type is not known to the pywizlight. 
+
 **[DiscoveredBulb](DiscoveredBulb.md)**: Representation of discovered bulb. 
 
 **[BulbRegistry](BulbRegistry.md)**: Representation of the bulb registry. 
