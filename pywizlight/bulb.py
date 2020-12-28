@@ -8,7 +8,11 @@ from time import time
 from pywizlight.scenes import SCENES
 from pywizlight import discovery
 from pywizlight.static.bulblibrary import BulbLib, BulbType
-from pywizlight.exceptions import WizLightConnectionError, WizLightTimeOutError
+from pywizlight.exceptions import (
+    WizLightConnectionError,
+    WizLightTimeOutError,
+    WizLightNotKnownBulb,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -115,7 +119,7 @@ class PilotParser:
         """Init the class."""
         self.pilotResult = pilotResult
 
-    def get_state(self) -> str:
+    def get_state(self) -> bool:
         """Return the state of the bulb."""
         if "state" in self.pilotResult:
             return self.pilotResult["state"]
@@ -216,14 +220,8 @@ class wizlight:
     # ------------------ Non properties --------------
 
     async def get_bulbtype(self) -> BulbType:
-        """
-        Retrun the bulb type as BulbType object.
+        """Retrun the bulb type as BulbType object."""
 
-        name: get_bulbtype
-        description: Used for returning the BulbType for defining the functions and features of the bulb
-        return: ["BulbType", "None"]
-        authors: ["@sbidy"]
-        """
         if self.bulbtype is None:
             bulb_config = await self.getBulbConfig()
             if "moduleName" in bulb_config["result"]:
@@ -233,7 +231,7 @@ class wizlight:
                     if known_bulb.name == _bulbtype:
                         # retrun the BulbType object
                         return known_bulb
-        return None
+        raise WizLightNotKnownBulb("The bulb is unknown to the intergration.")
 
     async def turn_off(self):
         """Turn the light off."""
