@@ -29,8 +29,9 @@ async def run_after_tests():
 async def test_Bulb_Discovery():
     """Test discovery function."""
     bulbs = await wizlight.discover_lights(broadcast_space="192.168.178.255")
-    state = await bulb.updateState()
-    assert state.get_state() is False
+    for bulb in bulbs:
+        state = await bulb.updateState()
+        assert state.get_state() is False
 
 
 @pytest.mark.asyncio
