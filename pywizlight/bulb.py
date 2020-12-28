@@ -29,9 +29,13 @@ class PilotBuilder:
         rgb=None,
         brightness=None,
         colortemp=None,
+        state=True,
     ):
         """Set the parameter."""
-        self.pilot_params = {"state": True}
+        if state:
+            self.pilot_params = {"state": state}
+        else:
+            self.pilot_params = {"state": state}
 
         if warm_white is not None:
             self._set_warm_white(warm_white)
@@ -56,13 +60,15 @@ class PilotBuilder:
         """Set the value of the cold white led."""
         if value > 0 and value < 256:
             self.pilot_params["w"] = value
+        else:
+            raise ValueError("Value must be between 1 and 255")
 
     def _set_cold_white(self, value: int):
         """Set the value of the cold white led."""
         if value > 0 and value < 256:
             self.pilot_params["c"] = value
         else:
-            raise IndexError("Value must be between 1 and 255")
+            raise ValueError("Value must be between 1 and 255")
 
     def _set_speed(self, value: int):
         """Set the color changing speed in precent (0-100).
@@ -72,7 +78,7 @@ class PilotBuilder:
         if value > 0 and value < 101:
             self.pilot_params["speed"] = value
         else:
-            raise IndexError("Value must be between 0 and 100")
+            raise ValueError("Value must be between 0 and 100")
 
     def _set_scene(self, scene_id: int):
         """Set the scene by id."""
@@ -80,14 +86,23 @@ class PilotBuilder:
             self.pilot_params["sceneId"] = scene_id
         else:
             # id not in SCENES !
-            raise IndexError("Scene is not available. Only 0 to 32 are supported")
+            raise ValueError("Scene is not available. Only 0 to 32 are supported")
 
     def _set_rgb(self, values):
         """Set the RGB color state of the bulb."""
         red, green, blue = values
-        self.pilot_params["r"] = red
-        self.pilot_params["g"] = green
-        self.pilot_params["b"] = blue
+        if red >= 0 and red < 256:
+            self.pilot_params["r"] = red
+        else:
+            raise ValueError("Red is not in range between 0-255.")
+        if green >= 0 and green < 256:
+            self.pilot_params["g"] = green
+        else:
+            raise ValueError("Green is not in range between 0-255.")
+        if blue >= 0 and blue < 256:
+            self.pilot_params["b"] = blue
+        else:
+            raise ValueError("Blue is not in range between 0-255.")
 
     def _set_brightness(self, value: int):
         """Set the value of the brightness 0-255."""
@@ -95,6 +110,8 @@ class PilotBuilder:
         # lamp doesn't supports lower than 10%
         if percent < 10:
             percent = 10
+        if percent > 101:
+            raise ValueError("Max value can be 100% with 255.")
         self.pilot_params["dimming"] = percent
 
     def _set_colortemp(self, kelvin: int):
