@@ -1,18 +1,15 @@
 """pywizlight integration."""
 import asyncio
-import asyncio_dgram
 import json
 import logging
 from time import time
 
+import asyncio_dgram
+
+from pywizlight.exceptions import (WizLightConnectionError,
+                                   WizLightNotKnownBulb, WizLightTimeOutError)
 from pywizlight.scenes import SCENES
-from pywizlight import discovery
 from pywizlight.static.bulblibrary import BulbLib, BulbType
-from pywizlight.exceptions import (
-    WizLightConnectionError,
-    WizLightTimeOutError,
-    WizLightNotKnownBulb,
-)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -238,7 +235,6 @@ class wizlight:
 
     async def get_bulbtype(self) -> BulbType:
         """Retrun the bulb type as BulbType object."""
-
         if self.bulbtype is None:
             bulb_config = await self.getBulbConfig()
             if "moduleName" in bulb_config["result"]:
@@ -383,18 +379,3 @@ class wizlight:
             else:
                 # exception should be created
                 raise ValueError("Can't read response from the bulb. Debug:", resp)
-
-    # ------------ Statics Should be moved to discovery !! ---------
-    @staticmethod
-    async def discover_lights(broadcast_space="255.255.255.255") -> list:
-        """Find lights and return list with wizlight objects."""
-        discovered_IPs = await discovery.find_wizlights(
-            broadcast_address=broadcast_space
-        )
-        # empty list for adding bulbs
-        bulbs = []
-        # create light entities from register
-        for entries in discovered_IPs:
-            bulbs.append(wizlight(ip=entries.ip_address, mac=entries.mac_address))
-
-        return bulbs

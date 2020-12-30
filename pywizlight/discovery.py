@@ -4,6 +4,7 @@ import json
 import logging
 import socket
 
+from pywizlight import wizlight
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -109,3 +110,14 @@ async def find_wizlights(wait_time=5, broadcast_address="255.255.255.255") -> li
                 )
             )
         return bulbs
+
+
+async def discover_lights(broadcast_space="255.255.255.255") -> list:
+    """Find lights and return list with wizlight objects."""
+    discovered_IPs = await find_wizlights(broadcast_address=broadcast_space)
+    # empty list for adding bulbs
+    bulbs = []
+    # create light entities from register
+    for entries in discovered_IPs:
+        bulbs.append(wizlight(ip=entries.ip_address, mac=entries.mac_address))
+    return bulbs

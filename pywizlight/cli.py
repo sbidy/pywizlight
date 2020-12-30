@@ -1,9 +1,10 @@
-"""Command-line interface to interact with dingz devices."""
+"""Command-line interface to interact with wizlight devices."""
 import asyncio
 from functools import wraps
 
 import click
-from pywizlight import wizlight, discovery
+
+from pywizlight import discovery, wizlight
 
 
 def coro(f):
@@ -20,7 +21,7 @@ def coro(f):
 @click.group()
 @click.version_option()
 def main():
-    """Simple command-line tool to interact with Wizlight bulbs."""
+    """Command-line tool to interact with Wizlight bulbs."""
 
 
 @main.command("discover")

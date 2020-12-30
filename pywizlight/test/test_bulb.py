@@ -1,9 +1,9 @@
 """Tests for the Bulb API."""
 import pytest
 
-from pywizlight.test.fake_bulb import startup_bulb
-from pywizlight import wizlight, PilotBuilder, SCENES
+from pywizlight import SCENES, PilotBuilder, wizlight
 from pywizlight.exceptions import WizLightTimeOutError
+from pywizlight.test.fake_bulb import startup_bulb
 
 
 class TestBulb:
