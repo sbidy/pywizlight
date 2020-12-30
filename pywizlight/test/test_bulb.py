@@ -22,6 +22,7 @@ class TestBulb:
     @classmethod
     def setup_class(cls):
         """Startup the class."""
+        # Init the fake bulb on localhost
         startup_bulb(module_name="ESP01_SHRGB_03")
 
     # Non-Error states - PilotBuilder

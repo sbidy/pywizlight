@@ -288,7 +288,7 @@ class wizlight:
     async def getMac(self):
         """Read the MAC from the bulb."""
         resp = await self.getBulbConfig()
-        if resp is not None and "result" in resp:
+        if resp is not None and "result" in resp and self.mac is None:
             self.mac = PilotParser(resp["result"]).get_mac()
         else:
             self.mac = None
