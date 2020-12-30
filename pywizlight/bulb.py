@@ -6,8 +6,11 @@ from time import time
 
 import asyncio_dgram
 
-from pywizlight.exceptions import (WizLightConnectionError,
-                                   WizLightNotKnownBulb, WizLightTimeOutError)
+from pywizlight.exceptions import (
+    WizLightConnectionError,
+    WizLightNotKnownBulb,
+    WizLightTimeOutError,
+)
 from pywizlight.scenes import SCENES
 from pywizlight.static.bulblibrary import BulbLib, BulbType
 
