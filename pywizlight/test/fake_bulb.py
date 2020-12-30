@@ -69,6 +69,7 @@ def udp_fake_bulb():
     UDPServerObject = socketserver.ThreadingUDPServer(
         server_address=("127.0.0.1", 38899), RequestHandlerClass=BulbUDPRequestHandler
     )
+    UDPServerObject.daemon_threads = True
     UDPServerObject.serve_forever()
 
 
