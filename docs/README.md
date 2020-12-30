@@ -22,6 +22,8 @@
 
 **[wizlight](wizlight.md)**: Create an instance of a WiZ Light Bulb. 
 
+**[TestBulb](TestBulb.md)**: Bulb test class. 
+
 **[Features](Features.md)**: Defines the supported features. 
 
 **[KelvinRange](KelvinRange.md)**: Deines the kelvin range. 
@@ -62,18 +64,23 @@ Simple command-line tool to interact with Wizlight bulbs.
 
 
 
-### pytest_namespace
+### udp_fake_bulb
 
 
-Define the global var. 
+Start a fake bulb instance. 
 
 
 
 
-### data
+### startup_bulb
 
 
-Init the bad and good bulbs. 
+Startup the bulb. 
+#### Parameters
+name | description | default
+--- | --- | ---
+module_name |  | "ESP01_SHRGB_03"
+
 
 
 
