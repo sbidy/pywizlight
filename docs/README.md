@@ -59,7 +59,7 @@ f |  |
 ### main
 
 
-Simple command-line tool to interact with Wizlight bulbs. 
+Command-line tool to interact with Wizlight bulbs. 
 
 
 
