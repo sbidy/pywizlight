@@ -12,7 +12,7 @@ from pywizlight.exceptions import (
     WizLightTimeOutError,
 )
 from pywizlight.scenes import SCENES
-from pywizlight.static.bulblibrary import BulbLib, BulbType
+from pywizlight.bulblibrary import BulbLib, BulbType
 
 _LOGGER = logging.getLogger(__name__)
 
