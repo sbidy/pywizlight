@@ -90,6 +90,16 @@ async def main():
     state = await light.updateState()
     print(state.get_scene())
 
+    # Get the features of the bulb
+    bulb_type = await bulb.get_bulbtype()
+    print(bulb_type.features.brightness) # returns true if brightness is supported
+    print(bulb_type.features.color) # returns true if color is supported
+    print(bulb_type.features.color_tmp) # returns true if color temperatures are supported
+    print(bulb_type.features.effect) # returns true if effects are supported
+    print(bulb_type.kelvin_range.max) # returns max kelvin in in INT
+    print(bulb_type.kelvin_range.min) # returns min kelvin in in INT
+    print(bulb_type.name) # returns the module name of the bulb
+
     # Turns the light off
     await light.turn_off()
 
