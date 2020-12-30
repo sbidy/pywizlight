@@ -1,164 +1,154 @@
 """Tests for the Bulb API."""
 import pytest
 
+from pywizlight.test.fake_bulb import startup_bulb
 from pywizlight import wizlight, PilotBuilder, SCENES
 from pywizlight.exceptions import WizLightTimeOutError
 
 
-def pytest_namespace():
-    """Define the global var."""
-    return {"correct_bulb": wizlight, "bad_bulb": wizlight}
+class TestBulb:
+    """Bulb test class."""
 
+    def pytest_namespace(self):
+        """Define the global var."""
+        return {"correct_bulb": wizlight, "bad_bulb": wizlight}
 
-@pytest.fixture
-def data():
-    """Init the bad and good bulbs."""
-    pytest.correct_bulb = wizlight(ip="192.168.178.95")
-    pytest.bad_bulb = wizlight(ip="1.1.1.1")
+    @pytest.fixture
+    def data(self):
+        """Init the bad and good bulbs."""
+        pytest.correct_bulb = wizlight(ip="127.0.0.1")
+        pytest.bad_bulb = wizlight(ip="1.1.1.1")
 
+    @classmethod
+    def setup_class(cls):
+        """Startup the class."""
+        startup_bulb(module_name="ESP01_SHRGB_03")
 
-@pytest.fixture(autouse=True)
-async def run_after_tests():
-    """Run after Testes."""
-    yield
-    await pytest.correct_bulb.turn_off()
+    # Non-Error states - PilotBuilder
+    @pytest.mark.asyncio
+    async def test_Bulb_Discovery(self):
+        """Test discovery function."""
+        bulbs = await wizlight.discover_lights(broadcast_space="192.168.178.255")
+        for bulb in bulbs:
+            state = await bulb.updateState()
+            assert state.get_state() is False
 
-
-# Non-Error states - PilotBuilder
-@pytest.mark.asyncio
-async def test_Bulb_Discovery():
-    """Test discovery function."""
-    bulbs = await wizlight.discover_lights(broadcast_space="192.168.178.255")
-    for bulb in bulbs:
-        state = await bulb.updateState()
+    @pytest.mark.asyncio
+    async def test_PilotBuilder_state(self, data):
+        """Test State."""
+        state = await pytest.correct_bulb.updateState()
         assert state.get_state() is False
 
+    @pytest.mark.asyncio
+    async def test_PilotBuilder_colortemp(self, data):
+        """Test Color Temp."""
+        await pytest.correct_bulb.turn_on(PilotBuilder(colortemp=2800))
+        state = await pytest.correct_bulb.updateState()
 
-@pytest.mark.asyncio
-async def test_PilotBuilder_state(data):
-    """Test State."""
-    state = await pytest.correct_bulb.updateState()
-    assert state.get_state() is False
+        assert state.get_colortemp() == 2800
 
+    @pytest.mark.asyncio
+    async def test_PilotBuilder_brightness(self, data):
+        """Test Brightness."""
+        await pytest.correct_bulb.turn_on(PilotBuilder(brightness=10))
+        state = await pytest.correct_bulb.updateState()
+        # 10% == 26 in Hex
+        assert state.get_brightness() == 26
 
-@pytest.mark.asyncio
-async def test_PilotBuilder_colortemp(data):
-    """Test Color Temp."""
-    await pytest.correct_bulb.turn_on(PilotBuilder(colortemp=2800))
-    state = await pytest.correct_bulb.updateState()
+    @pytest.mark.asyncio
+    async def test_PilotBuilder_warm_wite(self, data):
+        """Test Warm White."""
+        await pytest.correct_bulb.turn_on(PilotBuilder(warm_white=255))
+        state = await pytest.correct_bulb.updateState()
 
-    assert state.get_colortemp() == 2800
+        assert state.get_warm_white() == 255
 
+    @pytest.mark.asyncio
+    async def test_PilotBuilder_cold_white(self, data):
+        """Test Cold White."""
+        await pytest.correct_bulb.turn_on(PilotBuilder(cold_white=255))
+        state = await pytest.correct_bulb.updateState()
 
-@pytest.mark.asyncio
-async def test_PilotBuilder_brightness(data):
-    """Test Brightness."""
-    await pytest.correct_bulb.turn_on(PilotBuilder(brightness=10))
-    state = await pytest.correct_bulb.updateState()
-    # 10% == 26 in Hex
-    assert state.get_brightness() == 26
-    await pytest.correct_bulb.turn_off()
+        assert state.get_cold_white() == 255
 
+    @pytest.mark.asyncio
+    async def test_PilotBuilder_rgb(self, data):
+        """Test RGB Value."""
+        await pytest.correct_bulb.turn_on(PilotBuilder(rgb=(0, 128, 255)))
+        state = await pytest.correct_bulb.updateState()
 
-@pytest.mark.asyncio
-async def test_PilotBuilder_warm_wite(data):
-    """Test Warm White."""
-    await pytest.correct_bulb.turn_on(PilotBuilder(warm_white=255))
-    state = await pytest.correct_bulb.updateState()
+        assert state.get_rgb() == (0, 128, 255)
 
-    assert state.get_warm_white() == 255
-    await pytest.correct_bulb.turn_off()
+    @pytest.mark.asyncio
+    async def test_PilotBuilder_scene(self, data):
+        """Test Screen."""
+        await pytest.correct_bulb.turn_on(PilotBuilder(scene=1))
+        state = await pytest.correct_bulb.updateState()
 
+        assert state.get_scene() == SCENES[1]
 
-@pytest.mark.asyncio
-async def test_PilotBuilder_cold_white(data):
-    """Test Cold White."""
-    await pytest.correct_bulb.turn_on(PilotBuilder(cold_white=255))
-    state = await pytest.correct_bulb.updateState()
+    # ------ Error states -------------------------------------
+    @pytest.mark.asyncio
+    async def test_error_PilotBuilder_brightness(self, data):
+        """Error Brightness."""
+        with pytest.raises(ValueError):
+            await pytest.correct_bulb.turn_on(PilotBuilder(brightness=500))
 
-    assert state.get_cold_white() == 255
-    await pytest.correct_bulb.turn_off()
+    @pytest.mark.asyncio
+    async def test_error_PilotBuilder_warm_wite(self, data):
+        """Error Warm White."""
+        with pytest.raises(ValueError):
+            await pytest.correct_bulb.turn_on(PilotBuilder(warm_white=300))
+        with pytest.raises(ValueError):
+            await pytest.correct_bulb.turn_on(PilotBuilder(warm_white=0))
 
+    @pytest.mark.asyncio
+    async def test_error_PilotBuilder_cold_white_upper(self, data):
+        """Error Cold White."""
+        with pytest.raises(ValueError):
+            await pytest.correct_bulb.turn_on(PilotBuilder(cold_white=300))
 
-@pytest.mark.asyncio
-async def test_PilotBuilder_rgb(data):
-    """Test RGB Value."""
-    await pytest.correct_bulb.turn_on(PilotBuilder(rgb=(0, 128, 255)))
-    state = await pytest.correct_bulb.updateState()
+    @pytest.mark.asyncio
+    async def test_error_PilotBuilder_cold_white_lower(self, data):
+        """Error Cold White."""
+        with pytest.raises(ValueError):
+            await pytest.correct_bulb.turn_on(PilotBuilder(cold_white=0))
 
-    assert state.get_rgb() == (0, 128, 255)
-    await pytest.correct_bulb.turn_off()
+    @pytest.mark.asyncio
+    async def test_error_PilotBuilder_r(self, data):
+        """Error Red Value."""
+        with pytest.raises(ValueError):
+            await pytest.correct_bulb.turn_on(PilotBuilder(rgb=(300, 0, 0)))
 
+    @pytest.mark.asyncio
+    async def test_error_PilotBuilder_green(self, data):
+        """Error Green Value."""
+        with pytest.raises(ValueError):
+            await pytest.correct_bulb.turn_on(PilotBuilder(rgb=(0, 300, 0)))
 
-@pytest.mark.asyncio
-async def test_PilotBuilder_scene(data):
-    """Test Screen."""
-    await pytest.correct_bulb.turn_on(PilotBuilder(scene=1))
-    state = await pytest.correct_bulb.updateState()
+    @pytest.mark.asyncio
+    async def test_error_PilotBuilder_blue(self, data):
+        """Error Blue Value."""
+        with pytest.raises(ValueError):
+            await pytest.correct_bulb.turn_on(PilotBuilder(rgb=(0, 0, 300)))
 
-    assert state.get_scene() == SCENES[1]
-    await pytest.correct_bulb.turn_off()
+    @pytest.mark.asyncio
+    async def test_error_PilotBuilder_scene(self, data):
+        """Error Screen."""
+        with pytest.raises(ValueError):
+            await pytest.correct_bulb.turn_on(PilotBuilder(scene=532))
 
+    # Error states / Timout
+    @pytest.mark.asyncio
+    async def test_timeout(self, data):
+        """Test the timout exception after."""
+        pytest.correct_bulb
+        with pytest.raises(WizLightTimeOutError):
+            await pytest.bad_bulb.getBulbConfig()
 
-# ------ Error states -------------------------------------
-@pytest.mark.asyncio
-async def test_error_PilotBuilder_brightness(data):
-    """Error Brightness."""
-    with pytest.raises(ValueError):
-        await pytest.correct_bulb.turn_on(PilotBuilder(brightness=500))
-
-
-@pytest.mark.asyncio
-async def test_error_PilotBuilder_warm_wite(data):
-    """Error Warm White."""
-    with pytest.raises(ValueError):
-        await pytest.correct_bulb.turn_on(PilotBuilder(warm_white=300))
-    with pytest.raises(ValueError):
-        await pytest.correct_bulb.turn_on(PilotBuilder(warm_white=0))
-
-
-@pytest.mark.asyncio
-async def test_error_PilotBuilder_cold_white(data):
-    """Error Cold White."""
-    with pytest.raises(ValueError):
-        await pytest.correct_bulb.turn_on(PilotBuilder(cold_white=300))
-    with pytest.raises(ValueError):
-        await pytest.correct_bulb.turn_on(PilotBuilder(cold_white=0))
-
-
-@pytest.mark.asyncio
-async def test_error_PilotBuilder_rgb(data):
-    """Error RGB Value."""
-    # Red
-    with pytest.raises(ValueError):
-        await pytest.correct_bulb.turn_on(PilotBuilder(rgb=(300, 0, 0)))
-    # Green
-    with pytest.raises(ValueError):
-        await pytest.correct_bulb.turn_on(PilotBuilder(rgb=(0, 300, 0)))
-    # Blue
-    with pytest.raises(ValueError):
-        await pytest.correct_bulb.turn_on(PilotBuilder(rgb=(0, 0, 300)))
-
-
-@pytest.mark.asyncio
-async def test_error_PilotBuilder_scene(data):
-    """Error Screen."""
-    with pytest.raises(ValueError):
-        await pytest.correct_bulb.turn_on(PilotBuilder(scene=532))
-
-
-# Error states / Timout
-@pytest.mark.asyncio
-async def test_timeout(data):
-    """Test the timout exception after."""
-    pytest.correct_bulb
-    with pytest.raises(WizLightTimeOutError):
-        await pytest.bad_bulb.getBulbConfig()
-
-
-@pytest.mark.asyncio
-async def test_timeout_PilotBuilder(data):
-    """Test Timout for Result."""
-    # check if the bulb state it given as bool - mock ?
-    with pytest.raises(WizLightTimeOutError):
-        await pytest.bad_bulb.turn_on(PilotBuilder(brightness=255))
+    @pytest.mark.asyncio
+    async def test_timeout_PilotBuilder(self, data):
+        """Test Timout for Result."""
+        # check if the bulb state it given as bool - mock ?
+        with pytest.raises(WizLightTimeOutError):
+            await pytest.bad_bulb.turn_on(PilotBuilder(brightness=255))
