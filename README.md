@@ -31,6 +31,8 @@ sudo dnf -y install python3-pywizlight
 
 Thank you [@angadsingh](https://github.com/angadsingh) for make such incredible improvements!!
 
+Thanks to [@fabaff](https://github.com/fabaff) for the CLI tool and some code rework!
+
 ## Example
 
 ```python
