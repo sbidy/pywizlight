@@ -355,7 +355,7 @@ class wizlight:
             data = receive_task.result()
 
         except asyncio.TimeoutError:
-            _LOGGER.exception(
+            _LOGGER.debug(
                 "[wizlight {}, connid {}] Failed to do UDP call(s) to wiz light - Timeout Error!".format(
                     self.ip, connid
                 ),

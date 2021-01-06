@@ -25,7 +25,7 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     license="MIT",
     url="https://github.com/sbidy/pywizlight",
-    packages=setuptools.find_packages(exclude=["test.py", "test"]),
+    packages=setuptools.find_packages(exclude=["test.py", "tests"]),
     entry_points={"console_scripts": ["wizlight = pywizlight.cli:main"]},
     classifiers=[
         "Programming Language :: Python :: 3",
