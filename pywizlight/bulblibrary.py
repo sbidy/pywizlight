@@ -157,6 +157,13 @@ class BulbLib:
             features=Features(brightness=True, color=True, effect=True, color_tmp=True),
             kelvin_range=KelvinRange(min=2200, max=6500),
         ),
+        BulbType(
+			name="ESP15_SHRGB1S_01I",
+			features=Features(
+				brightness=True, color=True, effect=True, color_tmp=True
+			),
+			kelvin_range=KelvinRange(min=2200, max=6500),
+		),
     ]
 
     def getBulbList(self) -> list:
