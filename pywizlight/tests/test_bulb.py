@@ -3,7 +3,8 @@ import pytest
 
 from pywizlight import SCENES, PilotBuilder, wizlight
 from pywizlight.exceptions import WizLightTimeOutError
-from pywizlight.test.fake_bulb import startup_bulb
+from pywizlight.tests.fake_bulb import startup_bulb
+from pywizlight.discovery import discover_lights
 
 
 class TestBulb:
@@ -29,7 +30,7 @@ class TestBulb:
     @pytest.mark.asyncio
     async def test_Bulb_Discovery(self):
         """Test discovery function."""
-        bulbs = await wizlight.discover_lights(broadcast_space="192.168.178.255")
+        bulbs = await discover_lights(broadcast_space="192.168.178.255")
         for bulb in bulbs:
             state = await bulb.updateState()
             assert state.get_state() is False
