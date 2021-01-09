@@ -10,6 +10,7 @@ Tested with the following smart lights:
 
 - [Original Phillips Wiz WiFi LEDs](https://www.lighting.philips.co.in/consumer/smart-wifi-led)
 - [SLV Play RGB bulb](https://www.amazon.de/dp/B07PNCDJLW)
+- [WiZ Smart LED](https://www.amazon.de/gp/product/B07YLW52MK)
 
 ## Install
 
