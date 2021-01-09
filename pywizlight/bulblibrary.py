@@ -60,7 +60,14 @@ class BulbLib:
             kelvin_range=KelvinRange(min=2200, max=6500),
         ),
         BulbType(
-            name="ESP01_SHDW_01",
+            name="ESP01_SHDW1_31",
+            features=Features(
+                brightness=True, color=False, effect=False, color_tmp=False
+            ),
+            kelvin_range=KelvinRange(min=2200, max=6500),
+        ),
+        BulbType(
+            name="ESP03_SHDW1_01",
             features=Features(
                 brightness=True, color=False, effect=False, color_tmp=False
             ),
