@@ -207,6 +207,44 @@ After that all state can be fetched from `light.state`, which is a `PilotParser`
 - **Registration** - used to "register" with the bulb: This notifies the built that
   it you want it to send you heartbeat sync packets.
 
+### Sync functions:
+- syncUserConfig
+- syncSchdPset
+- syncBroadcastPilot
+- syncSystemConfig
+- syncConfig
+- syncAlarm
+
+### Set functions:
+- pulse
+- setUserConfig
+- setSystemConfig
+- setDevInfo
+- setSchd
+- setSchdPset
+- setWifiConfig
+- reset
+- setFavs
+- setState
+- setPilot
+
+### Get functions
+- getPilot
+- getUserConfig
+- getSystemConfig
+- registration
+- getWifiConfig
+- reboot
+- getDevInfo
+
+### Error States and Returns
+- Parse error
+- Invalid Request
+- Method not found
+- Invalid params
+- Internal error
+- Success
+
 ## Example UDP requests
 
 Send message to the bulb:
