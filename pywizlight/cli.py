@@ -30,7 +30,7 @@ async def discover():
     """Disocver bulb in the local network."""
     click.echo("Waiting for broadcast packages...")
 
-    bulbs = await discovery.find_wizlights(discovery)
+    bulbs = await discovery.find_wizlights()
     for bulb in bulbs:
         click.echo(bulb.__dict__)
 

@@ -45,7 +45,7 @@ async def main():
     """Sample code to work with bulbs."""
     # Discover all bulbs in the network via broadcast datagram (UDP)
     # function takes the discovery object and returns a list with wizlight objects.
-    bulbs = await discovery.find_wizlights(discovery)
+    bulbs = await discovery.find_wizlights()
     # Print the IP address of the bulb on index 0
     print(f"Bulb IP address: {bulbs[0].ip}")
 
