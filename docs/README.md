@@ -16,6 +16,12 @@
 
 **[BroadcastProtocol](BroadcastProtocol.md)**: Protocol that sends an UDP broadcast message for bulb discovery. 
 
+**[PilotBuilder](PilotBuilder.md)**: Get information from the bulb. 
+
+**[PilotParser](PilotParser.md)**: Interpret the message from the bulb. 
+
+**[wizlight](wizlight.md)**: Create an instance of a WiZ Light Bulb. 
+
 **[Features](Features.md)**: Defines the supported features. 
 
 **[KelvinRange](KelvinRange.md)**: Deines the kelvin range. 
@@ -23,12 +29,6 @@
 **[BulbType](BulbType.md)**: BulbType object to define functions and features of the bulb. 
 
 **[BulbLib](BulbLib.md)**: Provides all existing bulbs. 
-
-**[PilotBuilder](PilotBuilder.md)**: Get information from the bulb. 
-
-**[PilotParser](PilotParser.md)**: Interpret the message from the bulb. 
-
-**[wizlight](wizlight.md)**: Create an instance of a WiZ Light Bulb. 
 
 **[TestBulb](TestBulb.md)**: Bulb test class. 
 
