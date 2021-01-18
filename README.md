@@ -209,6 +209,7 @@ After that all state can be fetched from `light.state`, which is a `PilotParser`
 
 ### Sync functions:
 - syncUserConfig
+- syncPilot - {"method":"syncPilot","env":"pro","params":{"mac":"ABCABCABC","rssi":-71,"src":"udp","state":true,"sceneId":0,"temp":6500,"dimming":62}}
 - syncSchdPset
 - syncBroadcastPilot
 - syncSystemConfig
@@ -216,7 +217,8 @@ After that all state can be fetched from `light.state`, which is a `PilotParser`
 - syncAlarm
 
 ### Set functions:
-- pulse
+- pulse - {"method":"pulse", {"params":{"delta":-15,"duration":300}}
+- registration - {"method":"registration","id":105,{"params":{"phoneIp":"10.0.0.0","phoneMac":"aaaaaaaaaaaa","register":true}}
 - setUserConfig
 - setSystemConfig
 - setDevInfo
@@ -232,7 +234,6 @@ After that all state can be fetched from `light.state`, which is a `PilotParser`
 - getPilot
 - getUserConfig
 - getSystemConfig
-- registration
 - getWifiConfig
 - reboot
 - getDevInfo
