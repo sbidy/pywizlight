@@ -3,9 +3,8 @@ import asyncio
 from functools import wraps
 
 import click
-from click.utils import echo
 
-from pywizlight import discovery, wizlight, PilotBuilder
+from pywizlight import PilotBuilder, discovery, wizlight
 
 
 def coro(f):
