@@ -40,7 +40,8 @@ self |  |
 ### get_id_from_scene_name
 
 
-Get the id from a scene name. 
+Retrun the id of an given scene name.   
+:param scene: Name of the scene :type scene: str :raises ValueError: Retrun if not in scene list :return: ID of the scene :rtype: int 
 
 #### Parameters
 name | description | default

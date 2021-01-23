@@ -28,7 +28,7 @@ state |  | True
 
 
 
-### get_pilot_message
+### set_pilot_message
 
 
 Return the pilot message. 
@@ -37,6 +37,21 @@ Return the pilot message.
 name | description | default
 --- | --- | ---
 self |  | 
+
+
+
+
+
+### set_state_message
+
+
+Return the setState message. It doesn't change the current status of the light. 
+
+#### Parameters
+name | description | default
+--- | --- | ---
+self |  | 
+state |  | 
 
 
 
