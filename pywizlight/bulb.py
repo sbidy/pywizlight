@@ -52,9 +52,14 @@ class PilotBuilder:
         if colortemp is not None:
             self._set_colortemp(colortemp)
 
-    def get_pilot_message(self):
+    def set_pilot_message(self):
         """Return the pilot message."""
         return json.dumps({"method": "setPilot", "params": self.pilot_params})
+
+    def set_state_message(self, state):
+        """Return the setState message. It doesn't change the current status of the light."""
+        self.pilot_params["state"] = state
+        return json.dumps({"method": "setState", "params": self.pilot_params})
 
     def _set_warm_white(self, value: int):
         """Set the value of the cold white led."""
@@ -254,14 +259,45 @@ class wizlight:
         message = r'{"method":"setPilot","params":{"state":false}}'
         await self.sendUDPMessage(message)
 
+    async def reboot(self):
+        """Reboot the bulb."""
+        message = r'{"method":"reboot","params":{}}'
+        await self.sendUDPMessage(message)
+
+    async def reset(self):
+        """Reset the bulb to factory defaults."""
+        message = r'{"method":"reset","params":{}}'
+        await self.sendUDPMessage(message)
+
     async def turn_on(self, pilot_builder=PilotBuilder()):
-        """Turn the light on."""
+        """Turn the light on with defined message.
+
+        :param pilot_builder: PilotBuilder object to set the turn on state, defaults to PilotBuilder()
+        :type pilot_builder: [type], optional
+        """
         await self.sendUDPMessage(
-            pilot_builder.get_pilot_message(), max_send_datagrams=10
+            pilot_builder.set_pilot_message(), max_send_datagrams=10
+        )
+
+    async def set_state(self, pilot_builder=PilotBuilder()):
+        """Set the state of the bulb with defined message. Doesn't turns on the light.
+
+        :param pilot_builder: PilotBuilder object to set the state, defaults to PilotBuilder()
+        :type pilot_builder: [type], optional
+        """
+        await self.sendUDPMessage(
+            pilot_builder.set_state_message(self.status), max_send_datagrams=10
         )
 
     def get_id_from_scene_name(self, scene: str) -> int:
-        """Get the id from a scene name."""
+        """Retrun the id of an given scene name.
+
+        :param scene: Name of the scene
+        :type scene: str
+        :raises ValueError: Retrun if not in scene list
+        :return: ID of the scene
+        :rtype: int
+        """
         for id in SCENES:
             if SCENES[id] == scene:
                 return id

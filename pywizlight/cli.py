@@ -3,8 +3,9 @@ import asyncio
 from functools import wraps
 
 import click
+from click.utils import echo
 
-from pywizlight import discovery, wizlight
+from pywizlight import discovery, wizlight, PilotBuilder
 
 
 def coro(f):
@@ -26,11 +27,16 @@ def main():
 
 @main.command("discover")
 @coro
-async def discover():
-    """Disocver bulb in the local network."""
-    click.echo("Waiting for broadcast packages...")
+@click.option(
+    "--b",
+    prompt="Set the broadcast address",
+    help="Define the broadcast address like 192.168.1.255.",
+)
+async def discover(b):
+    """Disocvery bulb in the local network."""
+    click.echo(f"Search for bulbs in {b} ... ")
 
-    bulbs = await discovery.find_wizlights()
+    bulbs = await discovery.find_wizlights(broadcast_address=b)
     for bulb in bulbs:
         click.echo(bulb.__dict__)
 
@@ -38,11 +44,51 @@ async def discover():
 @main.command("on")
 @coro
 @click.option("--ip", prompt="IP address of the bulb", help="IP address of the bulb.")
-async def turn_on(ip):
+@click.option(
+    "--k",
+    prompt="Kelvin for temperatur.",
+    help="Kelvin value (1000-8000) for turn on. Default 3000k",
+    default=3000,
+)
+@click.option(
+    "--brightness",
+    prompt="Set the brightness value 0-255",
+    help="Brightness for turn on. Default 128",
+    default=128,
+)
+async def turn_on(ip, k, brightness):
     """Turn a given bulb on."""
     click.echo("Turning on %s" % ip)
     bulb = wizlight(ip)
-    await bulb.turn_on()
+    if bulb and k <= 6800 and k >= 1000 and brightness >= 0 and brightness <= 256:
+        await bulb.turn_on(PilotBuilder(colortemp=k, brightness=brightness))
+    else:
+        click.echo("Error - values are not correct. Type --help for help.")
+
+
+@main.command("set-state")
+@coro
+@click.option("--ip", prompt="IP address of the bulb", help="IP address of the bulb.")
+@click.option(
+    "--k",
+    prompt="Kelvin for temperatur.",
+    help="Kelvin value (1000-8000) for turn on. Default 3000k",
+    default=3000,
+)
+@click.option(
+    "--brightness",
+    prompt="Set the brightness value 0-255",
+    help="Brightness for turn on. Default 128",
+    default=128,
+)
+async def set_state(ip, k, brightness):
+    """Turn a given bulb on."""
+    click.echo("Turning on %s" % ip)
+    bulb = wizlight(ip)
+    if bulb and k <= 6800 and k >= 1000 and brightness >= 0 and brightness <= 256:
+        await bulb.set_state(PilotBuilder(colortemp=k, brightness=brightness))
+    else:
+        click.echo("Error - values are not correct. Type --help for help.")
 
 
 @main.command("off")
