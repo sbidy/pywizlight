@@ -397,7 +397,7 @@ class wizlight:
                 ),
                 exc_info=False,
             )
-            raise WizLightTimeOutError("The request to the bulb timted out")
+            raise WizLightTimeOutError("The request to the bulb timed out")
         finally:
             try:
                 stream.close()
