@@ -28,7 +28,7 @@ Fedora Package Collection.
 sudo dnf -y install python3-pywizlight
 ```
 
-## Kudos
+## Contributors
 
 Thank you [@angadsingh](https://github.com/angadsingh) for make such incredible improvements!!
 
