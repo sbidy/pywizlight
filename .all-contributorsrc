@@ -1,0 +1,24 @@
+{
+  "files": [
+    "README.md"
+  ],
+  "imageSize": 100,
+  "commit": false,
+  "contributors": [
+    {
+      "login": "sbidy",
+      "name": "Stephan Traub",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1077364?v=4",
+      "profile": "https://github.com/sbidy",
+      "contributions": [
+        "infra"
+      ]
+    }
+  ],
+  "contributorsPerLine": 7,
+  "projectName": "pywizlight",
+  "projectOwner": "sbidy",
+  "repoType": "github",
+  "repoHost": "https://github.com",
+  "skipCi": true
+}
