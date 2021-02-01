@@ -1,0 +1,23 @@
+name: "all-contributors"
+on:
+  issue_comment:
+    types: [created]
+  pull_request_review_comment:
+    types: [created]
+
+jobs:
+  add-contributors:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - uses: sinchang/all-contributors-action@master
+      env:
+        GITHUB_REPOSITORY: ${{ secrets.GITHUB_REPOSITORY }}
+    - uses: gr2m/create-or-update-pull-request-action@v1.x
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        branch: ${{ env.branch }}
+        body: ${{ env.body }}
+        title: ${{ env.title }}
+        commit-message: ${{ env.commitMessage }}
