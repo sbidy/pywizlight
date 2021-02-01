@@ -1,6 +1,6 @@
 ![Upload Python Package](https://github.com/sbidy/pywizlight/workflows/Upload%20Python%20Package/badge.svg)
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-2-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-3-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 ![Code Quality Check](https://github.com/sbidy/pywizlight/workflows/Lint/badge.svg)
 ![Update Docs](https://github.com/sbidy/pywizlight/workflows/Update%20Docs/badge.svg)
@@ -41,6 +41,7 @@ sudo dnf -y install python3-pywizlight
   <tr>
     <td align="center"><a href="https://github.com/sbidy"><img src="https://avatars.githubusercontent.com/u/1077364?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Stephan Traub</b></sub></a><br /><a href="#infra-sbidy" title="Infrastructure (Hosting, Build-Tools, etc)">🚇</a></td>
     <td align="center"><a href="http://mtnspring.org"><img src="https://avatars.githubusercontent.com/u/223277?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Seth Nickell</b></sub></a><br /><a href="#infra-snickell" title="Infrastructure (Hosting, Build-Tools, etc)">🚇</a></td>
+    <td align="center"><a href="https://github.com/daanzu"><img src="https://avatars.githubusercontent.com/u/4319503?v=4?s=100" width="100px;" alt=""/><br /><sub><b>David Zurow</b></sub></a><br /><a href="https://github.com/sbidy/pywizlight/commits?author=daanzu" title="Documentation">📖</a></td>
   </tr>
 </table>
 
