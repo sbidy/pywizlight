@@ -60,6 +60,15 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "bigjohnson",
+      "name": "Alberto Panu",
+      "avatar_url": "https://avatars.githubusercontent.com/u/2248402?v=4",
+      "profile": "https://www.panu.it/",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,
