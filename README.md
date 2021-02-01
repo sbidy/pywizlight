@@ -1,6 +1,6 @@
 ![Upload Python Package](https://github.com/sbidy/pywizlight/workflows/Upload%20Python%20Package/badge.svg)
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-5-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-6-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 ![Code Quality Check](https://github.com/sbidy/pywizlight/workflows/Lint/badge.svg)
 ![Update Docs](https://github.com/sbidy/pywizlight/workflows/Update%20Docs/badge.svg)
@@ -44,6 +44,7 @@ sudo dnf -y install python3-pywizlight
     <td align="center"><a href="https://github.com/daanzu"><img src="https://avatars.githubusercontent.com/u/4319503?v=4?s=100" width="100px;" alt=""/><br /><sub><b>David Zurow</b></sub></a><br /><a href="https://github.com/sbidy/pywizlight/commits?author=daanzu" title="Documentation">📖</a></td>
     <td align="center"><a href="https://github.com/eibanez"><img src="https://avatars.githubusercontent.com/u/438494?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Eduardo Ibanez</b></sub></a><br /><a href="https://github.com/sbidy/pywizlight/commits?author=eibanez" title="Documentation">📖</a></td>
     <td align="center"><a href="https://github.com/angadsingh"><img src="https://avatars.githubusercontent.com/u/1623026?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Angad Singh</b></sub></a><br /><a href="#infra-angadsingh" title="Infrastructure (Hosting, Build-Tools, etc)">🚇</a></td>
+    <td align="center"><a href="http://fabian-affolter.ch/blog/"><img src="https://avatars.githubusercontent.com/u/116184?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Fabian Affolter</b></sub></a><br /><a href="#tool-fabaff" title="Tools">🔧</a> <a href="https://github.com/sbidy/pywizlight/commits?author=fabaff" title="Documentation">📖</a> <a href="#infra-fabaff" title="Infrastructure (Hosting, Build-Tools, etc)">🚇</a></td>
   </tr>
 </table>
 
