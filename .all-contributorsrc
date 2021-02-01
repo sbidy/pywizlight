@@ -13,6 +13,15 @@
       "contributions": [
         "infra"
       ]
+    },
+    {
+      "login": "daanzu",
+      "name": "David Zurow",
+      "avatar_url": "https://avatars.githubusercontent.com/u/4319503?v=4",
+      "profile": "https://github.com/daanzu",
+      "contributions": [
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7,
