@@ -39,7 +39,6 @@ sudo dnf -y install python3-pywizlight
 <!-- markdownlint-disable -->
 <table>
   <tr>
-    <td align="center"><a href="https://github.com/sbidy"><img src="https://avatars.githubusercontent.com/u/1077364?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Stephan Traub</b></sub></a><br /><a href="#infra-sbidy" title="Infrastructure (Hosting, Build-Tools, etc)">🚇</a></td>
     <td align="center"><a href="http://mtnspring.org"><img src="https://avatars.githubusercontent.com/u/223277?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Seth Nickell</b></sub></a><br /><a href="#infra-snickell" title="Infrastructure (Hosting, Build-Tools, etc)">🚇</a></td>
     <td align="center"><a href="https://github.com/daanzu"><img src="https://avatars.githubusercontent.com/u/4319503?v=4?s=100" width="100px;" alt=""/><br /><sub><b>David Zurow</b></sub></a><br /><a href="https://github.com/sbidy/pywizlight/commits?author=daanzu" title="Documentation">📖</a></td>
     <td align="center"><a href="https://github.com/eibanez"><img src="https://avatars.githubusercontent.com/u/438494?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Eduardo Ibanez</b></sub></a><br /><a href="https://github.com/sbidy/pywizlight/commits?author=eibanez" title="Documentation">📖</a></td>
