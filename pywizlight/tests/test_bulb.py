@@ -26,7 +26,7 @@ class TestBulb:
         # Init the fake bulb on localhost
         startup_bulb(module_name="ESP01_SHRGB_03")
 
-    # Non-Error states - PilotBuilder
+    # Non-Error states - PilotBuilder - Turn On
     @pytest.mark.asyncio
     async def test_Bulb_Discovery(self):
         """Test discovery function."""

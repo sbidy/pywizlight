@@ -6,15 +6,6 @@
   "commit": false,
   "contributors": [
     {
-      "login": "sbidy",
-      "name": "Stephan Traub",
-      "avatar_url": "https://avatars.githubusercontent.com/u/1077364?v=4",
-      "profile": "https://github.com/sbidy",
-      "contributions": [
-        "infra"
-      ]
-    },
-    {
       "login": "snickell",
       "name": "Seth Nickell",
       "avatar_url": "https://avatars.githubusercontent.com/u/223277?v=4",
