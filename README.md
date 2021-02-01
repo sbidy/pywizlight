@@ -287,8 +287,3 @@ scene mode:
 rhythm mode:
 
 `{'method': 'getPilot', 'env': 'pro', 'result': {'mac': 'a8bb50a4f94d', 'rssi': -63, 'src': '', 'state': True, 'sceneId': 14, 'speed': 100, 'dimming': 100, 'schdPsetId': 9}}`
-
-## Contributors
-
-- [@sbidy](http://github.com/sbidy) for the entire python library from scratch with complete light control
-- [@angadsingh](http://github.com/angadsingh) for implementing asyncio and non-blocking UDP, rhythm support, performance optimizations
