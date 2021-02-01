@@ -1,7 +1,11 @@
 ![Upload Python Package](https://github.com/sbidy/pywizlight/workflows/Upload%20Python%20Package/badge.svg)
+
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
+
 [![All Contributors](https://img.shields.io/badge/all_contributors-9-orange.svg?style=flat-square)](#contributors-)
+
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
+
 ![Code Quality Check](https://github.com/sbidy/pywizlight/workflows/Lint/badge.svg)
 ![Update Docs](https://github.com/sbidy/pywizlight/workflows/Update%20Docs/badge.svg)
 
@@ -33,17 +37,16 @@ sudo dnf -y install python3-pywizlight
 
 ## Contributors
 
-
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
 <!-- prettier-ignore-start -->
 <!-- markdownlint-disable -->
 <table>
   <tr>
-    <td align="center"><a href="http://mtnspring.org"><img src="https://avatars.githubusercontent.com/u/223277?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Seth Nickell</b></sub></a><br /><a href="#infra-snickell" title="Infrastructure (Hosting, Build-Tools, etc)">🚇</a></td>
+    <td align="center"><a href="http://mtnspring.org"><img src="https://avatars.githubusercontent.com/u/223277?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Seth Nickell</b></sub></a><br /><a href="https://github.com/sbidy/pywizlight/commits?author=redaxmedia" title="Code">💻</a></td>
     <td align="center"><a href="https://github.com/daanzu"><img src="https://avatars.githubusercontent.com/u/4319503?v=4?s=100" width="100px;" alt=""/><br /><sub><b>David Zurow</b></sub></a><br /><a href="https://github.com/sbidy/pywizlight/commits?author=daanzu" title="Documentation">📖</a></td>
     <td align="center"><a href="https://github.com/eibanez"><img src="https://avatars.githubusercontent.com/u/438494?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Eduardo Ibanez</b></sub></a><br /><a href="https://github.com/sbidy/pywizlight/commits?author=eibanez" title="Documentation">📖</a></td>
-    <td align="center"><a href="https://github.com/angadsingh"><img src="https://avatars.githubusercontent.com/u/1623026?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Angad Singh</b></sub></a><br /><a href="#infra-angadsingh" title="Infrastructure (Hosting, Build-Tools, etc)">🚇</a></td>
-    <td align="center"><a href="http://fabian-affolter.ch/blog/"><img src="https://avatars.githubusercontent.com/u/116184?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Fabian Affolter</b></sub></a><br /><a href="#tool-fabaff" title="Tools">🔧</a> <a href="https://github.com/sbidy/pywizlight/commits?author=fabaff" title="Documentation">📖</a> <a href="#infra-fabaff" title="Infrastructure (Hosting, Build-Tools, etc)">🚇</a></td>
+    <td align="center"><a href="https://github.com/angadsingh"><img src="https://avatars.githubusercontent.com/u/1623026?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Angad Singh</b></sub></a><br /><a href="https://github.com/sbidy/pywizlight/commits?author=angadsingh" title="Code">💻</a></td>
+    <td align="center"><a href="http://fabian-affolter.ch/blog/"><img src="https://avatars.githubusercontent.com/u/116184?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Fabian Affolter</b></sub></a><br /><a href="#tool-fabaff" title="Tools">🔧</a> <a href="https://github.com/sbidy/pywizlight/commits?author=fabaff" title="Documentation">📖</a> <a href="https://github.com/sbidy/pywizlight/commits?author=fabaff" title="Code">💻</a></td>
     <td align="center"><a href="https://redaxmedia.com"><img src="https://avatars.githubusercontent.com/u/1835397?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Henry Ruhs</b></sub></a><br /><a href="https://github.com/sbidy/pywizlight/commits?author=redaxmedia" title="Code">💻</a></td>
     <td align="center"><a href="https://www.panu.it/"><img src="https://avatars.githubusercontent.com/u/2248402?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Alberto Panu</b></sub></a><br /><a href="https://github.com/sbidy/pywizlight/commits?author=bigjohnson" title="Code">💻</a></td>
   </tr>
@@ -57,7 +60,6 @@ sudo dnf -y install python3-pywizlight
 <!-- prettier-ignore-end -->
 
 <!-- ALL-CONTRIBUTORS-LIST:END -->
-
 
 ## Example
 
@@ -233,6 +235,7 @@ After that all state can be fetched from `light.state`, which is a `PilotParser`
   it you want it to send you heartbeat sync packets.
 
 ### Sync functions:
+
 - syncUserConfig
 - syncPilot - {"method":"syncPilot","env":"pro","params":{"mac":"ABCABCABC","rssi":-71,"src":"udp","state":true,"sceneId":0,"temp":6500,"dimming":62}}
 - syncSchdPset
@@ -242,6 +245,7 @@ After that all state can be fetched from `light.state`, which is a `PilotParser`
 - syncAlarm
 
 ### Set functions:
+
 - pulse - {"method":"pulse", {"params":{"delta":-15,"duration":300}}
 - registration - {"method":"registration","id":105,{"params":{"phoneIp":"10.0.0.0","phoneMac":"aaaaaaaaaaaa","register":true}}
 - setUserConfig
@@ -256,6 +260,7 @@ After that all state can be fetched from `light.state`, which is a `PilotParser`
 - setPilot
 
 ### Get functions
+
 - getPilot
 - getUserConfig
 - getSystemConfig
@@ -264,6 +269,7 @@ After that all state can be fetched from `light.state`, which is a `PilotParser`
 - getDevInfo
 
 ### Error States and Returns
+
 - Parse error
 - Invalid Request
 - Method not found
