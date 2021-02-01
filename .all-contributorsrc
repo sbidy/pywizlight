@@ -13,6 +13,15 @@
       "contributions": [
         "infra"
       ]
+    },
+    {
+      "login": "angadsingh",
+      "name": "Angad Singh",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1623026?v=4",
+      "profile": "https://github.com/angadsingh",
+      "contributions": [
+        "infra"
+      ]
     }
   ],
   "contributorsPerLine": 7,
