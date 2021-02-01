@@ -1,4 +1,7 @@
 ![Upload Python Package](https://github.com/sbidy/pywizlight/workflows/Upload%20Python%20Package/badge.svg)
+<!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
+[![All Contributors](https://img.shields.io/badge/all_contributors-1-orange.svg?style=flat-square)](#contributors-)
+<!-- ALL-CONTRIBUTORS-BADGE:END -->
 ![Code Quality Check](https://github.com/sbidy/pywizlight/workflows/Lint/badge.svg)
 ![Update Docs](https://github.com/sbidy/pywizlight/workflows/Update%20Docs/badge.svg)
 
@@ -31,6 +34,19 @@ sudo dnf -y install python3-pywizlight
 ## Contributors
 
 Thank you [@angadsingh](https://github.com/angadsingh) for make such incredible improvements!!
+<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
+<!-- prettier-ignore-start -->
+<!-- markdownlint-disable -->
+<table>
+  <tr>
+    <td align="center"><a href="https://github.com/sbidy"><img src="https://avatars.githubusercontent.com/u/1077364?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Stephan Traub</b></sub></a><br /><a href="#infra-sbidy" title="Infrastructure (Hosting, Build-Tools, etc)">🚇</a></td>
+  </tr>
+</table>
+
+<!-- markdownlint-restore -->
+<!-- prettier-ignore-end -->
+
+<!-- ALL-CONTRIBUTORS-LIST:END -->
 
 Thanks to [@fabaff](https://github.com/fabaff) for the CLI tool and some code rework!
 
