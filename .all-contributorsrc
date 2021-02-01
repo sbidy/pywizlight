@@ -11,7 +11,7 @@
       "avatar_url": "https://avatars.githubusercontent.com/u/223277?v=4",
       "profile": "http://mtnspring.org",
       "contributions": [
-        "infra"
+        "code"
       ]
     },
     {
@@ -38,7 +38,7 @@
       "avatar_url": "https://avatars.githubusercontent.com/u/1623026?v=4",
       "profile": "https://github.com/angadsingh",
       "contributions": [
-        "infra"
+        "code"
       ]
     },
     {
@@ -47,9 +47,8 @@
       "avatar_url": "https://avatars.githubusercontent.com/u/116184?v=4",
       "profile": "http://fabian-affolter.ch/blog/",
       "contributions": [
-        "tool",
         "doc",
-        "infra"
+        "code"
       ]
     },
     {
