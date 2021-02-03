@@ -1,0 +1,3 @@
+[submodule "pywizlight/definitions"]
+	path = pywizlight/definitions
+	url = https://gitlab.com/eutampieri/wiz-definitions.git
