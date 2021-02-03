@@ -10,7 +10,6 @@ from pywizlight.exceptions import (
     WizLightConnectionError,
     WizLightNotKnownBulb,
     WizLightTimeOutError,
-    WizLightError,
 )
 from pywizlight.scenes import SCENES
 from pywizlight.bulblibrary import BulbLib, BulbType
