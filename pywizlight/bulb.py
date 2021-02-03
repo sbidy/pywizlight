@@ -10,6 +10,7 @@ from pywizlight.exceptions import (
     WizLightConnectionError,
     WizLightNotKnownBulb,
     WizLightTimeOutError,
+    WizLightError,
 )
 from pywizlight.scenes import SCENES
 from pywizlight.bulblibrary import BulbLib, BulbType
@@ -275,9 +276,7 @@ class wizlight:
         :param pilot_builder: PilotBuilder object to set the turn on state, defaults to PilotBuilder()
         :type pilot_builder: [type], optional
         """
-        await self.sendUDPMessage(
-            pilot_builder.set_pilot_message(), max_send_datagrams=10
-        )
+        await self.sendUDPMessage(pilot_builder.set_pilot_message())
 
     async def set_state(self, pilot_builder=PilotBuilder()):
         """Set the state of the bulb with defined message. Doesn't turns on the light.
@@ -285,9 +284,7 @@ class wizlight:
         :param pilot_builder: PilotBuilder object to set the state, defaults to PilotBuilder()
         :type pilot_builder: [type], optional
         """
-        await self.sendUDPMessage(
-            pilot_builder.set_state_message(self.status), max_send_datagrams=10
-        )
+        await self.sendUDPMessage(pilot_builder.set_state_message(self.status))
 
     def get_id_from_scene_name(self, scene: str) -> int:
         """Retrun the id of an given scene name.
@@ -350,17 +347,16 @@ class wizlight:
         data, remote_addr = await asyncio.wait_for(stream.recv(), timeout)
         return data
 
-    async def sendUDPMessage(
-        self, message, timeout=30, send_interval=0.5, max_send_datagrams=100
-    ):
+    async def sendUDPMessage(self, message, timeout=30, send_interval=0.5):
         """Send the UDP message to the bulb."""
         connid = hex(int(time() * 10000000))[2:]
         data = None
+        max_send_datagrams = round(timeout / send_interval)
 
         try:
             _LOGGER.debug(
-                "[wizlight {}, connid {}] connecting to UDP port".format(
-                    self.ip, connid
+                "[wizlight {}, connid {}] connecting to UDP port with send_interval of {} sec..".format(
+                    self.ip, connid, send_interval
                 )
             )
             stream = await asyncio.wait_for(
