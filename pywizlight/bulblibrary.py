@@ -138,6 +138,11 @@ class BulbLib:
             features=Features(brightness=True, color=True, effect=True, color_tmp=True),
             kelvin_range=KelvinRange(min=2200, max=6500),
         ),
+        BulbType(
+            name="ESP01_SHRGB3_01",
+            features=Features(brightness=True, color=True, effect=True, color_tmp=True),
+            kelvin_range=KelvinRange(min=2200, max=6500),
+        ),
         # Test device
         BulbType(
             name="ESP01_SHRGB_03",
