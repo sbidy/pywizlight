@@ -347,11 +347,15 @@ class wizlight:
         data, remote_addr = await asyncio.wait_for(stream.recv(), timeout)
         return data
 
-    async def sendUDPMessage(self, message, timeout=30, send_interval=0.5):
+    async def sendUDPMessage(self, message):
         """Send the UDP message to the bulb."""
         connid = hex(int(time() * 10000000))[2:]
         data = None
-        max_send_datagrams = round(timeout / send_interval)
+        # overall 10 sec. for time out
+        timeout = 10
+        # max 5 sec. for send datagrams
+        send_interval = 0.5
+        max_send_datagrams = 10
 
         try:
             _LOGGER.debug(
