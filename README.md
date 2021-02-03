@@ -1,9 +1,7 @@
 ![Upload Python Package](https://github.com/sbidy/pywizlight/workflows/Upload%20Python%20Package/badge.svg)
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-
-[![All Contributors](https://img.shields.io/badge/all_contributors-9-orange.svg?style=flat-square)](#contributors-)
-
+[![All Contributors](https://img.shields.io/badge/all_contributors-10-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 ![Code Quality Check](https://github.com/sbidy/pywizlight/workflows/Lint/badge.svg)
@@ -42,17 +40,18 @@ sudo dnf -y install python3-pywizlight
 <!-- markdownlint-disable -->
 <table>
   <tr>
-    <td align="center"><a href="http://mtnspring.org"><img src="https://avatars.githubusercontent.com/u/223277?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Seth Nickell</b></sub></a><br /><a href="https://github.com/sbidy/pywizlight/commits?author=redaxmedia" title="Code">💻</a></td>
+    <td align="center"><a href="http://mtnspring.org"><img src="https://avatars.githubusercontent.com/u/223277?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Seth Nickell</b></sub></a><br /><a href="https://github.com/sbidy/pywizlight/commits?author=snickell" title="Code">💻</a></td>
     <td align="center"><a href="https://github.com/daanzu"><img src="https://avatars.githubusercontent.com/u/4319503?v=4?s=100" width="100px;" alt=""/><br /><sub><b>David Zurow</b></sub></a><br /><a href="https://github.com/sbidy/pywizlight/commits?author=daanzu" title="Documentation">📖</a></td>
     <td align="center"><a href="https://github.com/eibanez"><img src="https://avatars.githubusercontent.com/u/438494?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Eduardo Ibanez</b></sub></a><br /><a href="https://github.com/sbidy/pywizlight/commits?author=eibanez" title="Documentation">📖</a></td>
     <td align="center"><a href="https://github.com/angadsingh"><img src="https://avatars.githubusercontent.com/u/1623026?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Angad Singh</b></sub></a><br /><a href="https://github.com/sbidy/pywizlight/commits?author=angadsingh" title="Code">💻</a></td>
-    <td align="center"><a href="http://fabian-affolter.ch/blog/"><img src="https://avatars.githubusercontent.com/u/116184?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Fabian Affolter</b></sub></a><br /><a href="#tool-fabaff" title="Tools">🔧</a> <a href="https://github.com/sbidy/pywizlight/commits?author=fabaff" title="Documentation">📖</a> <a href="https://github.com/sbidy/pywizlight/commits?author=fabaff" title="Code">💻</a></td>
+    <td align="center"><a href="http://fabian-affolter.ch/blog/"><img src="https://avatars.githubusercontent.com/u/116184?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Fabian Affolter</b></sub></a><br /><a href="https://github.com/sbidy/pywizlight/commits?author=fabaff" title="Documentation">📖</a> <a href="https://github.com/sbidy/pywizlight/commits?author=fabaff" title="Code">💻</a></td>
     <td align="center"><a href="https://redaxmedia.com"><img src="https://avatars.githubusercontent.com/u/1835397?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Henry Ruhs</b></sub></a><br /><a href="https://github.com/sbidy/pywizlight/commits?author=redaxmedia" title="Code">💻</a></td>
     <td align="center"><a href="https://www.panu.it/"><img src="https://avatars.githubusercontent.com/u/2248402?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Alberto Panu</b></sub></a><br /><a href="https://github.com/sbidy/pywizlight/commits?author=bigjohnson" title="Code">💻</a></td>
   </tr>
   <tr>
     <td align="center"><a href="https://github.com/skitterrusty"><img src="https://avatars.githubusercontent.com/u/71942600?v=4?s=100" width="100px;" alt=""/><br /><sub><b>skitterrusty</b></sub></a><br /><a href="https://github.com/sbidy/pywizlight/commits?author=skitterrusty" title="Code">💻</a></td>
     <td align="center"><a href="https://github.com/mots"><img src="https://avatars.githubusercontent.com/u/26517?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Mathias Roth</b></sub></a><br /><a href="https://github.com/sbidy/pywizlight/commits?author=mots" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/durnezj"><img src="https://avatars.githubusercontent.com/u/11504333?v=4?s=100" width="100px;" alt=""/><br /><sub><b>durnezj</b></sub></a><br /><a href="https://github.com/sbidy/pywizlight/commits?author=durnezj" title="Code">💻</a></td>
   </tr>
 </table>
 
