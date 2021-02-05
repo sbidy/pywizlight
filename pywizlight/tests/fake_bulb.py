@@ -44,7 +44,7 @@ def udp_fake_bulb():
             """Handle the request."""
             json_data = None
             data = self.rfile.readline().strip()
-            print(f"Reuest:{data}")
+            print(f"Request:{data}")
             try:
                 json_data = json.loads(data.decode())
             except json.JSONDecodeError:
@@ -74,7 +74,7 @@ def udp_fake_bulb():
 
 
 def startup_bulb(module_name="ESP01_SHRGB_03"):
-    """Startup the bulb."""
+    """Start up the bulb."""
     BULB_SYS_CONFIG["result"]["moduleName"] = module_name
     thread = threading.Thread(target=udp_fake_bulb)
     thread.daemon = True
