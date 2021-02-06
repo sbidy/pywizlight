@@ -75,7 +75,7 @@ Start a fake bulb instance.
 ### startup_bulb
 
 
-Startup the bulb. 
+Start up the bulb. 
 #### Parameters
 name | description | default
 --- | --- | ---
