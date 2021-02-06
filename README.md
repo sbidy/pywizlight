@@ -25,12 +25,23 @@ pip install pywizlight
 
 **Note:** Requires Python version `>=3.7`.
 
+### Fedora/CentOS
+
 On a Fedora-based system or on a CentOS/RHEL 8 machine which has EPEL enabled, as
 [`pywizlight`](https://src.fedoraproject.org/rpms/python-pywizlight) is present in the
 Fedora Package Collection.
 
 ```bash
 sudo dnf -y install python3-pywizlight
+```
+
+### NixOS
+
+For NixOS and Nix is the latest release of `pywizlight` usually in the [`unstable`](https://search.nixos.org/packages?channel=unstable&query=pywizlight)
+channel available. Stables releases might ship older versions of `pywizlight`.
+
+```bash
+nix-env -iA nixos.python37Packages.pywizlight
 ```
 
 ## Contributors
