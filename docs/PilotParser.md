@@ -63,6 +63,34 @@ self |  |
 
 
 
+### get_white_range
+
+
+Get the value of the whiteRange property. 
+
+#### Parameters
+name | description | default
+--- | --- | ---
+self |  | 
+
+
+
+
+
+### get_extended_white_range
+
+
+Get the value of the extende whiteRange property. 
+
+#### Parameters
+name | description | default
+--- | --- | ---
+self |  | 
+
+
+
+
+
 ### get_speed
 
 

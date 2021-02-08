@@ -16,6 +16,7 @@ name | description | default
 --- | --- | ---
 self |  | 
 ip |  | 
+connect_on_init |  | False
 port |  | 38899
 mac |  | None
 
@@ -27,6 +28,20 @@ mac |  | None
 
 
 Return the status of the bulb: true = on, false = off. 
+
+#### Parameters
+name | description | default
+--- | --- | ---
+self |  | 
+
+
+
+
+
+### _check_connection
+
+
+Check the connection to the bulb. 
 
 #### Parameters
 name | description | default
