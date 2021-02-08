@@ -2,7 +2,8 @@
 import asyncio
 import json
 import logging
-from time import time
+import socket
+from time import sleep, time
 
 import asyncio_dgram
 
@@ -12,7 +13,7 @@ from pywizlight.exceptions import (
     WizLightTimeOutError,
 )
 from pywizlight.scenes import SCENES
-from pywizlight.bulblibrary import BulbLib, BulbType
+from pywizlight.bulblibrary import BulbLib, BulbType, KelvinRange, Features
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -162,6 +163,20 @@ class PilotParser:
         else:
             return None
 
+    def get_white_range(self) -> list:
+        """Get the value of the whiteRange property."""
+        if "whiteRange" in self.pilotResult:
+            return self.pilotResult["whiteRange"]
+        else:
+            return None
+
+    def get_extended_white_range(self) -> list:
+        """Get the value of the extende whiteRange property."""
+        if "extRange" in self.pilotResult:
+            return self.pilotResult["extRange"]
+        else:
+            return None
+
     def get_speed(self) -> int:
         """Get the color changing speed."""
         if "speed" in self.pilotResult:
@@ -224,13 +239,18 @@ class wizlight:
 
     # default port for WiZ lights
 
-    def __init__(self, ip, port=38899, mac=None):
+    def __init__(self, ip, connect_on_init=False, port=38899, mac=None):
         """Create instance with the IP address of the bulb."""
         self.ip = ip
         self.port = port
         self.state = None
         self.mac = mac
         self.bulbtype = None
+        self.whiteRange = None
+        self.extwhiteRange = None
+        # check the state on init
+        if connect_on_init:
+            self._check_connection()
 
     @property
     def status(self) -> bool:
@@ -241,18 +261,84 @@ class wizlight:
 
     # ------------------ Non properties --------------
 
+    def _check_connection(self):
+        """Check the connection to the bulb."""
+        message = r'{"method":"getPilot","params":{}}'
+        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        sock.settimeout(2)
+        try:
+            # send a udp package
+            sock.sendto(bytes(message, "utf-8"), (self.ip, self.port))
+            # get the data to
+            data, addr = sock.recvfrom(1024)
+            if data:
+                return
+        except socket.timeout:
+            raise WizLightTimeOutError(
+                "No connection was established by initialization."
+            )
+
     async def get_bulbtype(self) -> BulbType:
         """Retrun the bulb type as BulbType object."""
         if self.bulbtype is None:
             bulb_config = await self.getBulbConfig()
             if "moduleName" in bulb_config["result"]:
                 _bulbtype = bulb_config["result"]["moduleName"]
-                # look for match in known bulbs
-                for known_bulb in BulbLib.BULBLIST:
-                    if known_bulb.name == _bulbtype:
-                        # retrun the BulbType object
-                        return known_bulb
-        raise WizLightNotKnownBulb("The bulb is unknown to the intergration.")
+                # set the minimum feature set and name
+                _bulb = BulbType(
+                    name=_bulbtype,
+                    features=Features(
+                        brightness=True, color=False, effect=False, color_tmp=False
+                    ),
+                    kelvin_range=KelvinRange(min=2700, max=6500),
+                )
+                # parse the features from name
+                _identifier = _bulbtype.split("_")[1]
+                # go an try to map extensions to the BulbTyp object
+                # Color support
+                if "RGB" in _identifier:
+                    _bulb.features.color = True
+                    # Only RGB bulbs can have an extenden 2200k range
+                    _kelvin = await self._geExtendedWhiteRange()
+                    _bulb.kelvin_range.min = _kelvin[0]
+                    _bulb.kelvin_range.max = _kelvin[1]
+                    # RGB supports effects and tunabel white
+                    _bulb.features.effect = True
+                    _bulb.features.color_tmp = True
+
+                # Non RGB but tunable white
+                if "TW" in _identifier:
+                    _bulb.features.color_tmp = True
+                    # non RGB bulb
+                    _bulb.features.color = False
+                    # non RGB can not use 2200k white range
+                    _kelvin = await self._getWhiteRange()
+                    _bulb.kelvin_range.min = _kelvin[0]
+                    _bulb.kelvin_range.max = _kelvin[1]
+                    # RGB supports effects but only "some"
+                    # ToDo: Improve the mapping to supported effects
+                    _bulb.features.effect = True
+
+                return _bulb
+            raise WizLightNotKnownBulb("The bulb features can not be mapped!")
+
+    async def _getWhiteRange(self):
+        """Read the white range from the bulb."""
+        resp = await self.getUserConfig()
+        if resp is not None and "result" in resp and self.whiteRange is None:
+            self.whiteRange = PilotParser(resp["result"]).get_white_range()
+        else:
+            self.whiteRange = None
+        return self.whiteRange
+
+    async def _geExtendedWhiteRange(self):
+        """Read extended withe range from the RGB bulb."""
+        resp = await self.getUserConfig()
+        if resp is not None and "result" in resp and self.extwhiteRange is None:
+            self.extwhiteRange = PilotParser(resp["result"]).get_extended_white_range()
+        else:
+            self.extwhiteRange = None
+        return self.extwhiteRange
 
     async def turn_off(self):
         """Turn the light off."""
@@ -328,6 +414,11 @@ class wizlight:
     async def getBulbConfig(self):
         """Return the configuration from the bulb."""
         message = r'{"method":"getSystemConfig","params":{}}'
+        return await self.sendUDPMessage(message)
+
+    async def getUserConfig(self):
+        """Return the user configuration from the bulb."""
+        message = r'{"method":"getUserConfig","params":{}}'
         return await self.sendUDPMessage(message)
 
     async def lightSwitch(self):

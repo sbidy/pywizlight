@@ -2,7 +2,11 @@
 
 Importand note:
 This lib be obsolete in the future. An automatic mapping will come.
-
+ESP01 -- defines the module family, WiFi only bulb this case
+SH -- Single Head light
+TW -- Tunable White, as in can only control CCT and dimming, no color
+1C -- Specific to the hardware -- defines PWM frequency + way of controlling CCT temperature
+31 -- Related to the hardware revision
 
 """
 
