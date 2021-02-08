@@ -1,4 +1,10 @@
-"""Library with compatible bulb types."""
+"""Library with compatible bulb types.
+
+Importand note:
+This lib be obsolete in the future. An automatic mapping will come.
+
+
+"""
 
 
 class Features:
@@ -127,6 +133,13 @@ class BulbLib:
         ),
         BulbType(
             name="ESP03_SHTW1W_01",
+            features=Features(
+                brightness=True, color=False, effect=True, color_tmp=True
+            ),
+            kelvin_range=KelvinRange(min=2700, max=6500),
+        ),
+        BulbType(
+            name="ESP01_SHTW_03",
             features=Features(
                 brightness=True, color=False, effect=True, color_tmp=True
             ),
