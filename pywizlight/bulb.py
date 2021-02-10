@@ -7,13 +7,13 @@ from time import sleep, time
 
 import asyncio_dgram
 
+from pywizlight.bulblibrary import BulbType, Features, KelvinRange, BulbClass
 from pywizlight.exceptions import (
     WizLightConnectionError,
     WizLightNotKnownBulb,
     WizLightTimeOutError,
 )
 from pywizlight.scenes import SCENES
-from pywizlight.bulblibrary import BulbLib, BulbType, KelvinRange, Features
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -245,7 +245,7 @@ class wizlight:
         self.port = port
         self.state = None
         self.mac = mac
-        self.bulbtype = None
+        self.bulbtype: BulbType = None
         self.whiteRange = None
         self.extwhiteRange = None
         # check the state on init
@@ -284,45 +284,44 @@ class wizlight:
             bulb_config = await self.getBulbConfig()
             if "moduleName" in bulb_config["result"]:
                 _bulbtype = bulb_config["result"]["moduleName"]
-                # set the minimum feature set and name
+                # define the kelvin range
+                _kelvin = await self.getExtendedWhiteRange()
+                # set the minimum features for dimmable bulbs (DW bulbs)
                 _bulb = BulbType(
+                    bulb_type=BulbClass.DW,
                     name=_bulbtype,
                     features=Features(
                         brightness=True, color=False, effect=False, color_tmp=False
                     ),
-                    kelvin_range=KelvinRange(min=2700, max=6500),
+                    kelvin_range=KelvinRange(min=_kelvin[0], max=_kelvin[1]),
                 )
-                # parse the features from name
-                _identifier = _bulbtype.split("_")[1]
+                try:
+                    # parse the features from name
+                    _identifier = _bulbtype.split("_")[1]
+                # Throw exception if index can not be found
+                except IndexError:
+                    raise WizLightNotKnownBulb("The bulb type can not be determined!")
                 # go an try to map extensions to the BulbTyp object
                 # Color support
                 if "RGB" in _identifier:
+                    _bulb.bulb_type = BulbClass.RGB
                     _bulb.features.color = True
-                    # Only RGB bulbs can have an extenden 2200k range
-                    _kelvin = await self._geExtendedWhiteRange()
-                    _bulb.kelvin_range.min = _kelvin[0]
-                    _bulb.kelvin_range.max = _kelvin[1]
-                    # RGB supports effects and tunabel white
+                    # RGB supports effects and tuneabel white
                     _bulb.features.effect = True
                     _bulb.features.color_tmp = True
-
-                # Non RGB but tunable white
+                # Non RGB but tunable white bulb
                 if "TW" in _identifier:
+                    _bulb.bulb_type = BulbClass.TW
                     _bulb.features.color_tmp = True
-                    # non RGB bulb
-                    _bulb.features.color = False
-                    # non RGB can not use 2200k white range
-                    _kelvin = await self._getWhiteRange()
-                    _bulb.kelvin_range.min = _kelvin[0]
-                    _bulb.kelvin_range.max = _kelvin[1]
                     # RGB supports effects but only "some"
                     # ToDo: Improve the mapping to supported effects
                     _bulb.features.effect = True
 
+                self.bulbtype = _bulb
                 return _bulb
             raise WizLightNotKnownBulb("The bulb features can not be mapped!")
 
-    async def _getWhiteRange(self):
+    async def getWhiteRange(self):
         """Read the white range from the bulb."""
         resp = await self.getUserConfig()
         if resp is not None and "result" in resp and self.whiteRange is None:
@@ -331,7 +330,7 @@ class wizlight:
             self.whiteRange = None
         return self.whiteRange
 
-    async def _geExtendedWhiteRange(self):
+    async def getExtendedWhiteRange(self):
         """Read extended withe range from the RGB bulb."""
         resp = await self.getUserConfig()
         if resp is not None and "result" in resp and self.extwhiteRange is None:
@@ -339,6 +338,24 @@ class wizlight:
         else:
             self.extwhiteRange = None
         return self.extwhiteRange
+
+    async def getSupportedScenes(self) -> list:
+        """Return the supported scenes based on type.
+
+        Lookup: https://docs.pro.wizconnected.com
+        """
+        if self.bulbtype is None:
+            await self.get_bulbtype()
+        # retrun for TW
+        if self.bulbtype.bulb_type == BulbClass.TW:
+            return [
+                SCENES[key]
+                for key in [6, 9, 10, 11, 12, 13, 14, 15, 16, 18, 29, 30, 31, 32]
+            ]
+        if self.bulbtype.bulb_type == BulbClass.DW:
+            return [SCENES[key] for key in [9, 10, 13, 14, 29, 30, 31, 32]]
+        # Must be RGB with all
+        return SCENES
 
     async def turn_off(self):
         """Turn the light off."""

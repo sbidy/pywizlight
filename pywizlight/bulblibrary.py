@@ -1,14 +1,19 @@
 """Library with compatible bulb types.
 
-Importand note:
-This lib be obsolete in the future. An automatic mapping will come.
+Bulb Type detection:
+ESP01_SHDW1C_31
 ESP01 -- defines the module family, WiFi only bulb this case
-SH -- Single Head light
+SH -- Single Head light / Most bulbs are singel heads / Stripes
 TW -- Tunable White, as in can only control CCT and dimming, no color
+DW -- Dimmable White / Most filament bulbs
+RGB -- Fullstack bulb
 1C -- Specific to the hardware -- defines PWM frequency + way of controlling CCT temperature
 31 -- Related to the hardware revision
-
 """
+
+
+from pywizlight.scenes import SCENES
+from enum import Enum
 
 
 class Features:
@@ -41,163 +46,35 @@ class KelvinRange:
         self.min = min
 
 
+class BulbClass(Enum):
+    """Bulb Types."""
+
+    """Have Cool White and Warm White LEDs."""
+    TW = "Tunabel White"
+    """Have only Dimmable white LEDs."""
+    DW = "Dimable White"
+    """Have only Dimmable white LEDs."""
+    RGB = "RGB Bulb"
+
+
 class BulbType:
     """BulbType object to define functions and features of the bulb."""
 
     features: Features
     name: str
+    filament_bulb: bool
     kelvin_range: KelvinRange
+    bulb_type: BulbClass
 
     def __init__(
-        self, features: Features, name: str, kelvin_range: KelvinRange
+        self,
+        features: Features,
+        name: str,
+        kelvin_range: KelvinRange,
+        bulb_type: BulbClass,
     ) -> None:
         """Create a bulb object with different features."""
         self.features = features
         self.name = name
         self.kelvin_range = kelvin_range
-
-
-class BulbLib:
-    """Provides all existing bulbs."""
-
-    BULBLIST = [
-        # Only Brightness
-        BulbType(
-            name="ESP01_SHDW_01",
-            features=Features(
-                brightness=True, color=False, effect=False, color_tmp=False
-            ),
-            kelvin_range=KelvinRange(min=2200, max=6500),
-        ),
-        BulbType(
-            name="ESP01_SHDW1_31",
-            features=Features(
-                brightness=True, color=False, effect=False, color_tmp=False
-            ),
-            kelvin_range=KelvinRange(min=2200, max=6500),
-        ),
-        BulbType(
-            name="ESP03_SHDW1_01",
-            features=Features(
-                brightness=True, color=False, effect=False, color_tmp=False
-            ),
-            kelvin_range=KelvinRange(min=2200, max=6500),
-        ),
-        # Brightness and Effects
-        BulbType(
-            name="ESP06_SHDW9_01",
-            features=Features(
-                brightness=True, color=False, effect=True, color_tmp=False
-            ),
-            kelvin_range=KelvinRange(min=2200, max=6500),
-        ),
-        BulbType(
-            name="ESP06_SHDW1_01",
-            features=Features(
-                brightness=True, color=False, effect=True, color_tmp=False
-            ),
-            kelvin_range=KelvinRange(min=2200, max=6500),
-        ),
-        # Brightness and Color Temp
-        BulbType(
-            name="ESP01_SHTW1C_31",
-            features=Features(
-                brightness=True, color=False, effect=False, color_tmp=True
-            ),
-            kelvin_range=KelvinRange(min=2200, max=6500),
-        ),
-        BulbType(
-            name="ESP17_SHTW9_01",
-            features=Features(
-                brightness=True, color=False, effect=False, color_tmp=True
-            ),
-            kelvin_range=KelvinRange(min=2000, max=5000),
-        ),
-        # Brightness, Color Temp and Effect
-        BulbType(
-            name="ESP56_SHTW3_01",
-            features=Features(
-                brightness=True, color=False, effect=True, color_tmp=True
-            ),
-            kelvin_range=KelvinRange(min=2200, max=6500),
-        ),
-        BulbType(
-            name="ESP15_SHTW1_01I",
-            features=Features(
-                brightness=True, color=False, effect=True, color_tmp=True
-            ),
-            kelvin_range=KelvinRange(min=2200, max=6500),
-        ),
-        BulbType(
-            name="ESP03_SHTW1C_01",
-            features=Features(
-                brightness=True, color=False, effect=True, color_tmp=True
-            ),
-            kelvin_range=KelvinRange(min=2700, max=6500),
-        ),
-        BulbType(
-            name="ESP03_SHTW1W_01",
-            features=Features(
-                brightness=True, color=False, effect=True, color_tmp=True
-            ),
-            kelvin_range=KelvinRange(min=2700, max=6500),
-        ),
-        BulbType(
-            name="ESP01_SHTW_03",
-            features=Features(
-                brightness=True, color=False, effect=True, color_tmp=True
-            ),
-            kelvin_range=KelvinRange(min=2700, max=6500),
-        ),
-        # Brightness, Color Temp, Color and Effect / all features
-        BulbType(
-            name="ESP01_SHRGB1C_31",
-            features=Features(brightness=True, color=True, effect=True, color_tmp=True),
-            kelvin_range=KelvinRange(min=2200, max=6500),
-        ),
-        BulbType(
-            name="ESP01_SHRGB3_01",
-            features=Features(brightness=True, color=True, effect=True, color_tmp=True),
-            kelvin_range=KelvinRange(min=2200, max=6500),
-        ),
-        # Test device
-        BulbType(
-            name="ESP01_SHRGB_03",
-            features=Features(brightness=True, color=True, effect=True, color_tmp=True),
-            kelvin_range=KelvinRange(min=2700, max=6500),
-        ),
-        BulbType(
-            name="ESP03_SHRGBP_31",
-            features=Features(brightness=True, color=True, effect=True, color_tmp=True),
-            kelvin_range=KelvinRange(min=2000, max=6500),
-        ),
-        BulbType(
-            name="ESP03_SHRGB1C_01",
-            features=Features(brightness=True, color=True, effect=True, color_tmp=True),
-            kelvin_range=KelvinRange(min=2200, max=6500),
-        ),
-        BulbType(
-            name="ESP03_SHRGB1W_01",
-            features=Features(brightness=True, color=True, effect=True, color_tmp=True),
-            kelvin_range=KelvinRange(min=2200, max=6500),
-        ),
-        BulbType(
-            name="ESP03_SHRGB3_01ABI",
-            features=Features(brightness=True, color=True, effect=True, color_tmp=True),
-            kelvin_range=KelvinRange(min=2200, max=6500),
-        ),
-        BulbType(
-            name="ESP15_SHRGB1S_01I",
-            features=Features(brightness=True, color=True, effect=True, color_tmp=True),
-            kelvin_range=KelvinRange(min=2200, max=6500),
-        ),
-        BulbType(
-            name="ESP14_SHRGB1C_01",
-            features=Features(brightness=True, color=True, effect=True, color_tmp=True),
-            kelvin_range=KelvinRange(min=2200, max=6500),
-        ),
-    ]
-
-    def getBulbList(self) -> list:
-        """Retrun the list of known bulbs as BulbType list."""
-        return self.BULBLIST
+        self.bulb_type = bulb_type
