@@ -339,7 +339,7 @@ class wizlight:
             self.extwhiteRange = None
         return self.extwhiteRange
 
-    async def getSupportedScenes(self) -> list:
+    async def getSupportedScenes(self):
         """Return the supported scenes based on type.
 
         Lookup: https://docs.pro.wizconnected.com
