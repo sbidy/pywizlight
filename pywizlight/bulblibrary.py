@@ -12,7 +12,6 @@ RGB -- Fullstack bulb
 """
 
 
-from pywizlight.scenes import SCENES
 from enum import Enum
 
 

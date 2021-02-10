@@ -3,7 +3,7 @@ import asyncio
 import json
 import logging
 import socket
-from time import sleep, time
+from time import time
 
 import asyncio_dgram
 
