@@ -250,8 +250,8 @@ After that all state can be fetched from `light.state`, which is a `PilotParser`
 
 ### Set functions:
 
-- pulse - {"method":"pulse", {"params":{"delta":-15,"duration":300}}
-- registration - {"method":"registration","id":105,{"params":{"phoneIp":"10.0.0.0","phoneMac":"aaaaaaaaaaaa","register":true}}
+- pulse - {"method":"pulse", "params":{"delta":-15,"duration":300}}
+- registration - {"method":"registration","id":105, "params":{"phoneIp":"10.0.0.0","phoneMac":"aaaaaaaaaaaa","register":true}}
 - setUserConfig
 - setSystemConfig
 - setDevInfo
