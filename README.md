@@ -11,12 +11,6 @@
 
 A Python connector for WiZ light bulbs.
 
-Tested with the following smart lights:
-
-- [Original Phillips Wiz WiFi LEDs](https://www.lighting.philips.co.in/consumer/smart-wifi-led)
-- [SLV Play RGB bulb](https://www.amazon.de/dp/B07PNCDJLW)
-- [WiZ Smart LED](https://www.amazon.de/gp/product/B07YLW52MK)
-
 ## Install
 
 ```bash
@@ -256,8 +250,8 @@ After that all state can be fetched from `light.state`, which is a `PilotParser`
 
 ### Set functions:
 
-- pulse - {"method":"pulse", {"params":{"delta":-15,"duration":300}}
-- registration - {"method":"registration","id":105,{"params":{"phoneIp":"10.0.0.0","phoneMac":"aaaaaaaaaaaa","register":true}}
+- pulse - {"method":"pulse", "params":{"delta":-15,"duration":300}}
+- registration - {"method":"registration","id":105, "params":{"phoneIp":"10.0.0.0","phoneMac":"aaaaaaaaaaaa","register":true}}
 - setUserConfig
 - setSystemConfig
 - setDevInfo
