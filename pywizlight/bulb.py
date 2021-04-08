@@ -284,8 +284,6 @@ class wizlight:
             bulb_config = await self.getBulbConfig()
             if "moduleName" in bulb_config["result"]:
                 _bulbtype = bulb_config["result"]["moduleName"]
-                # define the kelvin range
-                _kelvin = await self.getExtendedWhiteRange()
                 # set the minimum features for dimmable bulbs (DW bulbs)
                 _bulb = BulbType(
                     bulb_type=BulbClass.DW,
@@ -293,7 +291,7 @@ class wizlight:
                     features=Features(
                         brightness=True, color=False, effect=False, color_tmp=False
                     ),
-                    kelvin_range=KelvinRange(min=_kelvin[0], max=_kelvin[1]),
+                    kelvin_range=None,
                 )
                 try:
                     # parse the features from name
@@ -304,6 +302,9 @@ class wizlight:
                 # go an try to map extensions to the BulbTyp object
                 # Color support
                 if "RGB" in _identifier:
+                    # define the kelvin range
+                    _kelvin = await self.getExtendedWhiteRange()
+                    _bulb.kelvin_range = KelvinRange(min=_kelvin[0], max=_kelvin[1])
                     _bulb.bulb_type = BulbClass.RGB
                     _bulb.features.color = True
                     # RGB supports effects and tuneabel white
@@ -311,6 +312,9 @@ class wizlight:
                     _bulb.features.color_tmp = True
                 # Non RGB but tunable white bulb
                 if "TW" in _identifier:
+                    # define the kelvin range
+                    _kelvin = await self.getExtendedWhiteRange()
+                    _bulb.kelvin_range = KelvinRange(min=_kelvin[0], max=_kelvin[1])
                     _bulb.bulb_type = BulbClass.TW
                     _bulb.features.color_tmp = True
                     # RGB supports effects but only "some"
@@ -489,9 +493,8 @@ class wizlight:
                     )
                 )
                 asyncio.create_task(stream.send(bytes(message, "utf-8")))
-                done, pending = await asyncio.wait(
-                    [receive_task], timeout=send_interval
-                )
+                done, pending = await asyncio.wait([receive_task],
+                                                   timeout=send_interval)
                 if done:
                     break
 
