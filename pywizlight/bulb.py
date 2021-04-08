@@ -460,9 +460,8 @@ class wizlight:
         data = None
         # overall 10 sec. for time out
         timeout = 10
-        # max 5 sec. for send datagrams
         send_interval = 0.5
-        max_send_datagrams = 10
+        max_send_datagrams = int(timeout / send_interval)
 
         try:
             _LOGGER.debug(
@@ -483,16 +482,17 @@ class wizlight:
                 self.receiveUDPwithTimeout(stream, timeout)
             )
 
-            i = 0
-            while not receive_task.done() and i < max_send_datagrams:
+            for i in range(max_send_datagrams):
                 _LOGGER.debug(
                     "[wizlight {}, connid {}] sending command datagram {}: {}".format(
                         self.ip, connid, i, message
                     )
                 )
                 asyncio.create_task(stream.send(bytes(message, "utf-8")))
-                await asyncio.sleep(send_interval)
-                i += 1
+                done, pending = await asyncio.wait([receive_task],
+                                                   timeout=send_interval)
+                if done:
+                    break
 
             await receive_task
             data = receive_task.result()
