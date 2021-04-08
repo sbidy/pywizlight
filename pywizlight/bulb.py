@@ -489,8 +489,9 @@ class wizlight:
                     )
                 )
                 asyncio.create_task(stream.send(bytes(message, "utf-8")))
-                done, pending = await asyncio.wait([receive_task],
-                                                   timeout=send_interval)
+                done, pending = await asyncio.wait(
+                    [receive_task], timeout=send_interval
+                )
                 if done:
                     break
 
