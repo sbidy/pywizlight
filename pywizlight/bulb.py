@@ -285,6 +285,8 @@ class wizlight:
             if "moduleName" in bulb_config["result"]:
                 _bulbtype = bulb_config["result"]["moduleName"]
                 # set the minimum features for dimmable bulbs (DW bulbs)
+                # define the kelvin range
+                _kelvin = await self.getExtendedWhiteRange()
                 _bulb = BulbType(
                     bulb_type=BulbClass.DW,
                     name=_bulbtype,
@@ -301,10 +303,12 @@ class wizlight:
                     raise WizLightNotKnownBulb("The bulb type can not be determined!")
                 # go an try to map extensions to the BulbTyp object
                 # Color support
+                # TODO: Wokaround - In bulb firmware version 1.22.0 the kelvin range was removed. Should be fixed in the next version.
                 if "RGB" in _identifier:
-                    # define the kelvin range
-                    _kelvin = await self.getExtendedWhiteRange()
-                    _bulb.kelvin_range = KelvinRange(min=_kelvin[0], max=_kelvin[1])
+                    if _kelvin:
+                        _bulb.kelvin_range = KelvinRange(min=_kelvin[0], max=_kelvin[1])
+                    else:
+                        _bulb.kelvin_range = KelvinRange(min=2700, max=6500)
                     _bulb.bulb_type = BulbClass.RGB
                     _bulb.features.color = True
                     # RGB supports effects and tuneabel white
@@ -312,13 +316,14 @@ class wizlight:
                     _bulb.features.color_tmp = True
                 # Non RGB but tunable white bulb
                 if "TW" in _identifier:
-                    # define the kelvin range
-                    _kelvin = await self.getExtendedWhiteRange()
-                    _bulb.kelvin_range = KelvinRange(min=_kelvin[0], max=_kelvin[1])
+                    if _kelvin:
+                        _bulb.kelvin_range = KelvinRange(min=_kelvin[0], max=_kelvin[1])
+                    else:
+                        _bulb.kelvin_range = KelvinRange(min=2700, max=6500)
                     _bulb.bulb_type = BulbClass.TW
                     _bulb.features.color_tmp = True
                     # RGB supports effects but only "some"
-                    # ToDo: Improve the mapping to supported effects
+                    # TODO: Improve the mapping to supported effects
                     _bulb.features.effect = True
 
                 self.bulbtype = _bulb
