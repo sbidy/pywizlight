@@ -303,7 +303,7 @@ class wizlight:
                     raise WizLightNotKnownBulb("The bulb type can not be determined!")
                 # go an try to map extensions to the BulbTyp object
                 # Color support
-                # TODO: Wokaround - In bulb firmware version 1.22.0 the kelvin range was removed. Should be fixed in the next version.
+                # TODO: Wokaround - In bulb firmware version 1.22.0 the k-range was removed.
                 if "RGB" in _identifier:
                     if _kelvin:
                         _bulb.kelvin_range = KelvinRange(min=_kelvin[0], max=_kelvin[1])
