@@ -78,7 +78,7 @@ async def main():
     # function takes the discovery object and returns a list with wizlight objects.
     bulbs = await discovery.find_wizlights()
     # Print the IP address of the bulb on index 0
-    print(f"Bulb IP address: {bulbs[0].ip}")
+    print(f"Bulb IP address: {bulbs[0].ip_address}")
 
     # Iterate over all returned bulbs
     for bulb in bulbs:
@@ -125,7 +125,7 @@ async def main():
     print(state.get_scene())
 
     # Get the features of the bulb
-    bulb_type = await bulb.get_bulbtype()
+    bulb_type = await light.get_bulbtype()
     print(bulb_type.features.brightness) # returns true if brightness is supported
     print(bulb_type.features.color) # returns true if color is supported
     print(bulb_type.features.color_tmp) # returns true if color temperatures are supported
