@@ -81,7 +81,7 @@ async def turn_on(ip, k, brightness):
     default=128,
 )
 async def set_state(ip, k, brightness):
-    """Turn a given bulb on."""
+    """Set the current state of a given bulb."""
     click.echo("Turning on %s" % ip)
     bulb = wizlight(ip)
     if bulb and k <= 6800 and k >= 1000 and brightness >= 0 and brightness <= 256:
