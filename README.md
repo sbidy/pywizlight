@@ -1,7 +1,7 @@
 ![Upload Python Package](https://github.com/sbidy/pywizlight/workflows/Upload%20Python%20Package/badge.svg)
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-10-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-11-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 ![Code Quality Check](https://github.com/sbidy/pywizlight/workflows/Lint/badge.svg)
@@ -57,6 +57,7 @@ nix-env -iA nixos.python37Packages.pywizlight
     <td align="center"><a href="https://github.com/skitterrusty"><img src="https://avatars.githubusercontent.com/u/71942600?v=4?s=100" width="100px;" alt=""/><br /><sub><b>skitterrusty</b></sub></a><br /><a href="https://github.com/sbidy/pywizlight/commits?author=skitterrusty" title="Code">💻</a></td>
     <td align="center"><a href="https://github.com/mots"><img src="https://avatars.githubusercontent.com/u/26517?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Mathias Roth</b></sub></a><br /><a href="https://github.com/sbidy/pywizlight/commits?author=mots" title="Code">💻</a></td>
     <td align="center"><a href="https://github.com/durnezj"><img src="https://avatars.githubusercontent.com/u/11504333?v=4?s=100" width="100px;" alt=""/><br /><sub><b>durnezj</b></sub></a><br /><a href="https://github.com/sbidy/pywizlight/commits?author=durnezj" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/Dirty-No"><img src="https://avatars.githubusercontent.com/u/54525684?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Noëlle</b></sub></a><br /><a href="https://github.com/sbidy/pywizlight/commits?author=Dirty-No" title="Documentation">📖</a></td>
   </tr>
 </table>
 
