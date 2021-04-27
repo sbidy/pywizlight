@@ -95,6 +95,15 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "Dirty-No",
+      "name": "Noëlle",
+      "avatar_url": "https://avatars.githubusercontent.com/u/54525684?v=4",
+      "profile": "https://github.com/Dirty-No",
+      "contributions": [
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7,
