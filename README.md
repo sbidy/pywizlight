@@ -76,7 +76,7 @@ async def main():
     """Sample code to work with bulbs."""
     # Discover all bulbs in the network via broadcast datagram (UDP)
     # function takes the discovery object and returns a list with wizlight objects.
-    bulbs = await discovery.find_wizlights()
+    bulbs = await discovery.discover_lights(broadcast_space="192.168.1.255")
     # Print the IP address of the bulb on index 0
     print(f"Bulb IP address: {bulbs[0].ip}")
 
@@ -87,7 +87,7 @@ async def main():
         # await bulb.turn_off()
 
     # Set up a standard light
-    light = wizlight("192.168.0.170")
+    light = wizlight("192.168.1.27")
     # Set up the light with a custom port
     #light = wizlight("your bulb's IP address", port=12345)
 
@@ -125,7 +125,7 @@ async def main():
     print(state.get_scene())
 
     # Get the features of the bulb
-    bulb_type = await bulb.get_bulbtype()
+    bulb_type = await bulbs[0].get_bulbtype()
     print(bulb_type.features.brightness) # returns true if brightness is supported
     print(bulb_type.features.color) # returns true if color is supported
     print(bulb_type.features.color_tmp) # returns true if color temperatures are supported
