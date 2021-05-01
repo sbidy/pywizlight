@@ -12,6 +12,7 @@ from pywizlight.exceptions import (
     WizLightConnectionError,
     WizLightNotKnownBulb,
     WizLightTimeOutError,
+    WizLightMethodeNotFound,
 )
 from pywizlight.scenes import SCENES
 
@@ -174,6 +175,9 @@ class PilotParser:
         """Get the value of the extende whiteRange property."""
         if "extRange" in self.pilotResult:
             return self.pilotResult["extRange"]
+        # New after v1.22 FW - "cctRange":[2200,2700,6500,6500]
+        elif "cctRange" in self.pilotResult:
+            return self.pilotResult["cctRange"]
         else:
             return None
 
@@ -287,6 +291,8 @@ class wizlight:
                 # set the minimum features for dimmable bulbs (DW bulbs)
                 # define the kelvin range
                 _kelvin = await self.getExtendedWhiteRange()
+                # use only first and last entry - [2200,2700,6500,6500]
+                _kelvin = _kelvin[:: len(_kelvin) - 1]
                 _bulb = BulbType(
                     bulb_type=BulbClass.DW,
                     name=_bulbtype,
@@ -303,12 +309,8 @@ class wizlight:
                     raise WizLightNotKnownBulb("The bulb type can not be determined!")
                 # go an try to map extensions to the BulbTyp object
                 # Color support
-                # TODO: Wokaround - In bulb firmware version 1.22.0 the k-range was removed.
                 if "RGB" in _identifier:
-                    if _kelvin:
-                        _bulb.kelvin_range = KelvinRange(min=_kelvin[0], max=_kelvin[1])
-                    else:
-                        _bulb.kelvin_range = KelvinRange(min=2700, max=6500)
+                    _bulb.kelvin_range = KelvinRange(min=_kelvin[0], max=_kelvin[1])
                     _bulb.bulb_type = BulbClass.RGB
                     _bulb.features.color = True
                     # RGB supports effects and tuneabel white
@@ -316,10 +318,8 @@ class wizlight:
                     _bulb.features.color_tmp = True
                 # Non RGB but tunable white bulb
                 if "TW" in _identifier:
-                    if _kelvin:
-                        _bulb.kelvin_range = KelvinRange(min=_kelvin[0], max=_kelvin[1])
-                    else:
-                        _bulb.kelvin_range = KelvinRange(min=2700, max=6500)
+                    _bulb.kelvin_range = KelvinRange(min=_kelvin[0], max=_kelvin[1])
+                    _bulb.kelvin_range = KelvinRange(min=2700, max=6500)
                     _bulb.bulb_type = BulbClass.TW
                     _bulb.features.color_tmp = True
                     # RGB supports effects but only "some"
@@ -341,12 +341,22 @@ class wizlight:
 
     async def getExtendedWhiteRange(self):
         """Read extended withe range from the RGB bulb."""
-        resp = await self.getUserConfig()
+
+        # First for FW > 1.22
+        resp = await self.getModelConfig()
         if resp is not None and "result" in resp and self.extwhiteRange is None:
             self.extwhiteRange = PilotParser(resp["result"]).get_extended_white_range()
+            return self.extwhiteRange
         else:
-            self.extwhiteRange = None
-        return self.extwhiteRange
+            # For old FW < 1.22
+            resp = await self.getUserConfig()
+            if "result" in resp and self.extwhiteRange is None:
+                self.extwhiteRange = PilotParser(
+                    resp["result"]
+                ).get_extended_white_range()
+                return self.extwhiteRange
+            else:
+                self.extwhiteRange = None
 
     async def getSupportedScenes(self):
         """Return the supported scenes based on type.
@@ -442,6 +452,16 @@ class wizlight:
         message = r'{"method":"getSystemConfig","params":{}}'
         return await self.sendUDPMessage(message)
 
+    async def getModelConfig(self):
+        """Return the new model capabilities from the bulb.
+        Only available in bulb FW >1.22!
+        """
+        try:
+            message = r'{"method":"getModelConfig","params":{}}'
+            return await self.sendUDPMessage(message)
+        except WizLightMethodeNotFound:
+            return None
+
     async def getUserConfig(self):
         """Return the user configuration from the bulb."""
         message = r'{"method":"getUserConfig","params":{}}'
@@ -532,6 +552,9 @@ class wizlight:
                     )
                 )
                 return resp
-            else:
-                # exception should be created
-                raise ValueError("Can't read response from the bulb. Debug:", resp)
+            elif resp["error"]["code"] == -32601:
+                raise WizLightMethodeNotFound(
+                    "Cant found the methode. Maybe older bulb FW?"
+                )
+            # exception should be created
+            raise ValueError("Can't read response from the bulb. Debug:", resp)

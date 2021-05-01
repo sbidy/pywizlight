@@ -23,3 +23,9 @@ class WizLightNotKnownBulb(WizLightError):
     """The bulb type is not known to the pywizlight."""
 
     pass
+
+
+class WizLightMethodeNotFound(WizLightError):
+    """The the called bulb function is not available."""
+
+    pass
