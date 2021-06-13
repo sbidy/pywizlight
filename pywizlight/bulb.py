@@ -284,69 +284,73 @@ class wizlight:
 
     async def get_bulbtype(self) -> BulbType:
         """Retrun the bulb type as BulbType object."""
-        if self.bulbtype is None:
-            bulb_config = await self.getBulbConfig()
-            if "moduleName" in bulb_config["result"]:
-                _bulbtype = bulb_config["result"]["moduleName"]
-                # set the minimum features for dimmable bulbs (DW bulbs)
-                # define the kelvin range
-                _kelvin = await self.getExtendedWhiteRange()
-                # use only first and last entry - [2200,2700,6500,6500]
-                _kelvin = _kelvin[:: len(_kelvin) - 1]
-                _bulb = BulbType(
-                    bulb_type=BulbClass.DW,
-                    name=_bulbtype,
-                    features=Features(
-                        brightness=True, color=False, effect=False, color_tmp=False
-                    ),
-                    kelvin_range=None,
-                )
-                try:
-                    # parse the features from name
-                    _identifier = _bulbtype.split("_")[1]
-                # Throw exception if index can not be found
-                except IndexError:
-                    raise WizLightNotKnownBulb("The bulb type can not be determined!")
-                # go an try to map extensions to the BulbTyp object
-                # Color support
-                if "RGB" in _identifier:
-                    _bulb.kelvin_range = KelvinRange(min=_kelvin[0], max=_kelvin[1])
-                    _bulb.bulb_type = BulbClass.RGB
-                    _bulb.features.color = True
-                    # RGB supports effects and tuneabel white
-                    _bulb.features.effect = True
-                    _bulb.features.color_tmp = True
-                # Non RGB but tunable white bulb
-                if "TW" in _identifier:
-                    _bulb.kelvin_range = KelvinRange(min=_kelvin[0], max=_kelvin[1])
-                    _bulb.kelvin_range = KelvinRange(min=2700, max=6500)
-                    _bulb.bulb_type = BulbClass.TW
-                    _bulb.features.color_tmp = True
-                    # RGB supports effects but only "some"
-                    # TODO: Improve the mapping to supported effects
-                    _bulb.features.effect = True
+        if self.bulbtype is not None:
+            return self.bulbtype
 
-                self.bulbtype = _bulb
-                return _bulb
-            raise WizLightNotKnownBulb("The bulb features can not be mapped!")
+        bulb_config = await self.getBulbConfig()
+        if "moduleName" in bulb_config["result"]:
+            _bulbtype = bulb_config["result"]["moduleName"]
+            # set the minimum features for dimmable bulbs (DW bulbs)
+            # define the kelvin range
+            _kelvin = await self.getExtendedWhiteRange()
+            # use only first and last entry - [2200,2700,6500,6500]
+            _kelvin = _kelvin[:: len(_kelvin) - 1]
+            _bulb = BulbType(
+                bulb_type=BulbClass.DW,
+                name=_bulbtype,
+                features=Features(
+                    brightness=True, color=False, effect=False, color_tmp=False
+                ),
+                kelvin_range=None,
+            )
+            try:
+                # parse the features from name
+                _identifier = _bulbtype.split("_")[1]
+            # Throw exception if index can not be found
+            except IndexError:
+                raise WizLightNotKnownBulb("The bulb type can not be determined!")
+            # go an try to map extensions to the BulbTyp object
+            # Color support
+            if "RGB" in _identifier:
+                _bulb.kelvin_range = KelvinRange(min=_kelvin[0], max=_kelvin[1])
+                _bulb.bulb_type = BulbClass.RGB
+                _bulb.features.color = True
+                # RGB supports effects and tuneabel white
+                _bulb.features.effect = True
+                _bulb.features.color_tmp = True
+            # Non RGB but tunable white bulb
+            if "TW" in _identifier:
+                _bulb.kelvin_range = KelvinRange(min=_kelvin[0], max=_kelvin[1])
+                _bulb.kelvin_range = KelvinRange(min=2700, max=6500)
+                _bulb.bulb_type = BulbClass.TW
+                _bulb.features.color_tmp = True
+                # RGB supports effects but only "some"
+                # TODO: Improve the mapping to supported effects
+                _bulb.features.effect = True
+
+            self.bulbtype = _bulb
+            return self.bulbtype
 
     async def getWhiteRange(self):
         """Read the white range from the bulb."""
+        if self.whiteRange is not None:
+            return self.whiteRange
+
         resp = await self.getUserConfig()
-        if resp is not None and "result" in resp and self.whiteRange is None:
+        if resp is not None and "result" in resp:
             self.whiteRange = PilotParser(resp["result"]).get_white_range()
-        else:
-            self.whiteRange = None
+
         return self.whiteRange
 
     async def getExtendedWhiteRange(self):
         """Read extended withe range from the RGB bulb."""
+        if self.extwhiteRange is not None:
+            return self.extwhiteRange
 
         # First for FW > 1.22
         resp = await self.getModelConfig()
-        if resp is not None and "result" in resp and self.extwhiteRange is None:
+        if resp is not None and "result" in resp:
             self.extwhiteRange = PilotParser(resp["result"]).get_extended_white_range()
-            return self.extwhiteRange
         else:
             # For old FW < 1.22
             resp = await self.getUserConfig()
@@ -354,9 +358,8 @@ class wizlight:
                 self.extwhiteRange = PilotParser(
                     resp["result"]
                 ).get_extended_white_range()
-                return self.extwhiteRange
-            else:
-                self.extwhiteRange = None
+
+        return self.extwhiteRange
 
     async def getSupportedScenes(self):
         """Return the supported scenes based on type.
