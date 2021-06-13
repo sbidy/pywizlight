@@ -283,7 +283,7 @@ class wizlight:
             )
 
     async def get_bulbtype(self) -> BulbType:
-        """Retrun the bulb type as BulbType object."""
+        """Return the bulb type as BulbType object."""
         if self.bulbtype is not None:
             return self.bulbtype
 
@@ -368,7 +368,7 @@ class wizlight:
         """
         if self.bulbtype is None:
             await self.get_bulbtype()
-        # retrun for TW
+        # return for TW
         if self.bulbtype.bulb_type == BulbClass.TW:
             return [
                 SCENES[key]
@@ -411,11 +411,11 @@ class wizlight:
         await self.sendUDPMessage(pilot_builder.set_state_message(self.status))
 
     def get_id_from_scene_name(self, scene: str) -> int:
-        """Retrun the id of an given scene name.
+        """Return the id of an given scene name.
 
         :param scene: Name of the scene
         :type scene: str
-        :raises ValueError: Retrun if not in scene list
+        :raises ValueError: Return if not in scene list
         :return: ID of the scene
         :rtype: int
         """
