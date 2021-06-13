@@ -353,7 +353,7 @@ class wizlight:
         else:
             # For old FW < 1.22
             resp = await self.getUserConfig()
-            if "result" in resp and self.extwhiteRange is None:
+            if "result" in resp:
                 self.extwhiteRange = PilotParser(
                     resp["result"]
                 ).get_extended_white_range()
