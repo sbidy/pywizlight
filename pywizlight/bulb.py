@@ -321,7 +321,6 @@ class wizlight:
             # Non RGB but tunable white bulb
             if "TW" in _identifier:
                 _bulb.kelvin_range = KelvinRange(min=_kelvin[0], max=_kelvin[1])
-                _bulb.kelvin_range = KelvinRange(min=2700, max=6500)
                 _bulb.bulb_type = BulbClass.TW
                 _bulb.features.color_tmp = True
                 # RGB supports effects but only "some"
