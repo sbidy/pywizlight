@@ -34,10 +34,7 @@ class PilotBuilder:
         state=True,
     ):
         """Set the parameter."""
-        if state:
-            self.pilot_params = {"state": state}
-        else:
-            self.pilot_params = {"state": state}
+        self.pilot_params = {"state": state}
 
         if warm_white is not None:
             self._set_warm_white(warm_white)
