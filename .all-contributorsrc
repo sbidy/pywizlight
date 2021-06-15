@@ -113,6 +113,15 @@
       "contributions": [
         "doc"
       ]
+    },
+    {
+      "login": "emichael",
+      "name": "Ellis Michael",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1312141?v=4",
+      "profile": "http://ellismichael.com",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,
