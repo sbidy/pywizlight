@@ -60,6 +60,7 @@ nix-env -iA nixos.python37Packages.pywizlight
     <td align="center"><a href="https://github.com/Dirty-No"><img src="https://avatars.githubusercontent.com/u/54525684?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Noëlle</b></sub></a><br /><a href="https://github.com/sbidy/pywizlight/commits?author=Dirty-No" title="Documentation">📖</a></td>
     <td align="center"><a href="https://linkedin.com/in/scriptsrc"><img src="https://avatars.githubusercontent.com/u/8009126?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Patrick Kelley</b></sub></a><br /><a href="https://github.com/sbidy/pywizlight/commits?author=scriptsrc" title="Documentation">📖</a></td>
     <td align="center"><a href="https://github.com/CharlotteCross1998"><img src="https://avatars.githubusercontent.com/u/29734551?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Charlotte</b></sub></a><br /><a href="https://github.com/sbidy/pywizlight/commits?author=CharlotteCross1998" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/SvbZ3r0"><img src="https://avatars.githubusercontent.com/u/57280279?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Gughan Ravikumar</b></sub></a><br /><a href="https://github.com/sbidy/pywizlight/commits?author=SvbZ3r0" title="Code">💻</a></td>
   </tr>
 </table>
 
