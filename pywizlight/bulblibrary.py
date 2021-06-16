@@ -49,9 +49,9 @@ class BulbClass(Enum):
     """Bulb Types."""
 
     """Have Cool White and Warm White LEDs."""
-    TW = "Tunabel White"
+    TW = "Tunable White"
     """Have only Dimmable white LEDs."""
-    DW = "Dimable White"
+    DW = "Dimmable White"
     """Have RGB LEDs."""
     RGB = "RGB Bulb"
 
