@@ -66,7 +66,7 @@ class BroadcastProtocol(object):
         """Send a registration method as UDP broadcast."""
         # Note: The IP and address we give the bulb here don't seem to matter for our
         # intents and purposes, so they're hardcoded to technically valid dummy data.
-        # Fix for async problems if boardcast_registration is called twice! See #13.
+        # Fix for async problems if broaddcast_registration is called twice! See #13.
         # dirty dirty hack
         try:
             register_method = r'{"method":"registration","params":{"phoneMac":"AAAAAAAAAAAA","register":false,"phoneIp":"1.2.3.4","id":"1"}}'  # noqa: E501

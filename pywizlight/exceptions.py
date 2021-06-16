@@ -14,7 +14,7 @@ class WizLightConnectionError(WizLightError):
 
 
 class WizLightTimeOutError(WizLightError):
-    """When a connection error is encountered."""
+    """When a connection has timed out."""
 
     pass
 
