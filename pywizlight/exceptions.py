@@ -25,7 +25,7 @@ class WizLightNotKnownBulb(WizLightError):
     pass
 
 
-class WizLightMethodeNotFound(WizLightError):
+class WizLightMethodNotFound(WizLightError):
     """The the called bulb function is not available."""
 
     pass

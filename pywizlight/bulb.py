@@ -12,7 +12,7 @@ from pywizlight.exceptions import (
     WizLightConnectionError,
     WizLightNotKnownBulb,
     WizLightTimeOutError,
-    WizLightMethodeNotFound,
+    WizLightMethodNotFound,
 )
 from pywizlight.scenes import SCENES
 
@@ -456,7 +456,7 @@ class wizlight:
         try:
             message = r'{"method":"getModelConfig","params":{}}'
             return await self.sendUDPMessage(message)
-        except WizLightMethodeNotFound:
+        except WizLightMethodNotFound:
             return None
 
     async def getUserConfig(self):
@@ -550,7 +550,7 @@ class wizlight:
                 )
                 return resp
             elif resp["error"]["code"] == -32601:
-                raise WizLightMethodeNotFound(
+                raise WizLightMethodNotFound(
                     "Cant found the methode. Maybe older bulb FW?"
                 )
             # exception should be created
