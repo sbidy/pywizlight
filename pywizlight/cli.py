@@ -45,8 +45,8 @@ async def discover(b):
 @click.option("--ip", prompt="IP address of the bulb", help="IP address of the bulb.")
 @click.option(
     "--k",
-    prompt="Kelvin for temperatur.",
-    help="Kelvin value (1000-8000) for turn on. Default 3000k",
+    prompt="Kelvin for temperature.",
+    help="Kelvin value (1000-8000) for turn on. Default 3000",
     default=3000,
 )
 @click.option(
@@ -70,8 +70,8 @@ async def turn_on(ip, k, brightness):
 @click.option("--ip", prompt="IP address of the bulb", help="IP address of the bulb.")
 @click.option(
     "--k",
-    prompt="Kelvin for temperatur.",
-    help="Kelvin value (1000-8000) for turn on. Default 3000k",
+    prompt="Kelvin for temperature.",
+    help="Kelvin value (1000-8000) for turn on. Default 3000",
     default=3000,
 )
 @click.option(
