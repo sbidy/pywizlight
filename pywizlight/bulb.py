@@ -12,7 +12,7 @@ from pywizlight.exceptions import (
     WizLightConnectionError,
     WizLightNotKnownBulb,
     WizLightTimeOutError,
-    WizLightMethodeNotFound,
+    WizLightMethodNotFound,
 )
 from pywizlight.scenes import SCENES
 
@@ -61,7 +61,7 @@ class PilotBuilder:
         return json.dumps({"method": "setState", "params": self.pilot_params})
 
     def _set_warm_white(self, value: int):
-        """Set the value of the cold white led."""
+        """Set the value of the warm white led."""
         if value > 0 and value < 256:
             self.pilot_params["w"] = value
         else:
@@ -75,10 +75,8 @@ class PilotBuilder:
             raise ValueError("Value must be between 1 and 255")
 
     def _set_speed(self, value: int):
-        """Set the color changing speed in precent (0-100).
-
-        This applies only to changing effects.
-        """
+        """Set the color changing speed in precent (0-100)."""
+        # This applies only to changing effects.
         if value > 0 and value < 101:
             self.pilot_params["speed"] = value
         else:
@@ -111,7 +109,7 @@ class PilotBuilder:
     def _set_brightness(self, value: int):
         """Set the value of the brightness 0-255."""
         percent = self.hex_to_percent(value)
-        # lamp doesn't supports lower than 10%
+        # hardware limitation - values less than 10% are not supported
         if percent < 10:
             percent = 10
         if percent > 101:
@@ -169,7 +167,7 @@ class PilotParser:
             return None
 
     def get_extended_white_range(self) -> list:
-        """Get the value of the extende whiteRange property."""
+        """Get the value of the extended whiteRange property."""
         if "extRange" in self.pilotResult:
             return self.pilotResult["extRange"]
         # New after v1.22 FW - "cctRange":[2200,2700,6500,6500]
@@ -224,7 +222,7 @@ class PilotParser:
             return self.percent_to_hex(self.pilotResult["dimming"])
 
     def get_colortemp(self) -> int:
-        """Get the color temperatur from the bulb."""
+        """Get the color temperature from the bulb."""
         if "temp" in self.pilotResult:
             return self.pilotResult["temp"]
         else:
@@ -238,7 +236,7 @@ class PilotParser:
 class wizlight:
     """Create an instance of a WiZ Light Bulb."""
 
-    # default port for WiZ lights
+    # default port for WiZ lights - 38899
 
     def __init__(self, ip, connect_on_init=False, port=38899, mac=None):
         """Create instance with the IP address of the bulb."""
@@ -260,7 +258,7 @@ class wizlight:
             return None
         return self.state.get_state()
 
-    # ------------------ Non properties --------------
+    # ------------------ Non properties -------------- #
 
     def _check_connection(self):
         """Check the connection to the bulb."""
@@ -270,7 +268,7 @@ class wizlight:
         try:
             # send a udp package
             sock.sendto(bytes(message, "utf-8"), (self.ip, self.port))
-            # get the data to
+            # get response data
             data, addr = sock.recvfrom(1024)
             if data:
                 return
@@ -304,22 +302,22 @@ class wizlight:
                 # Throw exception if index can not be found
                 except IndexError:
                     raise WizLightNotKnownBulb("The bulb type can not be determined!")
-                # go an try to map extensions to the BulbTyp object
+                # try to map extensions to the BulbTyp object
                 # Color support
                 if "RGB" in _identifier:
                     _bulb.kelvin_range = KelvinRange(min=_kelvin[0], max=_kelvin[1])
                     _bulb.bulb_type = BulbClass.RGB
                     _bulb.features.color = True
-                    # RGB supports effects and tuneabel white
+                    # RGB supports effects and CCT
                     _bulb.features.effect = True
                     _bulb.features.color_tmp = True
-                # Non RGB but tunable white bulb
+                # Tunable white bulb; no RGB
                 if "TW" in _identifier:
                     _bulb.kelvin_range = KelvinRange(min=_kelvin[0], max=_kelvin[1])
                     _bulb.kelvin_range = KelvinRange(min=2700, max=6500)
                     _bulb.bulb_type = BulbClass.TW
                     _bulb.features.color_tmp = True
-                    # RGB supports effects but only "some"
+                    # TW supports some effects only
                     # TODO: Improve the mapping to supported effects
                     _bulb.features.effect = True
 
@@ -337,7 +335,7 @@ class wizlight:
         return self.whiteRange
 
     async def getExtendedWhiteRange(self):
-        """Read extended withe range from the RGB bulb."""
+        """Read extended white range from the RGB bulb."""
 
         # First for FW > 1.22
         resp = await self.getModelConfig()
@@ -368,9 +366,10 @@ class wizlight:
                 SCENES[key]
                 for key in [6, 9, 10, 11, 12, 13, 14, 15, 16, 18, 29, 30, 31, 32]
             ]
+        # retrun for DW
         if self.bulbtype.bulb_type == BulbClass.DW:
             return [SCENES[key] for key in [9, 10, 13, 14, 29, 30, 31, 32]]
-        # Must be RGB with all
+        # return for RGB - all scenes supported
         return SCENES
 
     async def turn_off(self):
@@ -397,7 +396,7 @@ class wizlight:
         await self.sendUDPMessage(pilot_builder.set_pilot_message())
 
     async def set_state(self, pilot_builder=PilotBuilder()):
-        """Set the state of the bulb with defined message. Doesn't turns on the light.
+        """Set the state of the bulb with defined message. Doesn't turn on the light.
 
         :param pilot_builder: PilotBuilder object to set the state, defaults to PilotBuilder()
         :type pilot_builder: [type], optional
@@ -405,11 +404,11 @@ class wizlight:
         await self.sendUDPMessage(pilot_builder.set_state_message(self.status))
 
     def get_id_from_scene_name(self, scene: str) -> int:
-        """Retrun the id of an given scene name.
+        """Return the id of a given scene name.
 
         :param scene: Name of the scene
         :type scene: str
-        :raises ValueError: Retrun if not in scene list
+        :raises ValueError: Return if not in scene list
         :return: ID of the scene
         :rtype: int
         """
@@ -424,7 +423,7 @@ class wizlight:
 
         Note: Call this method before getting any other property.
         Also, call this method to update the current value for any property.
-        getPilot - gets the current bulb state - no paramters need to be included
+        getPilot - gets the current bulb state - no parameters need to be included
         {"method": "getPilot", "id": 24}
         """
         message = r'{"method":"getPilot","params":{}}'
@@ -456,7 +455,7 @@ class wizlight:
         try:
             message = r'{"method":"getModelConfig","params":{}}'
             return await self.sendUDPMessage(message)
-        except WizLightMethodeNotFound:
+        except WizLightMethodNotFound:
             return None
 
     async def getUserConfig(self):
@@ -476,7 +475,7 @@ class wizlight:
             await self.turn_on()
 
     async def receiveUDPwithTimeout(self, stream, timeout):
-        """Get messtage with timout value."""
+        """Get message with timeout value."""
         data, remote_addr = await asyncio.wait_for(stream.recv(), timeout)
         return data
 
@@ -484,7 +483,7 @@ class wizlight:
         """Send the UDP message to the bulb."""
         connid = hex(int(time() * 10000000))[2:]
         data = None
-        # overall 10 sec. for time out
+        # overall 10 sec. for timeout
         timeout = 10
         send_interval = 0.5
         max_send_datagrams = int(timeout / send_interval)
@@ -550,7 +549,7 @@ class wizlight:
                 )
                 return resp
             elif resp["error"]["code"] == -32601:
-                raise WizLightMethodeNotFound(
+                raise WizLightMethodNotFound(
                     "Cant found the methode. Maybe older bulb FW?"
                 )
             # exception should be created

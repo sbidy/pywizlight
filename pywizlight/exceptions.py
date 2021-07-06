@@ -14,7 +14,7 @@ class WizLightConnectionError(WizLightError):
 
 
 class WizLightTimeOutError(WizLightError):
-    """When a connection error is encountered."""
+    """When a connection has timed out."""
 
     pass
 
@@ -25,7 +25,7 @@ class WizLightNotKnownBulb(WizLightError):
     pass
 
 
-class WizLightMethodeNotFound(WizLightError):
+class WizLightMethodNotFound(WizLightError):
     """The the called bulb function is not available."""
 
     pass

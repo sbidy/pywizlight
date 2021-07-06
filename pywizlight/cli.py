@@ -32,7 +32,7 @@ def main():
     help="Define the broadcast address like 192.168.1.255.",
 )
 async def discover(b):
-    """Disocvery bulb in the local network."""
+    """Discovery bulb in the local network."""
     click.echo(f"Search for bulbs in {b} ... ")
 
     bulbs = await discovery.find_wizlights(broadcast_address=b)
@@ -45,8 +45,8 @@ async def discover(b):
 @click.option("--ip", prompt="IP address of the bulb", help="IP address of the bulb.")
 @click.option(
     "--k",
-    prompt="Kelvin for temperatur.",
-    help="Kelvin value (1000-8000) for turn on. Default 3000k",
+    prompt="Kelvin for temperature.",
+    help="Kelvin value (1000-8000) for turn on. Default 3000",
     default=3000,
 )
 @click.option(
@@ -59,7 +59,7 @@ async def turn_on(ip, k, brightness):
     """Turn a given bulb on."""
     click.echo("Turning on %s" % ip)
     bulb = wizlight(ip)
-    if bulb and k <= 6800 and k >= 1000 and brightness >= 0 and brightness <= 256:
+    if bulb and k <= 6800 and k >= 1000 and brightness >= 0 and brightness <= 255:
         await bulb.turn_on(PilotBuilder(colortemp=k, brightness=brightness))
     else:
         click.echo("Error - values are not correct. Type --help for help.")
@@ -70,8 +70,8 @@ async def turn_on(ip, k, brightness):
 @click.option("--ip", prompt="IP address of the bulb", help="IP address of the bulb.")
 @click.option(
     "--k",
-    prompt="Kelvin for temperatur.",
-    help="Kelvin value (1000-8000) for turn on. Default 3000k",
+    prompt="Kelvin for temperature.",
+    help="Kelvin value (1000-8000) for turn on. Default 3000",
     default=3000,
 )
 @click.option(
@@ -84,7 +84,7 @@ async def set_state(ip, k, brightness):
     """Set the current state of a given bulb."""
     click.echo("Turning on %s" % ip)
     bulb = wizlight(ip)
-    if bulb and k <= 6800 and k >= 1000 and brightness >= 0 and brightness <= 256:
+    if bulb and k <= 6800 and k >= 1000 and brightness >= 0 and brightness <= 255:
         await bulb.set_state(PilotBuilder(colortemp=k, brightness=brightness))
     else:
         click.echo("Error - values are not correct. Type --help for help.")
