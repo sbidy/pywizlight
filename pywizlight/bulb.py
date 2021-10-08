@@ -20,6 +20,7 @@ _LOGGER = logging.getLogger(__name__)
 TW_SCENES = [6, 9, 10, 11, 12, 13, 14, 15, 16, 18, 29, 30, 31, 32]
 DW_SCENES = [9, 10, 13, 14, 29, 30, 31, 32]
 
+
 class PilotBuilder:
     """Get information from the bulb."""
 
@@ -364,10 +365,7 @@ class wizlight:
             await self.get_bulbtype()
         # return for TW
         if self.bulbtype.bulb_type == BulbClass.TW:
-            return [
-                SCENES[key]
-                for key in TW_SCENES
-            ]
+            return [SCENES[key] for key in TW_SCENES]
         # retrun for DW
         if self.bulbtype.bulb_type == BulbClass.DW:
             return [SCENES[key] for key in DW_SCENES]
