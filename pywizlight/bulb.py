@@ -352,7 +352,6 @@ class wizlight:
                 self.extwhiteRange = PilotParser(
                     resp["result"]
                 ).get_extended_white_range()
-
         return self.extwhiteRange
 
     async def getSupportedScenes(self):
