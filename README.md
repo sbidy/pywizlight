@@ -1,7 +1,7 @@
 ![Upload Python Package](https://github.com/sbidy/pywizlight/workflows/Upload%20Python%20Package/badge.svg)
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-12-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-13-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 ![Code Quality Check](https://github.com/sbidy/pywizlight/workflows/Lint/badge.svg)
@@ -59,6 +59,9 @@ nix-env -iA nixos.python37Packages.pywizlight
     <td align="center"><a href="https://github.com/durnezj"><img src="https://avatars.githubusercontent.com/u/11504333?v=4?s=100" width="100px;" alt=""/><br /><sub><b>durnezj</b></sub></a><br /><a href="https://github.com/sbidy/pywizlight/commits?author=durnezj" title="Code">💻</a></td>
     <td align="center"><a href="https://github.com/Dirty-No"><img src="https://avatars.githubusercontent.com/u/54525684?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Noëlle</b></sub></a><br /><a href="https://github.com/sbidy/pywizlight/commits?author=Dirty-No" title="Documentation">📖</a></td>
     <td align="center"><a href="https://linkedin.com/in/scriptsrc"><img src="https://avatars.githubusercontent.com/u/8009126?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Patrick Kelley</b></sub></a><br /><a href="https://github.com/sbidy/pywizlight/commits?author=scriptsrc" title="Documentation">📖</a></td>
+    <td align="center"><a href="http://ellismichael.com"><img src="https://avatars.githubusercontent.com/u/1312141?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Ellis Michael</b></sub></a><br /><a href="https://github.com/sbidy/pywizlight/commits?author=emichael" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/CharlotteCross1998"><img src="https://avatars.githubusercontent.com/u/29734551?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Charlotte</b></sub></a><br /><a href="https://github.com/sbidy/pywizlight/commits?author=CharlotteCross1998" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/SvbZ3r0"><img src="https://avatars.githubusercontent.com/u/57280279?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Gughan Ravikumar</b></sub></a><br /><a href="https://github.com/sbidy/pywizlight/commits?author=SvbZ3r0" title="Code">💻</a></td>
   </tr>
 </table>
 
@@ -153,7 +156,7 @@ loop.run_until_complete(main())
 
 `wizlight` is a command-line tool to perform basic interactions with bulbs.
 
-```bash
+```console
 $ wizlight
 Usage: wizlight [OPTIONS] COMMAND [ARGS]...
 
@@ -164,7 +167,7 @@ Options:
   --help     Show this message and exit.
 
 Commands:
-  discover  Disocver bulb in the local network.
+  discover  Discover bulb in the local network.
   off       Turn the bulb off.
   on        Turn the bulb on.
   state     Get the current state from the given bulb.
