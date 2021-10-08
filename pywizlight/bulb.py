@@ -325,7 +325,6 @@ class wizlight:
             self.bulbtype = _bulb
             return self.bulbtype
 
-
     async def getWhiteRange(self):
         """Read the white range from the bulb."""
         if self.whiteRange is not None:
