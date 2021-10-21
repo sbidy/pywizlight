@@ -9,9 +9,12 @@ import asyncio_dgram
 
 from pywizlight.bulblibrary import BulbClass, BulbType, Features, KelvinRange
 from pywizlight.colormgmt.rgbcw import hs2rgbcw, rgb2rgbcw, rgbcw2hs
-from pywizlight.exceptions import (WizLightConnectionError,
-                                   WizLightMethodNotFound,
-                                   WizLightNotKnownBulb, WizLightTimeOutError)
+from pywizlight.exceptions import (
+    WizLightConnectionError,
+    WizLightMethodNotFound,
+    WizLightNotKnownBulb,
+    WizLightTimeOutError,
+)
 from pywizlight.scenes import SCENES
 
 _LOGGER = logging.getLogger(__name__)
