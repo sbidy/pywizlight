@@ -7,13 +7,11 @@ from time import time
 
 import asyncio_dgram
 
-from pywizlight.bulblibrary import BulbType, Features, KelvinRange, BulbClass
-from pywizlight.exceptions import (
-    WizLightConnectionError,
-    WizLightNotKnownBulb,
-    WizLightTimeOutError,
-    WizLightMethodNotFound,
-)
+from pywizlight.bulblibrary import BulbClass, BulbType, Features, KelvinRange
+from pywizlight.colormgmt.rgbcw import hs2rgbcw, rgb2rgbcw, rgbcw2hs
+from pywizlight.exceptions import (WizLightConnectionError,
+                                   WizLightMethodNotFound,
+                                   WizLightNotKnownBulb, WizLightTimeOutError)
 from pywizlight.scenes import SCENES
 
 _LOGGER = logging.getLogger(__name__)
@@ -462,6 +460,19 @@ class wizlight:
         """Return the user configuration from the bulb."""
         message = r'{"method":"getUserConfig","params":{}}'
         return await self.sendUDPMessage(message)
+
+    # first hack for integration - should be integrated into the PilotBuilder
+    def getRGBCWfromRGB(self, rgb_value: tuple, brightness: int) -> PilotBuilder:
+        """Return the RGB,CW from the RGB."""
+        return rgb2rgbcw(rgb_value, brightness)
+
+    def getRGBCWfromHS(self, hs: tuple, brightness: int) -> PilotBuilder:
+        """Return the RGB,CW from the HS."""
+        return hs2rgbcw(hs, brightness)
+
+    def getHSfromRGBCW(self, rgb: tuple, cw: int) -> tuple:
+        """Return the HS from the RGB,CW."""
+        return rgbcw2hs(rgb, cw)
 
     async def lightSwitch(self):
         """Turn the light bulb on or off like a switch."""
