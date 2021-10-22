@@ -27,14 +27,15 @@ class PilotBuilder:
 
     def __init__(
         self,
-        warm_white=None,
-        cold_white=None,
+        warm_white: int = None,
+        cold_white: int = None,
         speed=None,
-        scene=None,
-        rgb=None,
-        brightness=None,
-        colortemp=None,
-        state=True,
+        scene: int = None,
+        rgb: tuple = None,
+        hs_color: tuple = None,
+        brightness: int = None,
+        colortemp: int = None,
+        state: bool = True,
     ):
         """Set the parameter."""
         self.pilot_params = {"state": state}
@@ -53,6 +54,8 @@ class PilotBuilder:
             self._set_brightness(brightness)
         if colortemp is not None:
             self._set_colortemp(colortemp)
+        if hs_color is not None:
+            self._set_hs_color(hs_color)
 
     def set_pilot_message(self):
         """Return the pilot message."""
@@ -93,9 +96,11 @@ class PilotBuilder:
             # id not in SCENES !
             raise ValueError("Scene is not available. Only 0 to 32 are supported")
 
-    def _set_rgb(self, values):
+    def _set_rgb(self, values: tuple):
         """Set the RGB color state of the bulb."""
-        red, green, blue = values
+        # Transform the RGB values to RGB+CW values
+        rgb, cw = rgb2rgbcw(values)
+        red, green, blue = rgb
         if red >= 0 and red < 256:
             self.pilot_params["r"] = red
         else:
@@ -108,6 +113,34 @@ class PilotBuilder:
             self.pilot_params["b"] = blue
         else:
             raise ValueError("Blue is not in range between 0-255.")
+
+        # Use the existing set_warm_white function to set the CW values
+        self._set_warm_white(cw)
+        # Use the existing set_cold_white function to set the CW values
+        self._set_cold_white(cw)
+
+    def _set_hs_color(self, values: tuple):
+        """Set the HS color state of the bulb."""
+        # Transform the HS values to RGB+CW values
+        rgb, cw = hs2rgbcw(values)
+        red, green, blue = rgb
+        if red >= 0 and red < 256:
+            self.pilot_params["r"] = red
+        else:
+            raise ValueError("Red is not in range between 0-255.")
+        if green >= 0 and green < 256:
+            self.pilot_params["g"] = green
+        else:
+            raise ValueError("Green is not in range between 0-255.")
+        if blue >= 0 and blue < 256:
+            self.pilot_params["b"] = blue
+        else:
+            raise ValueError("Blue is not in range between 0-255.")
+
+        # Use the existing set_warm_white function to set the CW values
+        self._set_warm_white(cw)
+        # Use the existing set_cold_white function to set the CW values
+        self._set_cold_white(cw)
 
     def _set_brightness(self, value: int):
         """Set the value of the brightness 0-255."""
@@ -464,18 +497,25 @@ class wizlight:
         message = r'{"method":"getUserConfig","params":{}}'
         return await self.sendUDPMessage(message)
 
-    # first hack for integration - should be integrated into the PilotBuilder
-    def getRGBCWfromRGB(self, rgb_value: tuple, brightness: int) -> PilotBuilder:
-        """Return the RGB,CW from the RGB."""
-        return rgb2rgbcw(rgb_value, brightness)
-
-    def getRGBCWfromHS(self, hs: tuple, brightness: int) -> PilotBuilder:
-        """Return the RGB,CW from the HS."""
-        return hs2rgbcw(hs, brightness)
-
-    def getHSfromRGBCW(self, rgb: tuple, cw: int) -> tuple:
-        """Return the HS from the RGB,CW."""
-        return rgbcw2hs(rgb, cw)
+    def convertHSfromRGBCW(self, rgb: tuple, cw: int) -> tuple:
+        """Convert rgb hue.
+        Given a tuple that is r,g,b and cw in 0-255 range, convert that to a hue, saturation tuple in the
+        range (0..360, 0..100).
+        """
+        red, green, blue = rgb
+        if (
+            red >= 0
+            and red < 256
+            and green >= 0
+            and green < 256
+            and blue >= 0
+            and blue < 256
+            and cw >= 0
+            and cw < 255
+        ):
+            return rgbcw2hs(rgb, cw)
+        else:
+            raise ValueError("Invalid RGB or CW values.")
 
     async def lightSwitch(self):
         """Turn the light bulb on or off like a switch."""

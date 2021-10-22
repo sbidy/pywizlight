@@ -2,8 +2,6 @@
 import logging
 from math import atan2, cos, pi
 
-from pywizlight.bulb import PilotBuilder
-
 from .vec import (
     vecAdd,
     vecDot,
@@ -46,7 +44,7 @@ def printBasis(basis, prefix=""):
     debug("")
 
 
-def trapezoid(hueVec, saturation, brightness):
+def trapezoid(hueVec, saturation):
     """This function computes the linear combination of two basis vectors that define a trapezoid.
     hueVec - a normalized vector in the hue color wheel (0..1, 0..1, 0..1)
     saturation - a single value representing the length of the hue vector (0..1)
@@ -136,15 +134,15 @@ def trapezoid(hueVec, saturation, brightness):
     # on full isn't the brightest configuration
     # warm_white appears to be 2800k, and cold_white appears to be 6200k, somewhat neutral
     # brightness is achieved by turning both of them on
-    return PilotBuilder(rgb=rgb, warm_white=cw, cold_white=cw, brightness=brightness)
+    return rgb, cw
 
 
-def rgb2rgbcw(rgb, brightness) -> trapezoid:
+def rgb2rgbcw(rgb) -> trapezoid:
     """Convert rgb to rgbcw.
     Given a rgb tuple in the range (0..255, 0..255, 0-255), convert that to a rgbcw for the wiz
     light. brightness may or may not be passed in and is passed through to the trapezoid function.
     """
-    debug("RGB IN: {}, BRIGHTNESS: {}".format(rgb, brightness))
+    debug("RGB IN: {}".format(rgb))
     # scale the vector into canonical space ([0-1])
     rgb = vecMul(rgb, 1 / 255)
     # compute the hue vector as a linear combination of the basis vectors, and extract the
@@ -159,7 +157,7 @@ def rgb2rgbcw(rgb, brightness) -> trapezoid:
     saturation = vecLen(hueVec)
     if saturation > EPSILON:
         hueVec = vecMul(hueVec, 1 / saturation)
-    return trapezoid(hueVec, saturation, brightness)
+    return trapezoid(hueVec, saturation)
 
 
 def rgbcw2hs(rgb, cw):
@@ -211,7 +209,7 @@ def rgbcw2hs(rgb, cw):
     return hue, saturation
 
 
-def hs2rgbcw(hs, brightness):
+def hs2rgbcw(hs):
     """Convert hue to a canonical value.
     given a hue, saturation tuple in the range (0..360, 0..100), convert that to a rgbcw for the wiz light
     brightness may or may not be passed in and is passed through to the trapezoid function.
@@ -226,8 +224,8 @@ def hs2rgbcw(hs, brightness):
     # we take the square root to give the user more visual control
     saturation = hs[1] / 100
     debug(
-        "HS IN: {}, HUE: {:.5f}, SATURATION: {:.3f}, BRIGHTNESS: {}".format(
-            vecFormat(hs), hueRadians, saturation, brightness
+        "HS IN: {}, HUE: {:.5f}, SATURATION: {:.3f}".format(
+            vecFormat(hs), hueRadians, saturation
         )
     )
-    return trapezoid(hueVec, saturation, brightness)
+    return trapezoid(hueVec, saturation)
