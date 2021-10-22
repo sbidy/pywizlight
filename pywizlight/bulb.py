@@ -115,8 +115,6 @@ class PilotBuilder:
             self._set_warm_white(cw)
             # Use the existing set_cold_white function to set the CW values
             self._set_cold_white(cw)
-        else:
-            raise ValueError("CW values must be between 0-255. Calculation error.")
 
     def _set_hs_color(self, values: tuple):
         """Set the HS color state of the bulb."""
