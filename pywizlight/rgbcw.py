@@ -126,8 +126,6 @@ def trapezoid(hueVec, saturation):
     # scale back to the pilot color space
     rgb = vecInt(vecMul(rgb, 255))
     cw = int(max(0, cw * CWMAX))
-    if cw == 0:
-        cw = None
     debug("    RGB OUT: {}, CW: {}".format(rgb, cw))
     # the wiz light appears to have 5 different LEDs, r, g, b, warm_white, and cold_white
     # there appears to be a max power supplied across the 5 LEDs, which explains why all-

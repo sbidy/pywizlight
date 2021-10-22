@@ -110,9 +110,6 @@ class PilotBuilder:
             self.pilot_params["b"] = blue
         else:
             raise ValueError("Blue is not in range between 0-255.")
-        # No CW because of full color
-        if cw is None:
-            cw = 0
         # Use the existing set_warm_white function to set the CW values
         self._set_warm_white(cw)
         # Use the existing set_cold_white function to set the CW values
