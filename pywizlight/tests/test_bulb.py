@@ -79,7 +79,7 @@ class TestBulb:
         await pytest.correct_bulb.turn_on(PilotBuilder(rgb=(0, 128, 255)))
         state = await pytest.correct_bulb.updateState()
 
-        assert state.get_rgb() == (0, 128, 255)
+        assert state.get_rgb() == (0, 127, 255)
 
     @pytest.mark.asyncio
     async def test_PilotBuilder_scene(self, data):

@@ -9,12 +9,9 @@ import asyncio_dgram
 
 from pywizlight.bulblibrary import BulbClass, BulbType, Features, KelvinRange
 from pywizlight.colormgmt.rgbcw import hs2rgbcw, rgb2rgbcw, rgbcw2hs
-from pywizlight.exceptions import (
-    WizLightConnectionError,
-    WizLightMethodNotFound,
-    WizLightNotKnownBulb,
-    WizLightTimeOutError,
-)
+from pywizlight.exceptions import (WizLightConnectionError,
+                                   WizLightMethodNotFound,
+                                   WizLightNotKnownBulb, WizLightTimeOutError)
 from pywizlight.scenes import SCENES
 
 _LOGGER = logging.getLogger(__name__)
@@ -32,7 +29,6 @@ class PilotBuilder:
         speed=None,
         scene: int = None,
         rgb: tuple = None,
-        hs_color: tuple = None,
         brightness: int = None,
         colortemp: int = None,
         state: bool = True,
@@ -54,8 +50,6 @@ class PilotBuilder:
             self._set_brightness(brightness)
         if colortemp is not None:
             self._set_colortemp(colortemp)
-        if hs_color is not None:
-            self._set_hs_color(hs_color)
 
     def set_pilot_message(self):
         """Return the pilot message."""
@@ -113,11 +107,13 @@ class PilotBuilder:
             self.pilot_params["b"] = blue
         else:
             raise ValueError("Blue is not in range between 0-255.")
-
-        # Use the existing set_warm_white function to set the CW values
-        self._set_warm_white(cw)
-        # Use the existing set_cold_white function to set the CW values
-        self._set_cold_white(cw)
+        if cw is not None:
+            # Use the existing set_warm_white function to set the CW values
+            self._set_warm_white(cw)
+            # Use the existing set_cold_white function to set the CW values
+            self._set_cold_white(cw)
+        else:
+            raise ValueError("CW values must be between 0-255. Calculation error.")
 
     def _set_hs_color(self, values: tuple):
         """Set the HS color state of the bulb."""
