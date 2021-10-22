@@ -110,10 +110,12 @@ class PilotBuilder:
             self.pilot_params["b"] = blue
         else:
             raise ValueError("Blue is not in range between 0-255.")
-        # Use the existing set_warm_white function to set the CW values
-        self._set_warm_white(cw)
-        # Use the existing set_cold_white function to set the CW values
-        self._set_cold_white(cw)
+        # No CW because of full RGB color
+        if cw is not None:
+            # Use the existing set_warm_white function to set the CW values
+            self._set_warm_white(cw)
+            # Use the existing set_cold_white function to set the CW values
+            self._set_cold_white(cw)
 
     def _set_hs_color(self, values: tuple):
         """Set the HS color state of the bulb."""
