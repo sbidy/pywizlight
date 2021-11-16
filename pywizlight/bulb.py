@@ -95,9 +95,8 @@ class PilotBuilder:
 
     def _set_rgb(self, values: tuple):
         """Set the RGB color state of the bulb."""
-        # Transform the RGB values to RGB+CW values
-        rgb, cw = rgb2rgbcw(values)
-        red, green, blue = rgb
+
+        red, green, blue = values
         if red >= 0 and red < 256:
             self.pilot_params["r"] = red
         else:
@@ -110,6 +109,8 @@ class PilotBuilder:
             self.pilot_params["b"] = blue
         else:
             raise ValueError("Blue is not in range between 0-255.")
+        # Transform the RGB values to RGB+CW values
+        rgb, cw = rgb2rgbcw(values)
         # No CW because of full RGB color
         if cw is not None:
             # Use the existing set_warm_white function to set the CW values
@@ -388,7 +389,7 @@ class wizlight:
                 ).get_extended_white_range()
         return self.extwhiteRange
 
-    async def getSupportedScenes(self):
+    async def getSupportedScenes(self) -> list:
         """Return the supported scenes based on type.
 
         Lookup: https://docs.pro.wizconnected.com
@@ -402,7 +403,7 @@ class wizlight:
         if self.bulbtype.bulb_type == BulbClass.DW:
             return [SCENES[key] for key in DW_SCENES]
         # return for RGB - all scenes supported
-        return SCENES
+        return list(SCENES.values())
 
     async def turn_off(self):
         """Turn the light off."""
