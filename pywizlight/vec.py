@@ -52,8 +52,8 @@ def vecInt(vec: Vector) -> IntVector:
 
 def vecNormalize(vec: Vector) -> Vector:
     """Normalize the vector (i.e. make its magnitude 1)."""
-    len = vecLen(vec)
-    return vecMul(vec, 1 / len) if (len > EPSILON) else vec
+    vector_length = vecLen(vec)
+    return vecMul(vec, 1 / vector_length) if (vector_length > EPSILON) else vec
 
 
 def vecFormat(vec: Vector) -> str:

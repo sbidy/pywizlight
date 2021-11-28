@@ -224,9 +224,9 @@ class PilotParser:
         if "schdPsetId" in self.pilotResult:  # rhythm
             return SCENES[1000]
 
-        id = self.pilotResult["sceneId"]
-        if id in SCENES:
-            return SCENES[id]
+        scene_id = self.pilotResult["sceneId"]
+        if scene_id in SCENES:
+            return SCENES[scene_id]
         else:
             return None
 
