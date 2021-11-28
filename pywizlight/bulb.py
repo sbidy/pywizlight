@@ -518,6 +518,8 @@ class wizlight:
         send_interval = 0.5
         max_send_datagrams = int(timeout / send_interval)
 
+        stream = None
+
         try:
             _LOGGER.debug(
                 f"[wizlight {self.ip}, connid {connid}] connecting to UDP port "
@@ -553,13 +555,12 @@ class wizlight:
             )
             raise WizLightTimeOutError("The request to the bulb timed out")
         finally:
-            try:
+            if stream:
                 stream.close()
-            except UnboundLocalError:
+            else:
                 raise WizLightConnectionError(
                     "Bulb is offline or IP address is not correct."
                 )
-
         if data is not None and len(data) is not None:
             resp = dict(json.loads(data.decode()))
             if "error" not in resp:
