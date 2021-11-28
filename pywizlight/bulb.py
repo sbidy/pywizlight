@@ -512,7 +512,6 @@ class wizlight:
     async def sendUDPMessage(self, message: str) -> BulbResponse:
         """Send the UDP message to the bulb."""
         connid = hex(int(time() * 10000000))[2:]
-        data = None
         # overall 10 sec. for timeout
         timeout = 10
         send_interval = 0.5
