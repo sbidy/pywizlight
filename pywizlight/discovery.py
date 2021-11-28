@@ -45,7 +45,7 @@ class BulbRegistry:
         return list(self.bulbs_by_mac.values())
 
 
-class BroadcastProtocol:
+class BroadcastProtocol(asyncio.DatagramProtocol):
     """Protocol that sends an UDP broadcast message for bulb discovery."""
 
     def __init__(self, loop, registry, broadcast_address):
