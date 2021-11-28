@@ -1,17 +1,20 @@
 """Command-line interface to interact with wizlight devices."""
 import asyncio
 from functools import wraps
+from typing import Callable, Any, TypeVar, Coroutine
 
 import click
 
 from pywizlight import PilotBuilder, discovery, wizlight
 
+T = TypeVar("T")
 
-def coro(f):
+
+def coro(f: Callable[..., Coroutine[Any, Any, T]]) -> Callable[..., T]:
     """Allow to use async in click."""
 
     @wraps(f)
-    def wrapper(*args, **kwargs):
+    def wrapper(*args: Any, **kwargs: Any) -> T:
         """Async wrapper."""
         return asyncio.run(f(*args, **kwargs))
 
@@ -20,7 +23,7 @@ def coro(f):
 
 @click.group()
 @click.version_option()
-def main():
+def main() -> None:
     """Command-line tool to interact with Wizlight bulbs."""
 
 
@@ -31,7 +34,7 @@ def main():
     prompt="Set the broadcast address",
     help="Define the broadcast address like 192.168.1.255.",
 )
-async def discover(b):
+async def discover(b: str) -> None:
     """Discovery bulb in the local network."""
     click.echo(f"Search for bulbs in {b} ... ")
 
@@ -48,14 +51,16 @@ async def discover(b):
     prompt="Kelvin for temperature.",
     help="Kelvin value (1000-8000) for turn on. Default 3000",
     default=3000,
+    type=int,
 )
 @click.option(
     "--brightness",
     prompt="Set the brightness value 0-255",
     help="Brightness for turn on. Default 128",
     default=128,
+    type=int,
 )
-async def turn_on(ip, k, brightness):
+async def turn_on(ip: str, k: int, brightness: int) -> None:
     """Turn a given bulb on."""
     click.echo(f"Turning on {ip}")
     bulb = wizlight(ip)
@@ -80,7 +85,7 @@ async def turn_on(ip, k, brightness):
     help="Brightness for turn on. Default 128",
     default=128,
 )
-async def set_state(ip, k, brightness):
+async def set_state(ip: str, k: int, brightness: int) -> None:
     """Set the current state of a given bulb."""
     click.echo(f"Turning on {ip}")
     bulb = wizlight(ip)
@@ -93,7 +98,7 @@ async def set_state(ip, k, brightness):
 @main.command("off")
 @coro
 @click.option("--ip", prompt="IP address of the bulb", help="IP address of the bulb.")
-async def turn_off(ip):
+async def turn_off(ip: str) -> None:
     """Turn a given bulb off."""
     click.echo(f"Turning off {ip}")
     bulb = wizlight(ip)
@@ -103,7 +108,7 @@ async def turn_off(ip):
 @main.command("state")
 @coro
 @click.option("--ip", prompt="IP address of the bulb", help="IP address of the bulb.")
-async def state(ip):
+async def state(ip: str) -> None:
     """Get the current state of a given bulb."""
     click.echo(f"Get the state from {ip}")
     bulb = wizlight(ip)

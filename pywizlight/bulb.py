@@ -4,9 +4,9 @@ import json
 import logging
 import socket
 from time import time
-from typing import Any, Dict, Tuple, Optional, Union
+from typing import Any, Dict, Tuple, Optional, Union, List
 
-import asyncio_dgram
+from asyncio_dgram.aio import connect as connect_dgram, DatagramStream
 
 from pywizlight.bulblibrary import BulbClass, BulbType, Features, KelvinRange
 from pywizlight.exceptions import (
@@ -22,6 +22,8 @@ from pywizlight.vec import Vector
 _LOGGER = logging.getLogger(__name__)
 TW_SCENES = [6, 9, 10, 11, 12, 13, 14, 15, 16, 18, 29, 30, 31, 32]
 DW_SCENES = [9, 10, 13, 14, 29, 30, 31, 32]
+
+BulbResponse = Dict[str, Any]
 
 
 class PilotBuilder:
@@ -143,7 +145,7 @@ class PilotBuilder:
         # Use the existing set_cold_white function to set the CW values
         self._set_cold_white(cw)
 
-    def _set_brightness(self, value: int):
+    def _set_brightness(self, value: int) -> None:
         """Set the value of the brightness 0-255."""
         percent = self.hex_to_percent(value)
         # hardware limitation - values less than 10% are not supported
@@ -153,7 +155,7 @@ class PilotBuilder:
             raise ValueError("Max value can be 100% with 255.")
         self.pilot_params["dimming"] = percent
 
-    def _set_colortemp(self, kelvin: int):
+    def _set_colortemp(self, kelvin: int) -> None:
         """Set the color temperature for the white led in the bulb."""
         # normalize the kelvin values - should be removed
         if kelvin < 1000:
@@ -163,7 +165,7 @@ class PilotBuilder:
 
         self.pilot_params["temp"] = kelvin
 
-    def hex_to_percent(self, hex):
+    def hex_to_percent(self, hex: float) -> float:
         """Convert hex 0-255 values to percent."""
         return round((hex / 255) * 100)
 
@@ -171,21 +173,21 @@ class PilotBuilder:
 class PilotParser:
     """Interpret the message from the bulb."""
 
-    def __init__(self, pilotResult):
+    def __init__(self, pilotResult: BulbResponse) -> None:
         """Init the class."""
         self.pilotResult = pilotResult
 
     def get_state(self) -> Optional[bool]:
         """Return the state of the bulb."""
         if "state" in self.pilotResult:
-            return self.pilotResult["state"]
+            return bool(self.pilotResult["state"])
         else:
             return None
 
     def get_mac(self) -> Optional[str]:
         """Return MAC from the bulb."""
         if "mac" in self.pilotResult:
-            return self.pilotResult["mac"]
+            return str(self.pilotResult["mac"])
         else:
             return None
 
@@ -196,20 +198,20 @@ class PilotParser:
         else:
             return None
 
-    def get_white_range(self) -> Optional[list]:
+    def get_white_range(self) -> Optional[List[float]]:
         """Get the value of the whiteRange property."""
         if "whiteRange" in self.pilotResult:
-            return list(self.pilotResult["whiteRange"])
+            return [float(x) for x in self.pilotResult["whiteRange"]]
         else:
             return None
 
-    def get_extended_white_range(self) -> Optional[list]:
+    def get_extended_white_range(self) -> Optional[List[float]]:
         """Get the value of the extended whiteRange property."""
         if "extRange" in self.pilotResult:
-            return list(self.pilotResult["extRange"])
+            return [float(x) for x in self.pilotResult["extRange"]]
         # New after v1.22 FW - "cctRange":[2200,2700,6500,6500]
         elif "cctRange" in self.pilotResult:
-            return list(self.pilotResult["cctRange"])
+            return [float(x) for x in self.pilotResult["cctRange"]]
         else:
             return None
 
@@ -234,7 +236,7 @@ class PilotParser:
     def get_cold_white(self) -> Optional[int]:
         """Get the value of the cold white led."""
         if "c" in self.pilotResult:
-            return self.pilotResult["c"]
+            return int(self.pilotResult["c"])
         else:
             return None
 
@@ -276,15 +278,21 @@ class wizlight:
 
     # default port for WiZ lights - 38899
 
-    def __init__(self, ip, connect_on_init=False, port=38899, mac=None):
+    def __init__(
+        self,
+        ip: str,
+        connect_on_init: bool = False,
+        port: int = 38899,
+        mac: Optional[str] = None,
+    ) -> None:
         """Create instance with the IP address of the bulb."""
         self.ip = ip
         self.port = port
-        self.state = None
+        self.state: Optional[PilotParser] = None
         self.mac = mac
-        self.bulbtype: BulbType = None
-        self.whiteRange = None
-        self.extwhiteRange = None
+        self.bulbtype: Optional[BulbType] = None
+        self.whiteRange: Optional[List[float]] = None
+        self.extwhiteRange: Optional[List[float]] = None
         # check the state on init
         if connect_on_init:
             self._check_connection()
@@ -298,7 +306,7 @@ class wizlight:
 
     # ------------------ Non properties -------------- #
 
-    def _check_connection(self):
+    def _check_connection(self) -> None:
         """Check the connection to the bulb."""
         message = r'{"method":"getPilot","params":{}}'
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -326,15 +334,18 @@ class wizlight:
             # set the minimum features for dimmable bulbs (DW bulbs)
             # define the kelvin range
             _kelvin = await self.getExtendedWhiteRange()
-            # use only first and last entry - [2200,2700,6500,6500]
-            _kelvin = _kelvin[:: len(_kelvin) - 1]
+            kelvin_range: Optional[KelvinRange]
+            if _kelvin:
+                kelvin_range = KelvinRange(min=int(min(_kelvin)), max=int(max(_kelvin)))
+            else:
+                kelvin_range = None
             _bulb = BulbType(
                 bulb_type=BulbClass.DW,
                 name=_bulbtype,
                 features=Features(
                     brightness=True, color=False, effect=False, color_tmp=False
                 ),
-                kelvin_range=None,
+                kelvin_range=kelvin_range,
             )
             try:
                 # parse the features from name
@@ -345,7 +356,6 @@ class wizlight:
             # go an try to map extensions to the BulbTyp object
             # Color support
             if "RGB" in _identifier:
-                _bulb.kelvin_range = KelvinRange(min=_kelvin[0], max=_kelvin[1])
                 _bulb.bulb_type = BulbClass.RGB
                 _bulb.features.color = True
                 # RGB supports effects and tuneabel white
@@ -353,7 +363,6 @@ class wizlight:
                 _bulb.features.color_tmp = True
             # Non RGB but tunable white bulb
             if "TW" in _identifier:
-                _bulb.kelvin_range = KelvinRange(min=_kelvin[0], max=_kelvin[1])
                 _bulb.bulb_type = BulbClass.TW
                 _bulb.features.color_tmp = True
                 # RGB supports effects but only "some"
@@ -362,8 +371,9 @@ class wizlight:
 
             self.bulbtype = _bulb
             return self.bulbtype
+        raise ValueError("Unable to determine bulb type.")
 
-    async def getWhiteRange(self):
+    async def getWhiteRange(self) -> Optional[List[float]]:
         """Read the white range from the bulb."""
         if self.whiteRange is not None:
             return self.whiteRange
@@ -374,7 +384,7 @@ class wizlight:
 
         return self.whiteRange
 
-    async def getExtendedWhiteRange(self):
+    async def getExtendedWhiteRange(self) -> Optional[List[float]]:
         """Read extended withe range from the RGB bulb."""
         if self.extwhiteRange is not None:
             return self.extwhiteRange
@@ -392,13 +402,14 @@ class wizlight:
                 ).get_extended_white_range()
         return self.extwhiteRange
 
-    async def getSupportedScenes(self) -> list:
+    async def getSupportedScenes(self) -> List[str]:
         """Return the supported scenes based on type.
 
         Lookup: https://docs.pro.wizconnected.com
         """
         if self.bulbtype is None:
             await self.get_bulbtype()
+        assert self.bulbtype  # Should have gotten set by get_bulbtype
         # return for TW
         if self.bulbtype.bulb_type == BulbClass.TW:
             return [SCENES[key] for key in TW_SCENES]
@@ -408,22 +419,22 @@ class wizlight:
         # return for RGB - all scenes supported
         return list(SCENES.values())
 
-    async def turn_off(self):
+    async def turn_off(self) -> None:
         """Turn the light off."""
         message = r'{"method":"setPilot","params":{"state":false}}'
         await self.sendUDPMessage(message)
 
-    async def reboot(self):
+    async def reboot(self) -> None:
         """Reboot the bulb."""
         message = r'{"method":"reboot","params":{}}'
         await self.sendUDPMessage(message)
 
-    async def reset(self):
+    async def reset(self) -> None:
         """Reset the bulb to factory defaults."""
         message = r'{"method":"reset","params":{}}'
         await self.sendUDPMessage(message)
 
-    async def turn_on(self, pilot_builder=PilotBuilder()):
+    async def turn_on(self, pilot_builder: PilotBuilder = PilotBuilder()) -> None:
         """Turn the light on with defined message.
 
         :param pilot_builder: PilotBuilder object to set the turn on state, defaults to PilotBuilder()
@@ -431,13 +442,14 @@ class wizlight:
         """
         await self.sendUDPMessage(pilot_builder.set_pilot_message())
 
-    async def set_state(self, pilot_builder=PilotBuilder()):
+    async def set_state(self, pilot_builder: PilotBuilder = PilotBuilder()) -> None:
         """Set the state of the bulb with defined message. Doesn't turn on the light.
 
         :param pilot_builder: PilotBuilder object to set the state, defaults to PilotBuilder()
         :type pilot_builder: [type], optional
         """
-        await self.sendUDPMessage(pilot_builder.set_state_message(self.status))
+        # TODO: self.status could be None, in which case casting it to a bool might not be what we really want
+        await self.sendUDPMessage(pilot_builder.set_state_message(bool(self.status)))
 
     def get_id_from_scene_name(self, scene: str) -> int:
         """Return the id of an given scene name.
@@ -454,7 +466,7 @@ class wizlight:
         raise ValueError(f"Scene '{scene}' not in scene list.")
 
     # ---------- Helper Functions ------------
-    async def updateState(self):
+    async def updateState(self) -> Optional[PilotParser]:
         """Update the bulb state.
 
         Note: Call this method before getting any other property.
@@ -470,7 +482,7 @@ class wizlight:
             self.state = None
         return self.state
 
-    async def getMac(self):
+    async def getMac(self) -> Optional[str]:
         """Read the MAC from the bulb."""
         resp = await self.getBulbConfig()
         if resp is not None and "result" in resp and self.mac is None:
@@ -479,12 +491,12 @@ class wizlight:
             self.mac = None
         return self.mac
 
-    async def getBulbConfig(self):
+    async def getBulbConfig(self) -> BulbResponse:
         """Return the configuration from the bulb."""
         message = r'{"method":"getSystemConfig","params":{}}'
         return await self.sendUDPMessage(message)
 
-    async def getModelConfig(self):
+    async def getModelConfig(self) -> Optional[BulbResponse]:
         """Return the new model capabilities from the bulb.
         Only available in bulb FW >1.22!
         """
@@ -494,12 +506,14 @@ class wizlight:
         except WizLightMethodNotFound:
             return None
 
-    async def getUserConfig(self):
+    async def getUserConfig(self) -> BulbResponse:
         """Return the user configuration from the bulb."""
         message = r'{"method":"getUserConfig","params":{}}'
         return await self.sendUDPMessage(message)
 
-    def convertHSfromRGBCW(self, rgb: tuple, cw: int) -> tuple:
+    def convertHSfromRGBCW(
+        self, rgb: Tuple[float, ...], cw: int
+    ) -> Tuple[float, float]:
         """Convert rgb hue.
         Given a tuple that is r,g,b and cw in 0-255 range, convert that to a hue, saturation tuple in the
         range (0..360, 0..100).
@@ -519,10 +533,12 @@ class wizlight:
         else:
             raise ValueError("Invalid RGB or CW values.")
 
-    async def lightSwitch(self):
+    async def lightSwitch(self) -> None:
         """Turn the light bulb on or off like a switch."""
         # first get the status
         state = await self.updateState()
+        if not state:  # Did not get state, nothing to do
+            return
         if state.get_state():
             # if the light is on - switch off
             await self.turn_off()
@@ -530,12 +546,14 @@ class wizlight:
             # if the light is off - turn on
             await self.turn_on()
 
-    async def receiveUDPwithTimeout(self, stream, timeout):
+    async def receiveUDPwithTimeout(
+        self, stream: DatagramStream, timeout: float
+    ) -> bytes:
         """Get message with timeout value."""
         data, remote_addr = await asyncio.wait_for(stream.recv(), timeout)
         return data
 
-    async def sendUDPMessage(self, message):
+    async def sendUDPMessage(self, message: str) -> BulbResponse:
         """Send the UDP message to the bulb."""
         connid = hex(int(time() * 10000000))[2:]
         data = None
@@ -550,7 +568,7 @@ class wizlight:
                 f"with send_interval of {send_interval} sec.."
             )
             stream = await asyncio.wait_for(
-                asyncio_dgram.connect((self.ip, self.port)), timeout
+                connect_dgram((self.ip, self.port)), timeout
             )
             _LOGGER.debug(
                 f"[wizlight {self.ip}, connid {connid}] listening for response datagram"
@@ -589,7 +607,7 @@ class wizlight:
                 )
 
         if data is not None and len(data) is not None:
-            resp = json.loads(data.decode())
+            resp = dict(json.loads(data.decode()))
             if "error" not in resp:
                 _LOGGER.debug(
                     f"[wizlight {self.ip}, connid {connid}] response received: {resp}"
@@ -599,5 +617,5 @@ class wizlight:
                 raise WizLightMethodNotFound(
                     "Cant found the methode. Maybe older bulb FW?"
                 )
-            # exception should be created
-            raise ValueError("Can't read response from the bulb. Debug:", resp)
+        # exception should be created
+        raise ValueError(f"Can't read response from the bulb. Debug: {data!r}")
