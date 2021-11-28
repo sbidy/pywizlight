@@ -64,7 +64,7 @@ async def turn_on(ip: str, k: int, brightness: int) -> None:
     """Turn a given bulb on."""
     click.echo(f"Turning on {ip}")
     bulb = wizlight(ip)
-    if bulb and k <= 6800 and k >= 1000 and brightness >= 0 and brightness <= 255:
+    if bulb and 1000 <= k <= 6800 and 0 <= brightness <= 255:
         await bulb.turn_on(PilotBuilder(colortemp=k, brightness=brightness))
     else:
         click.echo("Error - values are not correct. Type --help for help.")
@@ -89,7 +89,7 @@ async def set_state(ip: str, k: int, brightness: int) -> None:
     """Set the current state of a given bulb."""
     click.echo(f"Turning on {ip}")
     bulb = wizlight(ip)
-    if bulb and k <= 6800 and k >= 1000 and brightness >= 0 and brightness <= 255:
+    if bulb and 1000 <= k <= 6800 and 0 <= brightness <= 255:
         await bulb.set_state(PilotBuilder(colortemp=k, brightness=brightness))
     else:
         click.echo("Error - values are not correct. Type --help for help.")

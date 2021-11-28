@@ -70,14 +70,14 @@ class PilotBuilder:
 
     def _set_warm_white(self, value: int) -> None:
         """Set the value of the warm white led."""
-        if value > 0 and value < 256:
+        if 0 < value < 256:
             self.pilot_params["w"] = value
         else:
             raise ValueError("Value must be between 1 and 255")
 
     def _set_cold_white(self, value: int) -> None:
         """Set the value of the cold white led."""
-        if value > 0 and value < 256:
+        if 0 < value < 256:
             self.pilot_params["c"] = value
         else:
             raise ValueError("Value must be between 1 and 255")
@@ -85,7 +85,7 @@ class PilotBuilder:
     def _set_speed(self, value: int) -> None:
         """Set the color changing speed in precent (0-100)."""
         # This applies only to changing effects.
-        if value > 0 and value < 101:
+        if 0 < value < 101:
             self.pilot_params["speed"] = value
         else:
             raise ValueError("Value must be between 0 and 100")
@@ -102,15 +102,15 @@ class PilotBuilder:
         """Set the RGB color state of the bulb."""
 
         red, green, blue = values
-        if red >= 0 and red < 256:
+        if 0 <= red < 256:
             self.pilot_params["r"] = red
         else:
             raise ValueError("Red is not in range between 0-255.")
-        if green >= 0 and green < 256:
+        if 0 <= green < 256:
             self.pilot_params["g"] = green
         else:
             raise ValueError("Green is not in range between 0-255.")
-        if blue >= 0 and blue < 256:
+        if 0 <= blue < 256:
             self.pilot_params["b"] = blue
         else:
             raise ValueError("Blue is not in range between 0-255.")
@@ -128,15 +128,15 @@ class PilotBuilder:
         # Transform the HS values to RGB+CW values
         rgb, cw = hs2rgbcw(values)
         red, green, blue = rgb
-        if red >= 0 and red < 256:
+        if 0 <= red < 256:
             self.pilot_params["r"] = red
         else:
             raise ValueError("Red is not in range between 0-255.")
-        if green >= 0 and green < 256:
+        if 0 <= green < 256:
             self.pilot_params["g"] = green
         else:
             raise ValueError("Green is not in range between 0-255.")
-        if blue >= 0 and blue < 256:
+        if 0 <= blue < 256:
             self.pilot_params["b"] = blue
         else:
             raise ValueError("Blue is not in range between 0-255.")
