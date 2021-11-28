@@ -111,9 +111,11 @@ async def turn_off(ip: str) -> None:
 async def state(ip: str) -> None:
     """Get the current state of a given bulb."""
     click.echo(f"Get the state from {ip}")
-    bulb = wizlight(ip)
-    state = await bulb.updateState()
-    click.echo(state.__dict__["pilotResult"])
+    bulb_state = await wizlight(ip).updateState()
+    if bulb_state:
+        click.echo(bulb_state.pilotResult)
+    else:
+        click.echo("Did not get state from bulb")
 
 
 if __name__ == "__main__":
