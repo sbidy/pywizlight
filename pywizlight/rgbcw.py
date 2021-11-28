@@ -45,7 +45,7 @@ def printBasis(basis: Iterable[Vector], prefix: str = "") -> None:
     debug("")
 
 
-Trapezoid = Tuple[Vector, Optional[int]]
+Trapezoid = Tuple[Vector, int]
 
 
 def trapezoid(hueVec: Vector, saturation: float) -> Trapezoid:
@@ -128,9 +128,7 @@ def trapezoid(hueVec: Vector, saturation: float) -> Trapezoid:
         rgb = vecMul(rgb, saturation * 2)
     # scale back to the pilot color space
     rgb = vecInt(vecMul(rgb, 255))
-    out_cw: Optional[int] = int(max(0, cw * CWMAX))
-    if out_cw == 0:
-        out_cw = None
+    out_cw = int(max(0, cw * CWMAX))
     debug(f"    RGB OUT: {rgb}, CW: {out_cw}")
     # the wiz light appears to have 5 different LEDs, r, g, b, warm_white, and cold_white
     # there appears to be a max power supplied across the 5 LEDs, which explains why all-
