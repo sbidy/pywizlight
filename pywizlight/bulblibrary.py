@@ -10,11 +10,13 @@ RGB -- Fullstack bulb
 1C -- Specific to the hardware - defines PWM frequency + way of controlling CCT temperature
 31 -- Related to the hardware revision
 """
-
-
+import dataclasses
 from enum import Enum
+from typing import Optional
 
 
+# TODO: make this frozen
+@dataclasses.dataclass()
 class Features:
     """Defines the supported features."""
 
@@ -23,26 +25,13 @@ class Features:
     effect: bool
     brightness: bool
 
-    def __init__(
-        self, color: bool, color_tmp: bool, effect: bool, brightness: bool
-    ) -> None:
-        """Init the features with type."""
-        self.color = color
-        self.color_tmp = color_tmp
-        self.effect = effect
-        self.brightness = brightness
 
-
+@dataclasses.dataclass(frozen=True)
 class KelvinRange:
     """Defines the kelvin range."""
 
     max: int
     min: int
-
-    def __init__(self, max: int, min: int) -> None:
-        """Init for the kelvin range class."""
-        self.max = max
-        self.min = min
 
 
 class BulbClass(Enum):
@@ -56,24 +45,12 @@ class BulbClass(Enum):
     RGB = "RGB Bulb"
 
 
+# TODO: make this frozen
+@dataclasses.dataclass()
 class BulbType:
     """BulbType object to define functions and features of the bulb."""
 
     features: Features
     name: str
-    filament_bulb: bool
-    kelvin_range: KelvinRange
+    kelvin_range: Optional[KelvinRange]
     bulb_type: BulbClass
-
-    def __init__(
-        self,
-        features: Features,
-        name: str,
-        kelvin_range: KelvinRange,
-        bulb_type: BulbClass,
-    ) -> None:
-        """Create a bulb object with different features."""
-        self.features = features
-        self.name = name
-        self.kelvin_range = kelvin_range
-        self.bulb_type = bulb_type
