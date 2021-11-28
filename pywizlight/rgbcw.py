@@ -1,6 +1,7 @@
 """Manages the RGBCW color."""
 import logging
 from math import atan2, cos, pi
+from typing import Tuple, Iterable
 
 from .vec import (
     vecAdd,
@@ -11,10 +12,10 @@ from .vec import (
     vecLen,
     vecMul,
     EPSILON,
+    Vector,
 )
 
 _LOGGER = logging.getLogger(__name__)
-
 
 ANGLE = (pi * 2) / 3
 BASIS = (
@@ -27,7 +28,7 @@ CWMAX = 128
 BUFFER = ""
 
 
-def debug(msg, end="\n"):
+def debug(msg: str, end: str = "\n") -> None:
     global BUFFER
     BUFFER += msg
     if end == "\n":
@@ -37,19 +38,23 @@ def debug(msg, end="\n"):
         BUFFER += end
 
 
-def printBasis(basis, prefix=""):
+def printBasis(basis: Iterable[Vector], prefix: str = "") -> None:
     debug(f"{prefix}Basis Vectors: ", end="")
     for vector in basis:
         debug(f"{vecFormat(vector)} ", end="")
     debug("")
 
 
-def trapezoid(hueVec, saturation):
+Trapezoid = Tuple[Vector, Optional[int]]
+
+
+def trapezoid(hueVec: Vector, saturation: float) -> Trapezoid:
     """This function computes the linear combination of two basis vectors that define a trapezoid.
     hueVec - a normalized vector in the hue color wheel (0..1, 0..1, 0..1)
     saturation - a single value representing the length of the hue vector (0..1)
     brightness - a separate value that may be passed in, and should be used in the Pilot.
     """
+    rgb: Tuple[float, ...]
     # if saturation is essentially 0, just go to the full on
     if saturation <= EPSILON:
         rgb = (0, 0, 0)
@@ -80,14 +85,16 @@ def trapezoid(hueVec, saturation):
             # with the line we just computed, these are definitely not co-linear, so there
             # should always be an intersection point, and the result should always be in
             # the range [-1 .. 1], this is the first basis coefficient
-            coeff = [0, 0]
-            coeff[0] = vecDot(hueVec, AB) / vecDot(subBasis[0], AB)
+            coeff0 = vecDot(hueVec, AB) / vecDot(subBasis[0], AB)
             # compute the intersection point, and the second basis coefficient, note that
             # we compute the coefficients to always be positive, but the intersection calculation
             # needs to be in the opposite direction from the basis vector (hence the negative on
-            # coeff[0]).
-            intersection = vecAdd(vecMul(subBasis[0], -coeff[0]), hueVec)
-            coeff[1] = vecDot(intersection, subBasis[1])
+            # coeff0).
+            intersection = vecAdd(vecMul(subBasis[0], -coeff0), hueVec)
+            coeff = (
+                coeff0,
+                vecDot(intersection, subBasis[1]),
+            )
             debug(
                 f"   Intersection Point: {vecFormat(intersection)}, Coefficients: {vecFormat(coeff)}"
             )
@@ -96,8 +103,8 @@ def trapezoid(hueVec, saturation):
             # coefficients greater than 1, which will always happen unless the target color is
             # either one of the basis vectors or a bisector of two basis vectors. we scale both
             # coefficients by 1/maxCoefficient to make valid colors
-            maxCoeff = max(coeff[0], coeff[1])
-            coeff = [c / maxCoeff for c in coeff]
+            maxCoeff = max(coeff)
+            coeff = (coeff[0] / maxCoeff, coeff[1] / maxCoeff)
             debug(f"    Scaled Coefficients: {vecFormat(coeff)}")
             # now rebuild the rgb vector by putting the coefficients into the correct place
             j = 0
@@ -121,19 +128,19 @@ def trapezoid(hueVec, saturation):
         rgb = vecMul(rgb, saturation * 2)
     # scale back to the pilot color space
     rgb = vecInt(vecMul(rgb, 255))
-    cw = int(max(0, cw * CWMAX))
-    if cw == 0:
-        cw = None
-    debug(f"    RGB OUT: {rgb}, CW: {cw}")
+    out_cw: Optional[int] = int(max(0, cw * CWMAX))
+    if out_cw == 0:
+        out_cw = None
+    debug(f"    RGB OUT: {rgb}, CW: {out_cw}")
     # the wiz light appears to have 5 different LEDs, r, g, b, warm_white, and cold_white
     # there appears to be a max power supplied across the 5 LEDs, which explains why all-
     # on full isn't the brightest configuration
     # warm_white appears to be 2800k, and cold_white appears to be 6200k, somewhat neutral
     # brightness is achieved by turning both of them on
-    return rgb, cw
+    return rgb, out_cw
 
 
-def rgb2rgbcw(rgb) -> trapezoid:
+def rgb2rgbcw(rgb: Vector) -> Trapezoid:
     """Convert rgb to rgbcw.
     Given a rgb tuple in the range (0..255, 0..255, 0-255), convert that to a rgbcw for the wiz
     light. brightness may or may not be passed in and is passed through to the trapezoid function.
@@ -156,7 +163,7 @@ def rgb2rgbcw(rgb) -> trapezoid:
     return trapezoid(hueVec, saturation)
 
 
-def rgbcw2hs(rgb, cw):
+def rgbcw2hs(rgb: Vector, cw: float) -> Tuple[float, float]:
     """Convert rgb hue.
     Given a tuple that is r,g,b and cw in 0-255 range, convert that to a hue, saturation tuple in the
     range (0..360, 0..100).
@@ -201,7 +208,7 @@ def rgbcw2hs(rgb, cw):
     return hue, saturation
 
 
-def hs2rgbcw(hs):
+def hs2rgbcw(hs: Tuple[float, float]) -> Trapezoid:
     """Convert hue to a canonical value.
     given a hue, saturation tuple in the range (0..360, 0..100), convert that to a rgbcw for the wiz light
     brightness may or may not be passed in and is passed through to the trapezoid function.
