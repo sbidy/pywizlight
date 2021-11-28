@@ -8,11 +8,10 @@ from typing import Any, Dict, Tuple, Optional, Union, List
 
 from asyncio_dgram.aio import connect as connect_dgram, DatagramStream
 
-from pywizlight.bulblibrary import BulbClass, BulbType, Features, KelvinRange
+from pywizlight.bulblibrary import BulbClass, BulbType
 from pywizlight.exceptions import (
     WizLightConnectionError,
     WizLightMethodNotFound,
-    WizLightNotKnownBulb,
     WizLightTimeOutError,
 )
 from pywizlight.rgbcw import hs2rgbcw, rgb2rgbcw
@@ -328,49 +327,12 @@ class wizlight:
             return self.bulbtype
 
         bulb_config = await self.getBulbConfig()
-        if "moduleName" in bulb_config["result"]:
-            _bulbtype = bulb_config["result"]["moduleName"]
-            # set the minimum features for dimmable bulbs (DW bulbs)
-            # define the kelvin range
-            _kelvin = await self.getExtendedWhiteRange()
-            kelvin_range: Optional[KelvinRange]
-            if _kelvin:
-                kelvin_range = KelvinRange(min=int(min(_kelvin)), max=int(max(_kelvin)))
-            else:
-                kelvin_range = None
-            _bulb = BulbType(
-                bulb_type=BulbClass.DW,
-                name=_bulbtype,
-                features=Features(
-                    brightness=True, color=False, effect=False, color_tmp=False
-                ),
-                kelvin_range=kelvin_range,
-            )
-            try:
-                # parse the features from name
-                _identifier = _bulbtype.split("_")[1]
-            # Throw exception if index can not be found
-            except IndexError:
-                raise WizLightNotKnownBulb("The bulb type can not be determined!")
-            # go an try to map extensions to the BulbTyp object
-            # Color support
-            if "RGB" in _identifier:
-                _bulb.bulb_type = BulbClass.RGB
-                _bulb.features.color = True
-                # RGB supports effects and tuneabel white
-                _bulb.features.effect = True
-                _bulb.features.color_tmp = True
-            # Non RGB but tunable white bulb
-            if "TW" in _identifier:
-                _bulb.bulb_type = BulbClass.TW
-                _bulb.features.color_tmp = True
-                # RGB supports effects but only "some"
-                # TODO: Improve the mapping to supported effects
-                _bulb.features.effect = True
-
-            self.bulbtype = _bulb
-            return self.bulbtype
-        raise ValueError("Unable to determine bulb type.")
+        if "moduleName" not in bulb_config["result"]:
+            raise ValueError("Unable to determine bulb type.")
+        white_range = await self.getExtendedWhiteRange()
+        module_name = bulb_config["result"]["moduleName"]
+        self.bulbtype = BulbType.from_data(module_name, white_range)
+        return self.bulbtype
 
     async def getWhiteRange(self) -> Optional[List[float]]:
         """Read the white range from the bulb."""
