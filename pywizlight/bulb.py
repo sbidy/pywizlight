@@ -543,9 +543,8 @@ class wizlight:
 
         try:
             _LOGGER.debug(
-                "[wizlight {}, connid {}] connecting to UDP port with send_interval of {} sec..".format(
-                    self.ip, connid, send_interval
-                )
+                f"[wizlight {self.ip}, connid {connid}] connecting to UDP port "
+                f"with send_interval of {send_interval} sec.."
             )
             stream = await asyncio.wait_for(
                 asyncio_dgram.connect((self.ip, self.port)), timeout
@@ -560,9 +559,7 @@ class wizlight:
 
             for i in range(max_send_datagrams):
                 _LOGGER.debug(
-                    "[wizlight {}, connid {}] sending command datagram {}: {}".format(
-                        self.ip, connid, i, message
-                    )
+                    f"[wizlight {self.ip}, connid {connid}] sending command datagram {i}: {message}"
                 )
                 asyncio.create_task(stream.send(bytes(message, "utf-8")))
                 done, pending = await asyncio.wait(
@@ -576,9 +573,7 @@ class wizlight:
 
         except asyncio.TimeoutError:
             _LOGGER.debug(
-                "[wizlight {}, connid {}] Failed to do UDP call(s) to wiz light - Timeout Error!".format(
-                    self.ip, connid
-                ),
+                f"[wizlight {self.ip}, connid {connid}] Failed to do UDP call(s) to wiz light - Timeout Error!",
                 exc_info=False,
             )
             raise WizLightTimeOutError("The request to the bulb timed out")

@@ -63,9 +63,7 @@ def trapezoid(hueVec, saturation):
         )
         count = sum(mask)
         debug(
-            "    Max Angle: {:0.3f}, Mask: ({}, {}, {}), Count: {}".format(
-                maxAngle, mask[0], mask[1], mask[2], count
-            )
+            f"    Max Angle: {maxAngle:0.3f}, Mask: ({mask[0]}, {mask[1]}, {mask[2]}), Count: {count}"
         )
         if count == 1:
             # easy case, it's just one color component
@@ -91,9 +89,7 @@ def trapezoid(hueVec, saturation):
             intersection = vecAdd(vecMul(subBasis[0], -coeff[0]), hueVec)
             coeff[1] = vecDot(intersection, subBasis[1])
             debug(
-                "   Intersection Point: {}, Coefficients: {}".format(
-                    vecFormat(intersection), vecFormat(coeff)
-                )
+                f"   Intersection Point: {vecFormat(intersection)}, Coefficients: {vecFormat(coeff)}"
             )
             # there's a bit of a gamut problem here, as the area outside the hexagon defined by
             # the three unit basis vectors is not actually reachable. this manifests as
