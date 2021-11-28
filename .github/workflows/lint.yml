@@ -22,7 +22,7 @@ jobs:
           python-version: 3.8
 
       - name: Install Python dependencies
-        run: pip install black flake8
+        run: pip install black flake8 mypy pytest -e .
 
       - name: Run linters
         uses: samuelmeuli/lint-action@v1
@@ -31,6 +31,7 @@ jobs:
           # Enable linters
           black: true
           flake8: true
+          mypy: true
           flake8_args: "--exclude='test.py __init__.py' --max-line-length=120"
-          auto_fix: true
+          auto_fix: false
           git_email: "sbidy@hotmail.com"
