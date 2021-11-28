@@ -15,8 +15,9 @@ from pywizlight.exceptions import (
     WizLightNotKnownBulb,
     WizLightTimeOutError,
 )
-from pywizlight.rgbcw import hs2rgbcw, rgb2rgbcw, rgbcw2hs
+from pywizlight.rgbcw import hs2rgbcw, rgb2rgbcw
 from pywizlight.scenes import SCENES
+from pywizlight.utils import hex_to_percent, percent_to_hex
 from pywizlight.vec import Vector
 
 _LOGGER = logging.getLogger(__name__)
@@ -147,7 +148,7 @@ class PilotBuilder:
 
     def _set_brightness(self, value: int) -> None:
         """Set the value of the brightness 0-255."""
-        percent = self.hex_to_percent(value)
+        percent = hex_to_percent(value)
         # hardware limitation - values less than 10% are not supported
         if percent < 10:
             percent = 10
@@ -164,10 +165,6 @@ class PilotBuilder:
             kelvin = 10000
 
         self.pilot_params["temp"] = kelvin
-
-    def hex_to_percent(self, hex: float) -> float:
-        """Convert hex 0-255 values to percent."""
-        return round((hex / 255) * 100)
 
 
 class PilotParser:
@@ -258,7 +255,7 @@ class PilotParser:
     def get_brightness(self) -> Optional[int]:
         """Get the value of the brightness 0-255."""
         if "dimming" in self.pilotResult:
-            return self.percent_to_hex(self.pilotResult["dimming"])
+            return percent_to_hex(self.pilotResult["dimming"])
         return None
 
     def get_colortemp(self) -> Optional[int]:
@@ -268,9 +265,11 @@ class PilotParser:
         else:
             return None
 
-    def percent_to_hex(self, percent: float) -> int:
-        """Convert percent values 0-100 into hex 0-255."""
-        return int(round((percent / 100) * 255))
+
+async def receiveUDPwithTimeout(stream: DatagramStream, timeout: float) -> bytes:
+    """Get message with timeout value."""
+    data, remote_addr = await asyncio.wait_for(stream.recv(), timeout)
+    return data
 
 
 class wizlight:
@@ -451,20 +450,6 @@ class wizlight:
         # TODO: self.status could be None, in which case casting it to a bool might not be what we really want
         await self.sendUDPMessage(pilot_builder.set_state_message(bool(self.status)))
 
-    def get_id_from_scene_name(self, scene: str) -> int:
-        """Return the id of an given scene name.
-
-        :param scene: Name of the scene
-        :type scene: str
-        :raises ValueError: Return if not in scene list
-        :return: ID of the scene
-        :rtype: int
-        """
-        for id in SCENES:
-            if SCENES[id] == scene:
-                return id
-        raise ValueError(f"Scene '{scene}' not in scene list.")
-
     # ---------- Helper Functions ------------
     async def updateState(self) -> Optional[PilotParser]:
         """Update the bulb state.
@@ -511,28 +496,6 @@ class wizlight:
         message = r'{"method":"getUserConfig","params":{}}'
         return await self.sendUDPMessage(message)
 
-    def convertHSfromRGBCW(
-        self, rgb: Tuple[float, ...], cw: int
-    ) -> Tuple[float, float]:
-        """Convert rgb hue.
-        Given a tuple that is r,g,b and cw in 0-255 range, convert that to a hue, saturation tuple in the
-        range (0..360, 0..100).
-        """
-        red, green, blue = rgb
-        if (
-            red >= 0
-            and red < 256
-            and green >= 0
-            and green < 256
-            and blue >= 0
-            and blue < 256
-            and cw >= 0
-            and cw < 255
-        ):
-            return rgbcw2hs(rgb, cw)
-        else:
-            raise ValueError("Invalid RGB or CW values.")
-
     async def lightSwitch(self) -> None:
         """Turn the light bulb on or off like a switch."""
         # first get the status
@@ -545,13 +508,6 @@ class wizlight:
         else:
             # if the light is off - turn on
             await self.turn_on()
-
-    async def receiveUDPwithTimeout(
-        self, stream: DatagramStream, timeout: float
-    ) -> bytes:
-        """Get message with timeout value."""
-        data, remote_addr = await asyncio.wait_for(stream.recv(), timeout)
-        return data
 
     async def sendUDPMessage(self, message: str) -> BulbResponse:
         """Send the UDP message to the bulb."""
@@ -574,9 +530,7 @@ class wizlight:
                 f"[wizlight {self.ip}, connid {connid}] listening for response datagram"
             )
 
-            receive_task = asyncio.create_task(
-                self.receiveUDPwithTimeout(stream, timeout)
-            )
+            receive_task = asyncio.create_task(receiveUDPwithTimeout(stream, timeout))
 
             for i in range(max_send_datagrams):
                 _LOGGER.debug(

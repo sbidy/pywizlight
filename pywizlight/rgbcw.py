@@ -224,3 +224,26 @@ def hs2rgbcw(hs: Tuple[float, float]) -> Trapezoid:
         f"HS IN: {vecFormat(hs)}, HUE: {hueRadians:.5f}, SATURATION: {saturation:.3f}"
     )
     return trapezoid(hueVec, saturation)
+
+
+def convertHSfromRGBCW(
+    rgb: Tuple[float, ...], cw: int
+) -> Tuple[float, float]:
+    """Convert rgb hue.
+    Given a tuple that is r,g,b and cw in 0-255 range, convert that to a hue, saturation tuple in the
+    range (0..360, 0..100).
+    """
+    red, green, blue = rgb
+    if (
+        red >= 0
+        and red < 256
+        and green >= 0
+        and green < 256
+        and blue >= 0
+        and blue < 256
+        and cw >= 0
+        and cw < 255
+    ):
+        return rgbcw2hs(rgb, cw)
+    else:
+        raise ValueError("Invalid RGB or CW values.")
