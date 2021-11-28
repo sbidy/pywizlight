@@ -4,60 +4,63 @@
 """
 from math import sqrt, sin, cos
 from operator import mul, sub, add
-
+from typing import Tuple
 
 # a small value, really close to zero, more than adequate for our 3 orders of magnitude
 # of color resolution
 EPSILON = 1.0e-5
 
+Vector = Tuple[float, ...]
+IntVector = Tuple[int, ...]
 
-def vecDot(a, b):
+
+def vecDot(a: Vector, b: Vector) -> float:
     """Retrun sum."""
     return sum(map(mul, a, b))
 
 
-def vecLenSq(a):
-    """Retrun Square."""
+def vecLenSq(a: Vector) -> float:
+    """Return the vector's magnitude squared."""
     return vecDot(a, a)
 
 
-def vecLen(a) -> float:
-    """Retrun Square length."""
+def vecLen(a: Vector) -> float:
+    """Return the vector's magnitude."""
     lenSq = vecLenSq(a)
     return sqrt(lenSq) if (lenSq > EPSILON) else 0
 
 
-def vecAdd(a, b) -> tuple:
-    """Retrun tuple object with add."""
+def vecAdd(a: Vector, b: Vector) -> Vector:
+    """Sum two vectors."""
     return tuple(map(add, a, b))
 
 
-def vecSub(a, b):
-    """Retruns something."""
+def vecSub(a: Vector, b: Vector) -> Vector:
+    """Subtract two vectors."""
     return tuple(map(sub, a, b))
 
 
-def vecMul(vec, sca):
-    """Retruns something."""
+def vecMul(vec: Vector, sca: float) -> Vector:
+    """Scale a vector."""
     return tuple(c * sca for c in vec)
 
 
-def vecInt(vec):
-    """Retruns something."""
-    return tuple(int(c) for c in vec)
+def vecInt(vec: Vector) -> IntVector:
+    """Truncate the vector to integer precision."""
+    return tuple(map(int, vec))
 
 
-def vecNormalize(vec):
-    """Retruns something."""
+def vecNormalize(vec: Vector) -> Vector:
+    """Normalize the vector (i.e. make its magnitude 1)."""
     len = vecLen(vec)
     return vecMul(vec, 1 / len) if (len > EPSILON) else vec
 
 
-def vecFormat(vec) -> str:
+def vecFormat(vec: Vector) -> str:
     """Retruns something."""
     return f"({str([float(f'{n:.3f}') for n in vec])[1:-1]})"
 
 
-def vecFromAngle(angle):
-    """Retruns something."""
+def vecFromAngle(angle: float) -> Vector:
+    """Return the unit vector for a given angle (in radians)."""
     return (cos(angle), sin(angle))
