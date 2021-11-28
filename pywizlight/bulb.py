@@ -4,18 +4,20 @@ import json
 import logging
 import socket
 from time import time
+from typing import Any, Dict, Tuple, Optional, Union
 
 import asyncio_dgram
 
 from pywizlight.bulblibrary import BulbClass, BulbType, Features, KelvinRange
-from pywizlight.rgbcw import hs2rgbcw, rgb2rgbcw, rgbcw2hs
 from pywizlight.exceptions import (
     WizLightConnectionError,
     WizLightMethodNotFound,
     WizLightNotKnownBulb,
     WizLightTimeOutError,
 )
+from pywizlight.rgbcw import hs2rgbcw, rgb2rgbcw, rgbcw2hs
 from pywizlight.scenes import SCENES
+from pywizlight.vec import Vector
 
 _LOGGER = logging.getLogger(__name__)
 TW_SCENES = [6, 9, 10, 11, 12, 13, 14, 15, 16, 18, 29, 30, 31, 32]
@@ -27,17 +29,17 @@ class PilotBuilder:
 
     def __init__(
         self,
-        warm_white: int = None,
-        cold_white: int = None,
-        speed=None,
-        scene: int = None,
-        rgb: tuple = None,
-        brightness: int = None,
-        colortemp: int = None,
+        warm_white: Optional[int] = None,
+        cold_white: Optional[int] = None,
+        speed: Optional[int] = None,
+        scene: Optional[int] = None,
+        rgb: Optional[Tuple[float, float, float]] = None,
+        brightness: Optional[int] = None,
+        colortemp: Optional[int] = None,
         state: bool = True,
-    ):
+    ) -> None:
         """Set the parameter."""
-        self.pilot_params = {"state": state}
+        self.pilot_params: Dict[str, Any] = {"state": state}
 
         if warm_white is not None:
             self._set_warm_white(warm_white)
@@ -54,30 +56,30 @@ class PilotBuilder:
         if colortemp is not None:
             self._set_colortemp(colortemp)
 
-    def set_pilot_message(self):
+    def set_pilot_message(self) -> str:
         """Return the pilot message."""
         return json.dumps({"method": "setPilot", "params": self.pilot_params})
 
-    def set_state_message(self, state):
+    def set_state_message(self, state: bool) -> str:
         """Return the setState message. It doesn't change the current status of the light."""
         self.pilot_params["state"] = state
         return json.dumps({"method": "setState", "params": self.pilot_params})
 
-    def _set_warm_white(self, value: int):
+    def _set_warm_white(self, value: int) -> None:
         """Set the value of the warm white led."""
         if value > 0 and value < 256:
             self.pilot_params["w"] = value
         else:
             raise ValueError("Value must be between 1 and 255")
 
-    def _set_cold_white(self, value: int):
+    def _set_cold_white(self, value: int) -> None:
         """Set the value of the cold white led."""
         if value > 0 and value < 256:
             self.pilot_params["c"] = value
         else:
             raise ValueError("Value must be between 1 and 255")
 
-    def _set_speed(self, value: int):
+    def _set_speed(self, value: int) -> None:
         """Set the color changing speed in precent (0-100)."""
         # This applies only to changing effects.
         if value > 0 and value < 101:
@@ -85,7 +87,7 @@ class PilotBuilder:
         else:
             raise ValueError("Value must be between 0 and 100")
 
-    def _set_scene(self, scene_id: int):
+    def _set_scene(self, scene_id: int) -> None:
         """Set the scene by id."""
         if scene_id in SCENES:
             self.pilot_params["sceneId"] = scene_id
@@ -93,7 +95,7 @@ class PilotBuilder:
             # id not in SCENES !
             raise ValueError("Scene is not available. Only 0 to 32 are supported")
 
-    def _set_rgb(self, values: tuple):
+    def _set_rgb(self, values: Tuple[float, float, float]) -> None:
         """Set the RGB color state of the bulb."""
 
         red, green, blue = values
@@ -118,7 +120,7 @@ class PilotBuilder:
             # Use the existing set_cold_white function to set the CW values
             self._set_cold_white(cw)
 
-    def _set_hs_color(self, values: tuple):
+    def _set_hs_color(self, values: Tuple[float, float]) -> None:
         """Set the HS color state of the bulb."""
         # Transform the HS values to RGB+CW values
         rgb, cw = hs2rgbcw(values)
@@ -173,52 +175,52 @@ class PilotParser:
         """Init the class."""
         self.pilotResult = pilotResult
 
-    def get_state(self) -> bool:
+    def get_state(self) -> Optional[bool]:
         """Return the state of the bulb."""
         if "state" in self.pilotResult:
             return self.pilotResult["state"]
         else:
             return None
 
-    def get_mac(self) -> str:
+    def get_mac(self) -> Optional[str]:
         """Return MAC from the bulb."""
         if "mac" in self.pilotResult:
             return self.pilotResult["mac"]
         else:
             return None
 
-    def get_warm_white(self) -> int:
+    def get_warm_white(self) -> Optional[int]:
         """Get the value of the warm white led."""
         if "w" in self.pilotResult:
-            return self.pilotResult["w"]
+            return int(self.pilotResult["w"])
         else:
             return None
 
-    def get_white_range(self) -> list:
+    def get_white_range(self) -> Optional[list]:
         """Get the value of the whiteRange property."""
         if "whiteRange" in self.pilotResult:
-            return self.pilotResult["whiteRange"]
+            return list(self.pilotResult["whiteRange"])
         else:
             return None
 
-    def get_extended_white_range(self) -> list:
+    def get_extended_white_range(self) -> Optional[list]:
         """Get the value of the extended whiteRange property."""
         if "extRange" in self.pilotResult:
-            return self.pilotResult["extRange"]
+            return list(self.pilotResult["extRange"])
         # New after v1.22 FW - "cctRange":[2200,2700,6500,6500]
         elif "cctRange" in self.pilotResult:
-            return self.pilotResult["cctRange"]
+            return list(self.pilotResult["cctRange"])
         else:
             return None
 
-    def get_speed(self) -> int:
+    def get_speed(self) -> Optional[int]:
         """Get the color changing speed."""
         if "speed" in self.pilotResult:
-            return self.pilotResult["speed"]
+            return int(self.pilotResult["speed"])
         else:
             return None
 
-    def get_scene(self) -> str:
+    def get_scene(self) -> Optional[str]:
         """Get the current scene name."""
         if "schdPsetId" in self.pilotResult:  # rhythm
             return SCENES[1000]
@@ -229,14 +231,14 @@ class PilotParser:
         else:
             return None
 
-    def get_cold_white(self) -> int:
+    def get_cold_white(self) -> Optional[int]:
         """Get the value of the cold white led."""
         if "c" in self.pilotResult:
             return self.pilotResult["c"]
         else:
             return None
 
-    def get_rgb(self):
+    def get_rgb(self) -> Union[Tuple[None, None, None], Vector]:
         """Get the RGB color state of the bulb and turns it on."""
         if (
             "r" in self.pilotResult
@@ -246,26 +248,27 @@ class PilotParser:
             r = self.pilotResult["r"]
             g = self.pilotResult["g"]
             b = self.pilotResult["b"]
-            return r, g, b
+            return float(r), float(g), float(b)
         else:
             # no RGB color value was set
             return None, None, None
 
-    def get_brightness(self) -> int:
+    def get_brightness(self) -> Optional[int]:
         """Get the value of the brightness 0-255."""
         if "dimming" in self.pilotResult:
             return self.percent_to_hex(self.pilotResult["dimming"])
+        return None
 
-    def get_colortemp(self) -> int:
+    def get_colortemp(self) -> Optional[int]:
         """Get the color temperature from the bulb."""
         if "temp" in self.pilotResult:
-            return self.pilotResult["temp"]
+            return int(self.pilotResult["temp"])
         else:
             return None
 
-    def percent_to_hex(self, percent):
+    def percent_to_hex(self, percent: float) -> int:
         """Convert percent values 0-100 into hex 0-255."""
-        return round((percent / 100) * 255)
+        return int(round((percent / 100) * 255))
 
 
 class wizlight:
@@ -287,7 +290,7 @@ class wizlight:
             self._check_connection()
 
     @property
-    def status(self) -> bool:
+    def status(self) -> Optional[bool]:
         """Return the status of the bulb: true = on, false = off."""
         if self.state is None:
             return None
