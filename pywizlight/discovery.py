@@ -21,7 +21,7 @@ class DiscoveredBulb:
     def create_bulb_from_message(raw_addr, announce_message):
         """Create announce message."""
         ip_address = raw_addr[0]
-        _LOGGER.debug("Found bulb with IP: {}".format(ip_address))
+        _LOGGER.debug(f"Found bulb with IP: {ip_address}")
         bulb = DiscoveredBulb(
             ip_address=ip_address,
             mac_address=json.loads(announce_message)["result"]["mac"],
@@ -29,7 +29,7 @@ class DiscoveredBulb:
         return bulb
 
 
-class BulbRegistry(object):
+class BulbRegistry:
     """Representation of the bulb registry."""
 
     def __init__(self):
@@ -45,7 +45,7 @@ class BulbRegistry(object):
         return list(self.bulbs_by_mac.values())
 
 
-class BroadcastProtocol(object):
+class BroadcastProtocol:
     """Protocol that sends an UDP broadcast message for bulb discovery."""
 
     def __init__(self, loop, registry, broadcast_address):
@@ -79,7 +79,7 @@ class BroadcastProtocol(object):
 
     def datagram_received(self, data, addr):
         """Receive data from broadcast."""
-        _LOGGER.debug("Received data {} from IP address {}".format(data, addr))
+        _LOGGER.debug(f"Received data {data} from IP address {addr}")
         decoded_message = data.decode()
         if """"success":true""" in decoded_message:
             bulb = DiscoveredBulb.create_bulb_from_message(addr, decoded_message)
@@ -105,9 +105,7 @@ async def find_wizlights(wait_time=5, broadcast_address="255.255.255.255") -> li
         bulbs = registry.bulbs()
         for bulb in bulbs:
             _LOGGER.info(
-                "Discovered bulb {} with MAC {}".format(
-                    bulb.ip_address, bulb.mac_address
-                )
+                f"Discovered bulb {bulb.ip_address} with MAC {bulb.mac_address}"
             )
         return bulbs
 

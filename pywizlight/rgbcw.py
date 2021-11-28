@@ -38,9 +38,9 @@ def debug(msg, end="\n"):
 
 
 def printBasis(basis, prefix=""):
-    debug("{}Basis Vectors: ".format(prefix), end="")
+    debug(f"{prefix}Basis Vectors: ", end="")
     for vector in basis:
-        debug("{} ".format(vecFormat(vector)), end="")
+        debug(f"{vecFormat(vector)} ", end="")
     debug("")
 
 
@@ -59,7 +59,7 @@ def trapezoid(hueVec, saturation):
         # out which of the basis vectors we will use
         maxAngle = cos((pi * 2 / 3) - EPSILON)
         mask = tuple(
-            [(1 if (vecDot(hueVec, vector) > maxAngle) else 0) for vector in BASIS]
+            (1 if (vecDot(hueVec, vector) > maxAngle) else 0) for vector in BASIS
         )
         count = sum(mask)
         debug(
@@ -102,7 +102,7 @@ def trapezoid(hueVec, saturation):
             # coefficients by 1/maxCoefficient to make valid colors
             maxCoeff = max(coeff[0], coeff[1])
             coeff = [c / maxCoeff for c in coeff]
-            debug("    Scaled Coefficients: {}".format(vecFormat(coeff)))
+            debug(f"    Scaled Coefficients: {vecFormat(coeff)}")
             # now rebuild the rgb vector by putting the coefficients into the correct place
             j = 0
             rgbList = []
@@ -128,7 +128,7 @@ def trapezoid(hueVec, saturation):
     cw = int(max(0, cw * CWMAX))
     if cw == 0:
         cw = None
-    debug("    RGB OUT: {}, CW: {}".format(rgb, cw))
+    debug(f"    RGB OUT: {rgb}, CW: {cw}")
     # the wiz light appears to have 5 different LEDs, r, g, b, warm_white, and cold_white
     # there appears to be a max power supplied across the 5 LEDs, which explains why all-
     # on full isn't the brightest configuration
@@ -142,7 +142,7 @@ def rgb2rgbcw(rgb) -> trapezoid:
     Given a rgb tuple in the range (0..255, 0..255, 0-255), convert that to a rgbcw for the wiz
     light. brightness may or may not be passed in and is passed through to the trapezoid function.
     """
-    debug("RGB IN: {}".format(rgb))
+    debug(f"RGB IN: {rgb}")
     # scale the vector into canonical space ([0-1])
     rgb = vecMul(rgb, 1 / 255)
     # compute the hue vector as a linear combination of the basis vectors, and extract the
@@ -178,11 +178,7 @@ def rgbcw2hs(rgb, cw):
         ),
         vecMul(BASIS[2], rgb[2]),
     )
-    debug(
-        "RGB IN: {}, CW: {:.3f}, HUE VECTOR: {}".format(
-            vecFormat(rgb), cw, vecFormat(hueVec)
-        )
-    )
+    debug(f"RGB IN: {vecFormat(rgb)}, CW: {cw:.3f}, HUE VECTOR: {vecFormat(hueVec)}")
     # the discontinuous nature of the wiz bulb setting means we have two different states:
     # 1) the cw value is 1, and the hue vector is scaled (from 50% saturation to white)
     # 2) the hue vector is saturated, and cw is scaled down (from 50% saturation to full color)
@@ -205,7 +201,7 @@ def rgbcw2hs(rgb, cw):
     # scale the hue/saturation values back to their native ranges and return the tuple
     hue *= 180 / pi
     saturation *= 100
-    debug("    HUE OUT: {:.5f}, SATURATION: {:.3f}".format(hue, saturation))
+    debug(f"    HUE OUT: {hue:.5f}, SATURATION: {saturation:.3f}")
     return hue, saturation
 
 
@@ -224,8 +220,6 @@ def hs2rgbcw(hs):
     # we take the square root to give the user more visual control
     saturation = hs[1] / 100
     debug(
-        "HS IN: {}, HUE: {:.5f}, SATURATION: {:.3f}".format(
-            vecFormat(hs), hueRadians, saturation
-        )
+        f"HS IN: {vecFormat(hs)}, HUE: {hueRadians:.5f}, SATURATION: {saturation:.3f}"
     )
     return trapezoid(hueVec, saturation)

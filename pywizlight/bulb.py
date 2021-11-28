@@ -448,7 +448,7 @@ class wizlight:
         for id in SCENES:
             if SCENES[id] == scene:
                 return id
-        raise ValueError("Scene '%s' not in scene list." % scene)
+        raise ValueError(f"Scene '{scene}' not in scene list.")
 
     # ---------- Helper Functions ------------
     async def updateState(self):
@@ -551,9 +551,7 @@ class wizlight:
                 asyncio_dgram.connect((self.ip, self.port)), timeout
             )
             _LOGGER.debug(
-                "[wizlight {}, connid {}] listening for response datagram".format(
-                    self.ip, connid
-                )
+                f"[wizlight {self.ip}, connid {connid}] listening for response datagram"
             )
 
             receive_task = asyncio.create_task(
@@ -596,9 +594,7 @@ class wizlight:
             resp = json.loads(data.decode())
             if "error" not in resp:
                 _LOGGER.debug(
-                    "[wizlight {}, connid {}] response received: {}".format(
-                        self.ip, connid, resp
-                    )
+                    f"[wizlight {self.ip}, connid {connid}] response received: {resp}"
                 )
                 return resp
             elif resp["error"]["code"] == -32601:

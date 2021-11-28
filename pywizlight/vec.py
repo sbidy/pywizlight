@@ -39,12 +39,12 @@ def vecSub(a, b):
 
 def vecMul(vec, sca):
     """Retruns something."""
-    return tuple([c * sca for c in vec])
+    return tuple(c * sca for c in vec)
 
 
 def vecInt(vec):
     """Retruns something."""
-    return tuple([int(c) for c in vec])
+    return tuple(int(c) for c in vec)
 
 
 def vecNormalize(vec):
@@ -55,7 +55,7 @@ def vecNormalize(vec):
 
 def vecFormat(vec) -> str:
     """Retruns something."""
-    return "({})".format(str([float("{0:.3f}".format(n)) for n in vec])[1:-1])
+    return f"({str([float(f'{n:.3f}') for n in vec])[1:-1]})"
 
 
 def vecFromAngle(angle):

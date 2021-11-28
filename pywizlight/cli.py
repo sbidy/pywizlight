@@ -57,7 +57,7 @@ async def discover(b):
 )
 async def turn_on(ip, k, brightness):
     """Turn a given bulb on."""
-    click.echo("Turning on %s" % ip)
+    click.echo(f"Turning on {ip}")
     bulb = wizlight(ip)
     if bulb and k <= 6800 and k >= 1000 and brightness >= 0 and brightness <= 255:
         await bulb.turn_on(PilotBuilder(colortemp=k, brightness=brightness))
@@ -82,7 +82,7 @@ async def turn_on(ip, k, brightness):
 )
 async def set_state(ip, k, brightness):
     """Set the current state of a given bulb."""
-    click.echo("Turning on %s" % ip)
+    click.echo(f"Turning on {ip}")
     bulb = wizlight(ip)
     if bulb and k <= 6800 and k >= 1000 and brightness >= 0 and brightness <= 255:
         await bulb.set_state(PilotBuilder(colortemp=k, brightness=brightness))
@@ -95,7 +95,7 @@ async def set_state(ip, k, brightness):
 @click.option("--ip", prompt="IP address of the bulb", help="IP address of the bulb.")
 async def turn_off(ip):
     """Turn a given bulb off."""
-    click.echo("Turning off %s" % ip)
+    click.echo(f"Turning off {ip}")
     bulb = wizlight(ip)
     await bulb.turn_off()
 
@@ -105,7 +105,7 @@ async def turn_off(ip):
 @click.option("--ip", prompt="IP address of the bulb", help="IP address of the bulb.")
 async def state(ip):
     """Get the current state of a given bulb."""
-    click.echo("Get the state from %s" % ip)
+    click.echo(f"Get the state from {ip}")
     bulb = wizlight(ip)
     state = await bulb.updateState()
     click.echo(state.__dict__["pilotResult"])
