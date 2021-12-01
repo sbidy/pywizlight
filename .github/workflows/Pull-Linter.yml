@@ -3,6 +3,8 @@ name: Pull-Linter
 on:
   pull_request:
     types: ['opened', 'edited', 'reopened', 'synchronize']
+  pull_request_target:
+    branches: [ master ]
 
 jobs:
   run-linters:
