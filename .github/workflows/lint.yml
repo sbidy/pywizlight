@@ -1,11 +1,16 @@
 name: Lint
 
 on:
-  # Triggers the workflow on push or pull request events but only for the master branch
   push:
     branches: [ master ]
   pull_request:
     branches: [ master ]
+  pull_request_target:
+    branches: [ master ]
+
+permissions:
+  checks: write
+  contents: read
 
 jobs:
   run-linters:
