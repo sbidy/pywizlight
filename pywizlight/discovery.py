@@ -1,73 +1,83 @@
 """Discover bulbs in a network."""
 import asyncio
+import dataclasses
 import json
 import logging
 import socket
+from asyncio import DatagramTransport, BaseTransport, AbstractEventLoop
+from typing import Dict, List, Tuple, Optional, Any
 
 from pywizlight import wizlight
 
 _LOGGER = logging.getLogger(__name__)
 
 
+@dataclasses.dataclass(frozen=True)
 class DiscoveredBulb:
     """Representation of discovered bulb."""
 
-    def __init__(self, ip_address, mac_address):
-        """Initialize the discovered bulb."""
-        self.ip_address = ip_address
-        self.mac_address = mac_address
+    ip_address: str
+    mac_address: str
 
     @staticmethod
-    def create_bulb_from_message(raw_addr, announce_message):
+    def create_bulb_from_message(
+        raw_addr: Tuple[str, int], announce_message: str
+    ) -> "DiscoveredBulb":
         """Create announce message."""
         ip_address = raw_addr[0]
-        _LOGGER.debug("Found bulb with IP: {}".format(ip_address))
-        bulb = DiscoveredBulb(
+        _LOGGER.debug(f"Found bulb with IP: {ip_address}")
+        return DiscoveredBulb(
             ip_address=ip_address,
             mac_address=json.loads(announce_message)["result"]["mac"],
         )
-        return bulb
 
 
-class BulbRegistry(object):
+@dataclasses.dataclass
+class BulbRegistry:
     """Representation of the bulb registry."""
 
-    def __init__(self):
-        """Initialize the bulb registry."""
-        self.bulbs_by_mac = {}
+    bulbs_by_mac: Dict[str, DiscoveredBulb] = dataclasses.field(default_factory=dict)
 
-    def register(self, bulb):
+    def register(self, bulb: DiscoveredBulb) -> None:
         """Register a new bulb."""
         self.bulbs_by_mac[bulb.mac_address] = bulb
 
-    def bulbs(self) -> list:
+    def bulbs(self) -> List[DiscoveredBulb]:
         """Get all present bulbs."""
         return list(self.bulbs_by_mac.values())
 
 
-class BroadcastProtocol(object):
+class BroadcastProtocol(asyncio.DatagramProtocol):
     """Protocol that sends an UDP broadcast message for bulb discovery."""
 
-    def __init__(self, loop, registry, broadcast_address):
+    def __init__(
+        self, loop: AbstractEventLoop, registry: BulbRegistry, broadcast_address: str
+    ) -> None:
         """Init discovery function."""
         self.loop = loop
         self.registry = registry
         self.broadcast_address = broadcast_address
+        self.transport: Optional[DatagramTransport] = None
 
-    def connection_made(self, transport):
+    def connection_made(self, transport: BaseTransport) -> None:
         """Init connection to socket and register broadcasts."""
+        assert isinstance(
+            transport, DatagramTransport
+        )  # Required to keep this liskov-safe
         self.transport = transport
         sock = transport.get_extra_info("socket")
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
         self.broadcast_registration()
 
-    def broadcast_registration(self):
+    def broadcast_registration(self) -> None:
         """Send a registration method as UDP broadcast."""
         # Note: The IP and address we give the bulb here don't seem to matter for our
         # intents and purposes, so they're hardcoded to technically valid dummy data.
         # Fix for async problems if broaddcast_registration is called twice! See #13.
         # dirty dirty hack
+        if not self.transport:
+            return
         try:
             register_method = r'{"method":"registration","params":{"phoneMac":"AAAAAAAAAAAA","register":false,"phoneIp":"1.2.3.4","id":"1"}}'  # noqa: E501
             self.transport.sendto(
@@ -77,20 +87,22 @@ class BroadcastProtocol(object):
         except AttributeError:
             pass
 
-    def datagram_received(self, data, addr):
+    def datagram_received(self, data: bytes, addr: Tuple[str, int]) -> None:
         """Receive data from broadcast."""
-        _LOGGER.debug("Received data {} from IP address {}".format(data, addr))
+        _LOGGER.debug(f"Received data {data!r} from IP address {addr}")
         decoded_message = data.decode()
         if """"success":true""" in decoded_message:
             bulb = DiscoveredBulb.create_bulb_from_message(addr, decoded_message)
             self.registry.register(bulb)
 
-    def connection_lost(self, exc):
+    def connection_lost(self, exc: Any) -> None:
         """Return connection error."""
         _LOGGER.debug("Closing UDP discovery")
 
 
-async def find_wizlights(wait_time=5, broadcast_address="255.255.255.255") -> list:
+async def find_wizlights(
+    wait_time: float = 5, broadcast_address: str = "255.255.255.255"
+) -> List[DiscoveredBulb]:
     """Start discovery and return list of IPs of the bulbs."""
     registry = BulbRegistry()
     loop = asyncio.get_event_loop()
@@ -105,14 +117,12 @@ async def find_wizlights(wait_time=5, broadcast_address="255.255.255.255") -> li
         bulbs = registry.bulbs()
         for bulb in bulbs:
             _LOGGER.info(
-                "Discovered bulb {} with MAC {}".format(
-                    bulb.ip_address, bulb.mac_address
-                )
+                f"Discovered bulb {bulb.ip_address} with MAC {bulb.mac_address}"
             )
         return bulbs
 
 
-async def discover_lights(broadcast_space="255.255.255.255") -> list:
+async def discover_lights(broadcast_space: str = "255.255.255.255") -> List[wizlight]:
     """Find lights and return list with wizlight objects."""
     discovered_IPs = await find_wizlights(broadcast_address=broadcast_space)
     # empty list for adding bulbs

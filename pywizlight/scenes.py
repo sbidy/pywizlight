@@ -34,3 +34,17 @@ SCENES = {
     32: "Steampunk",
     1000: "Rhythm",
 }
+SCENE_NAME_TO_ID = {scene_name: scene_id for (scene_id, scene_name) in SCENES.items()}
+
+
+def get_id_from_scene_name(scene: str) -> int:
+    """Return the id of an given scene name.
+
+    :param scene: Name of the scene
+    :raises ValueError: Return if not in scene list
+    :return: ID of the scene
+    """
+    scene_id = SCENE_NAME_TO_ID.get(scene)
+    if not scene_id:
+        raise ValueError(f"Scene '{scene}' not in scene list.")
+    return scene_id

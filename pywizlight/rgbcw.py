@@ -1,6 +1,7 @@
 """Manages the RGBCW color."""
 import logging
 from math import atan2, cos, pi
+from typing import Tuple, Iterable
 
 from .vec import (
     vecAdd,
@@ -11,10 +12,10 @@ from .vec import (
     vecLen,
     vecMul,
     EPSILON,
+    Vector,
 )
 
 _LOGGER = logging.getLogger(__name__)
-
 
 ANGLE = (pi * 2) / 3
 BASIS = (
@@ -27,7 +28,7 @@ CWMAX = 128
 BUFFER = ""
 
 
-def debug(msg, end="\n"):
+def debug(msg: str, end: str = "\n") -> None:
     global BUFFER
     BUFFER += msg
     if end == "\n":
@@ -37,19 +38,23 @@ def debug(msg, end="\n"):
         BUFFER += end
 
 
-def printBasis(basis, prefix=""):
-    debug("{}Basis Vectors: ".format(prefix), end="")
+def printBasis(basis: Iterable[Vector], prefix: str = "") -> None:
+    debug(f"{prefix}Basis Vectors: ", end="")
     for vector in basis:
-        debug("{} ".format(vecFormat(vector)), end="")
+        debug(f"{vecFormat(vector)} ", end="")
     debug("")
 
 
-def trapezoid(hueVec, saturation):
+Trapezoid = Tuple[Vector, int]
+
+
+def trapezoid(hueVec: Vector, saturation: float) -> Trapezoid:
     """This function computes the linear combination of two basis vectors that define a trapezoid.
     hueVec - a normalized vector in the hue color wheel (0..1, 0..1, 0..1)
     saturation - a single value representing the length of the hue vector (0..1)
     brightness - a separate value that may be passed in, and should be used in the Pilot.
     """
+    rgb: Tuple[float, ...]
     # if saturation is essentially 0, just go to the full on
     if saturation <= EPSILON:
         rgb = (0, 0, 0)
@@ -59,13 +64,11 @@ def trapezoid(hueVec, saturation):
         # out which of the basis vectors we will use
         maxAngle = cos((pi * 2 / 3) - EPSILON)
         mask = tuple(
-            [(1 if (vecDot(hueVec, vector) > maxAngle) else 0) for vector in BASIS]
+            (1 if (vecDot(hueVec, vector) > maxAngle) else 0) for vector in BASIS
         )
         count = sum(mask)
         debug(
-            "    Max Angle: {:0.3f}, Mask: ({}, {}, {}), Count: {}".format(
-                maxAngle, mask[0], mask[1], mask[2], count
-            )
+            f"    Max Angle: {maxAngle:0.3f}, Mask: ({mask[0]}, {mask[1]}, {mask[2]}), Count: {count}"
         )
         if count == 1:
             # easy case, it's just one color component
@@ -82,27 +85,27 @@ def trapezoid(hueVec, saturation):
             # with the line we just computed, these are definitely not co-linear, so there
             # should always be an intersection point, and the result should always be in
             # the range [-1 .. 1], this is the first basis coefficient
-            coeff = [0, 0]
-            coeff[0] = vecDot(hueVec, AB) / vecDot(subBasis[0], AB)
+            coeff0 = vecDot(hueVec, AB) / vecDot(subBasis[0], AB)
             # compute the intersection point, and the second basis coefficient, note that
             # we compute the coefficients to always be positive, but the intersection calculation
             # needs to be in the opposite direction from the basis vector (hence the negative on
-            # coeff[0]).
-            intersection = vecAdd(vecMul(subBasis[0], -coeff[0]), hueVec)
-            coeff[1] = vecDot(intersection, subBasis[1])
+            # coeff0).
+            intersection = vecAdd(vecMul(subBasis[0], -coeff0), hueVec)
+            coeff = (
+                coeff0,
+                vecDot(intersection, subBasis[1]),
+            )
             debug(
-                "   Intersection Point: {}, Coefficients: {}".format(
-                    vecFormat(intersection), vecFormat(coeff)
-                )
+                f"   Intersection Point: {vecFormat(intersection)}, Coefficients: {vecFormat(coeff)}"
             )
             # there's a bit of a gamut problem here, as the area outside the hexagon defined by
             # the three unit basis vectors is not actually reachable. this manifests as
             # coefficients greater than 1, which will always happen unless the target color is
             # either one of the basis vectors or a bisector of two basis vectors. we scale both
             # coefficients by 1/maxCoefficient to make valid colors
-            maxCoeff = max(coeff[0], coeff[1])
-            coeff = [c / maxCoeff for c in coeff]
-            debug("    Scaled Coefficients: {}".format(vecFormat(coeff)))
+            maxCoeff = max(coeff)
+            coeff = (coeff[0] / maxCoeff, coeff[1] / maxCoeff)
+            debug(f"    Scaled Coefficients: {vecFormat(coeff)}")
             # now rebuild the rgb vector by putting the coefficients into the correct place
             j = 0
             rgbList = []
@@ -125,24 +128,22 @@ def trapezoid(hueVec, saturation):
         rgb = vecMul(rgb, saturation * 2)
     # scale back to the pilot color space
     rgb = vecInt(vecMul(rgb, 255))
-    cw = int(max(0, cw * CWMAX))
-    if cw == 0:
-        cw = None
-    debug("    RGB OUT: {}, CW: {}".format(rgb, cw))
+    out_cw = int(max(0, cw * CWMAX))
+    debug(f"    RGB OUT: {rgb}, CW: {out_cw}")
     # the wiz light appears to have 5 different LEDs, r, g, b, warm_white, and cold_white
     # there appears to be a max power supplied across the 5 LEDs, which explains why all-
     # on full isn't the brightest configuration
     # warm_white appears to be 2800k, and cold_white appears to be 6200k, somewhat neutral
     # brightness is achieved by turning both of them on
-    return rgb, cw
+    return rgb, out_cw
 
 
-def rgb2rgbcw(rgb) -> trapezoid:
+def rgb2rgbcw(rgb: Vector) -> Trapezoid:
     """Convert rgb to rgbcw.
     Given a rgb tuple in the range (0..255, 0..255, 0-255), convert that to a rgbcw for the wiz
     light. brightness may or may not be passed in and is passed through to the trapezoid function.
     """
-    debug("RGB IN: {}".format(rgb))
+    debug(f"RGB IN: {rgb}")
     # scale the vector into canonical space ([0-1])
     rgb = vecMul(rgb, 1 / 255)
     # compute the hue vector as a linear combination of the basis vectors, and extract the
@@ -160,7 +161,7 @@ def rgb2rgbcw(rgb) -> trapezoid:
     return trapezoid(hueVec, saturation)
 
 
-def rgbcw2hs(rgb, cw):
+def rgbcw2hs(rgb: Vector, cw: float) -> Tuple[float, float]:
     """Convert rgb hue.
     Given a tuple that is r,g,b and cw in 0-255 range, convert that to a hue, saturation tuple in the
     range (0..360, 0..100).
@@ -178,11 +179,7 @@ def rgbcw2hs(rgb, cw):
         ),
         vecMul(BASIS[2], rgb[2]),
     )
-    debug(
-        "RGB IN: {}, CW: {:.3f}, HUE VECTOR: {}".format(
-            vecFormat(rgb), cw, vecFormat(hueVec)
-        )
-    )
+    debug(f"RGB IN: {vecFormat(rgb)}, CW: {cw:.3f}, HUE VECTOR: {vecFormat(hueVec)}")
     # the discontinuous nature of the wiz bulb setting means we have two different states:
     # 1) the cw value is 1, and the hue vector is scaled (from 50% saturation to white)
     # 2) the hue vector is saturated, and cw is scaled down (from 50% saturation to full color)
@@ -205,11 +202,11 @@ def rgbcw2hs(rgb, cw):
     # scale the hue/saturation values back to their native ranges and return the tuple
     hue *= 180 / pi
     saturation *= 100
-    debug("    HUE OUT: {:.5f}, SATURATION: {:.3f}".format(hue, saturation))
+    debug(f"    HUE OUT: {hue:.5f}, SATURATION: {saturation:.3f}")
     return hue, saturation
 
 
-def hs2rgbcw(hs):
+def hs2rgbcw(hs: Tuple[float, float]) -> Trapezoid:
     """Convert hue to a canonical value.
     given a hue, saturation tuple in the range (0..360, 0..100), convert that to a rgbcw for the wiz light
     brightness may or may not be passed in and is passed through to the trapezoid function.
@@ -224,8 +221,18 @@ def hs2rgbcw(hs):
     # we take the square root to give the user more visual control
     saturation = hs[1] / 100
     debug(
-        "HS IN: {}, HUE: {:.5f}, SATURATION: {:.3f}".format(
-            vecFormat(hs), hueRadians, saturation
-        )
+        f"HS IN: {vecFormat(hs)}, HUE: {hueRadians:.5f}, SATURATION: {saturation:.3f}"
     )
     return trapezoid(hueVec, saturation)
+
+
+def convertHSfromRGBCW(rgb: Tuple[float, ...], cw: int) -> Tuple[float, float]:
+    """Convert rgb hue.
+    Given a tuple that is r,g,b and cw in 0-255 range, convert that to a hue, saturation tuple in the
+    range (0..360, 0..100).
+    """
+    red, green, blue = rgb
+    if 0 <= red < 256 and 0 <= green < 256 and 0 <= blue < 256 and 0 <= cw < 255:
+        return rgbcw2hs(rgb, cw)
+    else:
+        raise ValueError("Invalid RGB or CW values.")
