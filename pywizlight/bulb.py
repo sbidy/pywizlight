@@ -116,7 +116,7 @@ class PilotBuilder:
         # Transform the RGB values to RGB+CW values
         rgb, cw = rgb2rgbcw(values)
         # No CW because of full RGB color
-        if cw is not None:
+        if cw > 0:
             # Use the existing set_warm_white function to set the CW values
             self._set_warm_white(cw)
             # Use the existing set_cold_white function to set the CW values
