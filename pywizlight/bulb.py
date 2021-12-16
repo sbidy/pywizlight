@@ -72,17 +72,17 @@ class PilotBuilder:
 
     def _set_warm_white(self, value: int) -> None:
         """Set the value of the warm white led."""
-        if 0 < value < 256:
+        if 0 <= value < 256:
             self.pilot_params["w"] = value
         else:
-            raise ValueError("Value must be between 1 and 255")
+            raise ValueError("Value must be between 0 and 255")
 
     def _set_cold_white(self, value: int) -> None:
         """Set the value of the cold white led."""
-        if 0 < value < 256:
+        if 0 <= value < 256:
             self.pilot_params["c"] = value
         else:
-            raise ValueError("Value must be between 1 and 255")
+            raise ValueError("Value must be between 0 and 255")
 
     def _set_speed(self, value: int) -> None:
         """Set the color changing speed in precent (0-100)."""
