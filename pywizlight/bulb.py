@@ -36,6 +36,7 @@ class PilotBuilder:
         speed: Optional[int] = None,
         scene: Optional[int] = None,
         rgb: Optional[Tuple[float, float, float]] = None,
+        hucolor: Optional[Tuple[float, float]] = None,
         brightness: Optional[int] = None,
         colortemp: Optional[int] = None,
         state: bool = True,
@@ -57,6 +58,8 @@ class PilotBuilder:
             self._set_brightness(brightness)
         if colortemp is not None:
             self._set_colortemp(colortemp)
+        if hucolor is not None:
+            self._set_hs_color(hucolor)
 
     def set_pilot_message(self) -> str:
         """Return the pilot message."""
@@ -100,6 +103,7 @@ class PilotBuilder:
     def _set_rgb(self, values: Tuple[float, float, float]) -> None:
         """Set the RGB color state of the bulb."""
 
+        # Setup the tuples for the RGB values
         red, green, blue = values
         if 0 <= red < 256:
             self.pilot_params["r"] = red
@@ -113,10 +117,10 @@ class PilotBuilder:
             self.pilot_params["b"] = blue
         else:
             raise ValueError("Blue is not in range between 0-255.")
-        # Transform the RGB values to RGB+CW values
-        rgb, cw = rgb2rgbcw(values)
+        # Get CW from RAW
+        rgb_out, cw = rgb2rgbcw(values)
         # No CW because of full RGB color
-        if cw > 0:
+        if cw is not None:
             # Use the existing set_warm_white function to set the CW values
             self._set_warm_white(cw)
             # Use the existing set_cold_white function to set the CW values
@@ -139,11 +143,11 @@ class PilotBuilder:
             self.pilot_params["b"] = blue
         else:
             raise ValueError("Blue is not in range between 0-255.")
-
-        # Use the existing set_warm_white function to set the CW values
-        self._set_warm_white(cw)
-        # Use the existing set_cold_white function to set the CW values
-        self._set_cold_white(cw)
+        if cw is not None:
+            # Use the existing set_warm_white function to set the CW values
+            self._set_warm_white(cw)
+            # Use the existing set_cold_white function to set the CW values
+            self._set_cold_white(cw)
 
     def _set_brightness(self, value: int) -> None:
         """Set the value of the brightness 0-255."""
