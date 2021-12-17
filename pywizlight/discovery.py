@@ -63,7 +63,9 @@ class BroadcastProtocol(asyncio.DatagramProtocol):
         """Init connection to socket and register broadcasts."""
         if TYPE_CHECKING:
             # TODO: if this is made a runtime check, it needs some changes (see #94)
-            assert isinstance(transport, BaseTransport)  # Required to keep this liskov-safe
+            assert isinstance(
+                transport, BaseTransport
+            )  # Required to keep this liskov-safe
         self.transport = transport
         sock = transport.get_extra_info("socket")
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
