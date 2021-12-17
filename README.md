@@ -73,6 +73,10 @@ nix-env -iA nixos.python37Packages.pywizlight
 
 <!-- ALL-CONTRIBUTORS-LIST:END -->
 
+## Discover bulbs via CLI
+
+To find bulbs via cli you can use `python -m pywizlight.cli discover`.
+
 ## Example
 
 ```python
