@@ -6,6 +6,8 @@
 
 ![Code Quality Check](https://github.com/sbidy/pywizlight/workflows/Lint/badge.svg)
 ![Update Docs](https://github.com/sbidy/pywizlight/workflows/Update%20Docs/badge.svg)
+[![Lint](https://github.com/sbidy/pywizlight/actions/workflows/lint.yml/badge.svg)](https://github.com/sbidy/pywizlight/actions/workflows/lint.yml)
+
 
 # pywizlight
 
