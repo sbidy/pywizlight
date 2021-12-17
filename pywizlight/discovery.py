@@ -61,8 +61,9 @@ class BroadcastProtocol(asyncio.DatagramProtocol):
 
     def connection_made(self, transport: BaseTransport) -> None:
         """Init connection to socket and register broadcasts."""
+        # ToDo: Test for BaseTransport and DatagramTransport cast / AssertionError
         assert isinstance(
-            transport, DatagramTransport
+            transport, BaseTransport
         )  # Required to keep this liskov-safe
         self.transport = transport
         sock = transport.get_extra_info("socket")
