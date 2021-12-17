@@ -5,7 +5,7 @@ import json
 import logging
 import socket
 from asyncio import DatagramTransport, BaseTransport, AbstractEventLoop
-from typing import Dict, List, Tuple, Optional, Any
+from typing import TYPE_CHECKING, Dict, List, Tuple, Optional, Any
 
 from pywizlight import wizlight
 
@@ -61,8 +61,9 @@ class BroadcastProtocol(asyncio.DatagramProtocol):
 
     def connection_made(self, transport: BaseTransport) -> None:
         """Init connection to socket and register broadcasts."""
-        # ToDo: Test for BaseTransport and DatagramTransport cast / AssertionError
-        assert isinstance(transport, BaseTransport)  # Required to keep this liskov-safe
+        if TYPE_CHECKING:
+            # TODO: if this is made a runtime check, it needs some changes (see #94)
+            assert isinstance(transport, BaseTransport)  # Required to keep this liskov-safe
         self.transport = transport
         sock = transport.get_extra_info("socket")
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
