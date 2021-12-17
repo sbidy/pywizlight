@@ -66,7 +66,7 @@ class BroadcastProtocol(asyncio.DatagramProtocol):
             assert isinstance(
                 transport, BaseTransport
             )  # Required to keep this liskov-safe
-        self.transport = transport
+        self.transport = transport # type: ignore
         sock = transport.get_extra_info("socket")
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
