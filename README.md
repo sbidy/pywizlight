@@ -4,8 +4,9 @@
 [![All Contributors](https://img.shields.io/badge/all_contributors-16-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
-![Code Quality Check](https://github.com/sbidy/pywizlight/workflows/Lint/badge.svg)
 ![Update Docs](https://github.com/sbidy/pywizlight/workflows/Update%20Docs/badge.svg)
+[![Lint](https://github.com/sbidy/pywizlight/actions/workflows/lint.yml/badge.svg)](https://github.com/sbidy/pywizlight/actions/workflows/lint.yml)
+
 
 # pywizlight
 
@@ -205,7 +206,7 @@ For async I/O this component uses https://github.com/jsbronder/asyncio-dgram, wh
 
 ## Classes
 
-`wizlight(ip)`: Creates a instance of a WiZ Light Bulb. Constructed with the IP address of the bulb.
+`wizlight(ip)`: Creates a instance of a WiZ Light Bulb. Constructed with the IP addCancel changesress of the bulb.
 
 ### Instance variables
 
