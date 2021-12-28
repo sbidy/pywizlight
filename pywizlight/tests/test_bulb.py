@@ -82,7 +82,7 @@ async def test_PilotBuilder_rgb(correct_bulb: wizlight) -> None:
     await correct_bulb.turn_on(PilotBuilder(rgb=(0, 128, 255)))
     state = await correct_bulb.updateState()
 
-    assert state and state.get_rgb() == (0, 128, 255)
+    assert state and state.get_rgb() == (0, 127, 255)
 
 
 @pytest.mark.asyncio
@@ -108,7 +108,7 @@ async def test_error_PilotBuilder_warm_wite(correct_bulb: wizlight) -> None:
     with pytest.raises(ValueError):
         await correct_bulb.turn_on(PilotBuilder(warm_white=300))
     with pytest.raises(ValueError):
-        await correct_bulb.turn_on(PilotBuilder(warm_white=0))
+        await correct_bulb.turn_on(PilotBuilder(warm_white=-1))
 
 
 @pytest.mark.asyncio
@@ -122,7 +122,7 @@ async def test_error_PilotBuilder_cold_white_upper(correct_bulb: wizlight) -> No
 async def test_error_PilotBuilder_cold_white_lower(correct_bulb: wizlight) -> None:
     """Error Cold White."""
     with pytest.raises(ValueError):
-        await correct_bulb.turn_on(PilotBuilder(cold_white=0))
+        await correct_bulb.turn_on(PilotBuilder(cold_white=-1))
 
 
 @pytest.mark.asyncio

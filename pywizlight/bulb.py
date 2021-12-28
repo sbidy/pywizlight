@@ -105,49 +105,43 @@ class PilotBuilder:
 
         # Setup the tuples for the RGB values
         red, green, blue = values
-        if 0 <= red < 256:
-            self.pilot_params["r"] = red
-        else:
+        if not (0 <= red < 256):
             raise ValueError("Red is not in range between 0-255.")
-        if 0 <= green < 256:
-            self.pilot_params["g"] = green
-        else:
+        if not (0 <= green < 256):
             raise ValueError("Green is not in range between 0-255.")
-        if 0 <= blue < 256:
-            self.pilot_params["b"] = blue
-        else:
+        if not (0 <= blue < 256):
             raise ValueError("Blue is not in range between 0-255.")
-        # Get CW from RAW
+        # Get the RGB+CW values
         rgb_out, cw = rgb2rgbcw(values)
+        # Extract the RGB values
+        red, green, blue = rgb_out
+        # Set the RGB values
+        self.pilot_params["r"] = red
+        self.pilot_params["g"] = green
+        self.pilot_params["b"] = blue
         # No CW because of full RGB color
         if cw is not None:
             # Use the existing set_warm_white function to set the CW values
             self._set_warm_white(cw)
-            # Use the existing set_cold_white function to set the CW values
-            self._set_cold_white(cw)
 
     def _set_hs_color(self, values: Tuple[float, float]) -> None:
         """Set the HS color state of the bulb."""
         # Transform the HS values to RGB+CW values
         rgb, cw = hs2rgbcw(values)
         red, green, blue = rgb
-        if 0 <= red < 256:
-            self.pilot_params["r"] = red
-        else:
+        if not (0 <= red < 256):
             raise ValueError("Red is not in range between 0-255.")
-        if 0 <= green < 256:
-            self.pilot_params["g"] = green
-        else:
+        if not (0 <= green < 256):
             raise ValueError("Green is not in range between 0-255.")
-        if 0 <= blue < 256:
-            self.pilot_params["b"] = blue
-        else:
+        if not (0 <= blue < 256):
             raise ValueError("Blue is not in range between 0-255.")
+        # Set the RGB values
+        self.pilot_params["r"] = red
+        self.pilot_params["g"] = green
+        self.pilot_params["b"] = blue
         if cw is not None:
             # Use the existing set_warm_white function to set the CW values
             self._set_warm_white(cw)
-            # Use the existing set_cold_white function to set the CW values
-            self._set_cold_white(cw)
 
     def _set_brightness(self, value: int) -> None:
         """Set the value of the brightness 0-255."""
