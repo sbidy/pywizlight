@@ -149,6 +149,15 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "UH-60",
+      "name": "UH-60",
+      "avatar_url": "https://avatars.githubusercontent.com/u/4968133?v=4",
+      "profile": "https://github.com/UH-60",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,
