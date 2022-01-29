@@ -1,7 +1,7 @@
 ![Upload Python Package](https://github.com/sbidy/pywizlight/workflows/Upload%20Python%20Package/badge.svg)
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-16-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-17-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 ![Update Docs](https://github.com/sbidy/pywizlight/workflows/Update%20Docs/badge.svg)
@@ -66,6 +66,7 @@ nix-env -iA nixos.python37Packages.pywizlight
   <tr>
     <td align="center"><a href="https://github.com/CharlotteCross1998"><img src="https://avatars.githubusercontent.com/u/29734551?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Charlotte</b></sub></a><br /><a href="https://github.com/sbidy/pywizlight/commits?author=CharlotteCross1998" title="Code">💻</a></td>
     <td align="center"><a href="https://akx.github.io/"><img src="https://avatars.githubusercontent.com/u/58669?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Aarni Koskela</b></sub></a><br /><a href="https://github.com/sbidy/pywizlight/commits?author=akx" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/UH-60"><img src="https://avatars.githubusercontent.com/u/4968133?v=4?s=100" width="100px;" alt=""/><br /><sub><b>UH-60</b></sub></a><br /><a href="https://github.com/sbidy/pywizlight/commits?author=UH-60" title="Code">💻</a></td>
   </tr>
 </table>
 
