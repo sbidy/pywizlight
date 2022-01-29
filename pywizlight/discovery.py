@@ -4,7 +4,7 @@ import dataclasses
 import json
 import logging
 import socket
-from asyncio import DatagramTransport, BaseTransport, AbstractEventLoop
+from asyncio import DatagramTransport, BaseTransport, AbstractEventLoop, Future
 from typing import TYPE_CHECKING, Dict, List, Tuple, Optional, Any
 
 from pywizlight import wizlight
@@ -51,13 +51,14 @@ class BroadcastProtocol(asyncio.DatagramProtocol):
     """Protocol that sends an UDP broadcast message for bulb discovery."""
 
     def __init__(
-        self, loop: AbstractEventLoop, registry: BulbRegistry, broadcast_address: str
+        self, loop: AbstractEventLoop, registry: BulbRegistry, broadcast_address: str, future: Future
     ) -> None:
         """Init discovery function."""
         self.loop = loop
         self.registry = registry
         self.broadcast_address = broadcast_address
         self.transport: Optional[DatagramTransport] = None
+        self.future = future
 
     def connection_made(self, transport: BaseTransport) -> None:
         """Init connection to socket and register broadcasts."""
@@ -100,6 +101,10 @@ class BroadcastProtocol(asyncio.DatagramProtocol):
     def connection_lost(self, exc: Any) -> None:
         """Return connection error."""
         _LOGGER.debug("Closing UDP discovery")
+        if exc is None:
+            self.future.set_result(None)
+        else:
+            self.future.set_exception(exc)
 
 
 async def find_wizlights(
@@ -108,14 +113,16 @@ async def find_wizlights(
     """Start discovery and return list of IPs of the bulbs."""
     registry = BulbRegistry()
     loop = asyncio.get_event_loop()
+    future = loop.create_future()
     transport, protocol = await loop.create_datagram_endpoint(
-        lambda: BroadcastProtocol(loop, registry, broadcast_address),
+        lambda: BroadcastProtocol(loop, registry, broadcast_address, future),
         local_addr=("0.0.0.0", 38899),
     )
     try:
         await asyncio.sleep(wait_time)
     finally:
         transport.close()
+        await future
         bulbs = registry.bulbs()
         for bulb in bulbs:
             _LOGGER.info(
