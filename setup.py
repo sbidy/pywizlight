@@ -34,6 +34,6 @@ setuptools.setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    install_requires=["asyncio-dgram", "click"],
+    install_requires=["click"],
     python_requires=">=3.7",
 )

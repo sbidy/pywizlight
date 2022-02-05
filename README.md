@@ -203,7 +203,7 @@ The discovery works with an UDP Broadcast request and collects all bulbs in the 
 
 ## Async I/O
 
-For async I/O this component uses https://github.com/jsbronder/asyncio-dgram, which internally uses asyncio DatagramTransport, which allows completely non-blocking UDP transport
+For async I/O this component uses python's built-in asyncio DatagramTransport, which allows completely non-blocking UDP transport
 
 ## Classes
 
