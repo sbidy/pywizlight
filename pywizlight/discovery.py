@@ -51,7 +51,11 @@ class BroadcastProtocol(asyncio.DatagramProtocol):
     """Protocol that sends an UDP broadcast message for bulb discovery."""
 
     def __init__(
-        self, loop: AbstractEventLoop, registry: BulbRegistry, broadcast_address: str, future: Future
+        self,
+        loop: AbstractEventLoop,
+        registry: BulbRegistry,
+        broadcast_address: str,
+        future: Future,
     ) -> None:
         """Init discovery function."""
         self.loop = loop
