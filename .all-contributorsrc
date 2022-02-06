@@ -158,6 +158,15 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "bdraco",
+      "name": "J. Nick Koston",
+      "avatar_url": "https://avatars.githubusercontent.com/u/663432?v=4",
+      "profile": "https://github.com/bdraco",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,
