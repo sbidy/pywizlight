@@ -36,6 +36,9 @@ TW_FEATURES = Features(brightness=True, color=False, effect=True, color_tmp=True
 # Dimmable white only supports brightness
 DW_FEATURES = Features(brightness=True, color=False, effect=False, color_tmp=False)
 
+# Socket supports only on/off
+SOCKET_FEATURES = Features(brightness=False, color=False, effect=False, color_tmp=False)
+
 
 @dataclasses.dataclass(frozen=True)
 class KelvinRange:
@@ -48,12 +51,14 @@ class KelvinRange:
 class BulbClass(Enum):
     """Bulb Types."""
 
-    """Have Cool White and Warm White LEDs."""
     TW = "Tunable White"
-    """Have only Dimmable white LEDs."""
+    """Have Cool White and Warm White LEDs."""
     DW = "Dimmable White"
-    """Have RGB LEDs."""
+    """Have only Dimmable white LEDs."""
     RGB = "RGB Bulb"
+    """Have RGB LEDs."""
+    SOCKET = "Socket"
+    """Smart socket with only on/off."""
 
 
 @dataclasses.dataclass(frozen=True)
@@ -87,6 +92,9 @@ class BulbType:
         elif "TW" in _identifier:  # Non RGB but tunable white bulb
             features = TW_FEATURES
             bulb_type = BulbClass.TW
+        elif "SOCKET" in _identifier:  # A smart socket
+            features = SOCKET_FEATURES
+            bulb_type = BulbClass.SOCKET
         else:  # Plain brightness-only bulb
             features = DW_FEATURES
             bulb_type = BulbClass.DW
