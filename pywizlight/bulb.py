@@ -1,8 +1,10 @@
 """pywizlight integration."""
 import asyncio
+import contextlib
 import json
 import logging
 import socket
+import time
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union, cast
 
 from pywizlight.bulblibrary import BulbClass, BulbType
@@ -11,6 +13,8 @@ from pywizlight.exceptions import (
     WizLightMethodNotFound,
     WizLightTimeOutError,
 )
+from pywizlight.protocol import WizProtocol
+from pywizlight.push_manager import PushManager
 from pywizlight.rgbcw import hs2rgbcw, rgb2rgbcw
 from pywizlight.scenes import SCENES
 from pywizlight.utils import hex_to_percent, percent_to_hex
@@ -21,6 +25,20 @@ TW_SCENES = [6, 9, 10, 11, 12, 13, 14, 15, 16, 18, 29, 30, 31, 32]
 DW_SCENES = [9, 10, 13, 14, 29, 30, 31, 32]
 
 BulbResponse = Dict[str, Any]
+
+PUSH_KEEP_ALIVE_INTERVAL = 20
+TIMEOUT = 7
+MAX_TIME_BETWEEN_PUSH = PUSH_KEEP_ALIVE_INTERVAL + TIMEOUT
+NEVER_TIME = -120.0
+_IGNORE_KEYS = {"src", "mqttCd", "ts", "rssi"}
+
+
+def states_match(old: dict[str, Any], new: dict[str, Any]) -> bool:
+    """Check if states match except for keys we do not want to callback on."""
+    for key, val in new.items():
+        if old.get(key) != val and key not in _IGNORE_KEYS:
+            return False
+    return True
 
 
 class PilotBuilder:
@@ -260,28 +278,6 @@ class PilotParser:
             return None
 
 
-class WizProtocol(asyncio.DatagramProtocol):
-    def __init__(
-        self,
-        on_response: Callable[[bytes, Tuple[str, int]], None],
-    ) -> None:
-        """Init the discovery protocol."""
-        self.transport = None
-        self.on_response = on_response
-
-    def datagram_received(self, data: bytes, addr: Tuple[str, int]) -> None:
-        """Trigger on_response."""
-        self.on_response(data, addr)
-
-    def error_received(self, ex: Optional[Exception]) -> None:
-        """Handle error."""
-        _LOGGER.debug("WizProtocol error: %s", ex)
-
-    def connection_lost(self, ex: Optional[Exception]) -> None:
-        """The connection is lost."""
-        _LOGGER.debug("WizProtocol connection lost: %s", ex)
-
-
 class wizlight:
     """Create an instance of a WiZ Light Bulb."""
 
@@ -304,9 +300,14 @@ class wizlight:
         self.extwhiteRange: Optional[List[float]] = None
         self.transport: Optional[asyncio.DatagramTransport] = None
         self.protocol: Optional[WizProtocol] = None
+
         self.lock = asyncio.Lock()
         self.loop = asyncio.get_event_loop()
+        self.push_callback: Optional[Callable] = None
         self.response_future: Optional[asyncio.Future] = None
+        self.push_cancel: Optional[Callable] = None
+        self.last_push: float = NEVER_TIME
+        self.push_running: bool = False
         # check the state on init
         if connect_on_init:
             self._check_connection()
@@ -330,6 +331,40 @@ class wizlight:
         )
         self.transport = cast(asyncio.DatagramTransport, transport_proto[0])
         self.protocol = cast(WizProtocol, transport_proto[1])
+
+    def register(self) -> None:
+        """Call register to keep alive push updates."""
+        if self.push_running:
+            asyncio.ensure_future(
+                self._async_send_register(PushManager().get().register_msg)
+            )
+            self.loop.call_later(PUSH_KEEP_ALIVE_INTERVAL, self.register)
+
+    async def _async_send_register(self, message: str) -> None:
+        """Send the registration message."""
+        with contextlib.suppress(WizLightTimeOutError):
+            await self.sendUDPMessage(message)
+
+    async def start_push(self, callback: Callable) -> None:
+        """Start periodic register calls to get push updates via syncPilot."""
+        _LOGGER.debug("Enabling push updates for %s", self.mac)
+        self.push_callback = callback
+        push_manager = PushManager().get()
+        self.push_cancel = push_manager.register(self.mac, self._on_push)
+        if await push_manager.start(self.ip):
+            self.push_running = True
+            self.register()
+
+    def _on_push(self, resp: dict, addr: Tuple[str, int]) -> None:
+        """Handle a syncPilot from the device."""
+        self.last_push = time.monotonic()
+        old_state = self.state.pilotResult if self.state else None
+        new_state = resp["params"]
+        if old_state and states_match(old_state, new_state):
+            return
+        self.state = PilotParser(new_state)
+        if self.push_callback:
+            self.push_callback(self.state)
 
     def _on_response(self, message: bytes, addr: Tuple[str, int]) -> None:
         """Handle a response from the device."""
@@ -454,12 +489,13 @@ class wizlight:
         getPilot - gets the current bulb state - no parameters need to be included
         {"method": "getPilot", "id": 24}
         """
-        message = r'{"method":"getPilot","params":{}}'
-        resp = await self.sendUDPMessage(message)
-        if resp is not None and "result" in resp:
-            self.state = PilotParser(resp["result"])
-        else:
-            self.state = None
+        if self.last_push + MAX_TIME_BETWEEN_PUSH < time.monotonic():
+            message = r'{"method":"getPilot","params":{}}'
+            resp = await self.sendUDPMessage(message)
+            if resp is not None and "result" in resp:
+                self.state = PilotParser(resp["result"])
+            else:
+                self.state = None
         return self.state
 
     async def getMac(self) -> Optional[str]:
@@ -507,10 +543,9 @@ class wizlight:
     async def sendUDPMessage(self, message: str) -> BulbResponse:
         """Send the UDP message to the bulb."""
         await self._ensure_connection()
-        timeout = 10
         data = message.encode("utf-8")
         send_interval = 0.5
-        max_send_datagrams = int(timeout / send_interval)
+        max_send_datagrams = int(TIMEOUT / send_interval)
         assert self.transport is not None
         async with self.lock:
             self.response_future = asyncio.Future()
@@ -547,9 +582,18 @@ class wizlight:
 
     async def async_close(self):
         """Close the transport."""
-        self.transport.close()
+        self._async_close()
+
+    def _async_close(self):
+        self.push_running = False
+        if self.transport:
+            self.transport.close()
+            self.transport = None
+        if self.push_cancel:
+            self.push_cancel()
+            self.push_cancel = None
 
     def __del__(self):
         """Close the connection when the object is destroyed."""
         if self.transport:
-            self.loop.call_soon_threadsafe(self.transport.close)
+            self.loop.call_soon_threadsafe(self._async_close)
