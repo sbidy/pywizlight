@@ -27,19 +27,6 @@ class Features:
     brightness: bool
 
 
-# RGB supports effects and tuneable white
-RGB_FEATURES = Features(brightness=True, color=True, effect=True, color_tmp=True)
-
-# TODO: TW supports effects but only "some"; improve the mapping to supported effects
-TW_FEATURES = Features(brightness=True, color=False, effect=True, color_tmp=True)
-
-# Dimmable white only supports brightness
-DW_FEATURES = Features(brightness=True, color=False, effect=False, color_tmp=False)
-
-# Socket supports only on/off
-SOCKET_FEATURES = Features(brightness=False, color=False, effect=False, color_tmp=False)
-
-
 @dataclasses.dataclass(frozen=True)
 class KelvinRange:
     """Defines the kelvin range."""
@@ -61,6 +48,20 @@ class BulbClass(Enum):
     """Smart socket with only on/off."""
 
 
+FEATURE_MAP = {
+    # RGB supports effects and tuneable white
+    BulbClass.RGB: Features(brightness=True, color=True, effect=True, color_tmp=True),
+    # TODO: TW supports effects but only "some"; improve the mapping to supported effects
+    BulbClass.TW: Features(brightness=True, color=False, effect=True, color_tmp=True),
+    # Dimmable white only supports brightness
+    BulbClass.DW: Features(brightness=True, color=False, effect=False, color_tmp=False),
+    # Socket supports only on/off
+    BulbClass.SOCKET: Features(
+        brightness=False, color=False, effect=False, color_tmp=False
+    ),
+}
+
+
 @dataclasses.dataclass(frozen=True)
 class BulbType:
     """BulbType object to define functions and features of the bulb."""
@@ -69,9 +70,12 @@ class BulbType:
     name: str
     kelvin_range: Optional[KelvinRange]
     bulb_type: BulbClass
+    fw_version: Optional[str]
 
     @staticmethod
-    def from_data(module_name: str, kelvin_list: Optional[List[float]]) -> "BulbType":
+    def from_data(
+        module_name: str, kelvin_list: Optional[List[float]], fw_version: Optional[str]
+    ) -> "BulbType":
         if kelvin_list:
             kelvin_range: Optional[KelvinRange] = KelvinRange(
                 min=int(min(kelvin_list)), max=int(max(kelvin_list))
@@ -87,21 +91,20 @@ class BulbType:
             raise WizLightNotKnownBulb("The bulb type can not be determined!")
 
         if "RGB" in _identifier:  # full RGB bulb
-            features = RGB_FEATURES
             bulb_type = BulbClass.RGB
         elif "TW" in _identifier:  # Non RGB but tunable white bulb
-            features = TW_FEATURES
             bulb_type = BulbClass.TW
         elif "SOCKET" in _identifier:  # A smart socket
-            features = SOCKET_FEATURES
             bulb_type = BulbClass.SOCKET
         else:  # Plain brightness-only bulb
-            features = DW_FEATURES
             bulb_type = BulbClass.DW
+
+        features = FEATURE_MAP[bulb_type]
 
         return BulbType(
             bulb_type=bulb_type,
             name=module_name,
             features=features,
             kelvin_range=kelvin_range,
+            fw_version=fw_version,
         )

@@ -45,6 +45,22 @@ def get_initial_sys_config() -> Dict[str, Any]:
     }
 
 
+def get_initial_model_config() -> Dict[str, Any]:
+    return {
+        "method": "getModelConfig",
+        "env": "pro",
+        "result": {
+            "ps": 1,
+            "pwmFreq": 1000,
+            "pwmRange": [3, 100],
+            "wcr": 30,
+            "nowc": 1,
+            "cctRange": [2200, 2700, 4800, 6500],
+            "renderFactor": [171, 255, 75, 255, 43, 85, 0, 0, 0, 0],
+        },
+    }
+
+
 BULB_JSON_ERROR = b'{"env":"pro","error":{"code":-32700,"message":"Parse error"}}'
 
 
@@ -53,6 +69,7 @@ class BulbUDPRequestHandlerBase(socketserver.DatagramRequestHandler):
 
     pilot_state: Dict[str, Any]  # Will be set by constructor for the actual class
     sys_config: Dict[str, Any]  # Will be set by constructor for the actual class
+    model_config: Dict[str, Any]  # Will be set by constructor for the actual class
 
     def handle(self) -> None:
         """Handle the request."""
@@ -71,8 +88,12 @@ class BulbUDPRequestHandlerBase(socketserver.DatagramRequestHandler):
         if method == "getPilot":
             print(f"Response:{json.dumps(self.pilot_state)!r}")
             self.wfile.write(bytes(json.dumps(self.pilot_state), "utf-8"))
-        if method == "getSystemConfig":
+        elif method == "getSystemConfig":
             self.wfile.write(bytes(json.dumps(self.sys_config), "utf-8"))
+        elif method == "getModelConfig":
+            self.wfile.write(bytes(json.dumps(self.model_config), "utf-8"))
+        else:
+            raise RuntimeError(f"No handler for {method}")
 
     def setPilot(self, json_data: Dict[str, Any]) -> bytes:
         """Change the values in the state."""
@@ -85,6 +106,7 @@ def make_udp_fake_bulb_server(module_name: str) -> socketserver.ThreadingUDPServ
     """Configure a fake bulb instance."""
     pilot_state = get_initial_pilot()
     sys_config = get_initial_sys_config()
+    model_config = get_initial_model_config()
     sys_config["result"]["moduleName"] = module_name
 
     BulbUDPRequestHandler = type(
@@ -93,6 +115,7 @@ def make_udp_fake_bulb_server(module_name: str) -> socketserver.ThreadingUDPServ
         {
             "pilot_state": pilot_state,
             "sys_config": sys_config,
+            "model_config": model_config,
         },
     )
 
