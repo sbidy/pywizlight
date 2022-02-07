@@ -1,5 +1,6 @@
 """pywizlight integration."""
 import asyncio
+import contextlib
 import json
 import logging
 import socket
@@ -26,7 +27,8 @@ DW_SCENES = [9, 10, 13, 14, 29, 30, 31, 32]
 BulbResponse = Dict[str, Any]
 
 PUSH_KEEP_ALIVE_INTERVAL = 20
-MAX_TIME_BETWEEN_PUSH = PUSH_KEEP_ALIVE_INTERVAL + 5
+TIMEOUT = 7
+MAX_TIME_BETWEEN_PUSH = PUSH_KEEP_ALIVE_INTERVAL + TIMEOUT
 NEVER_TIME = -120.0
 _IGNORE_KEYS = {"src", "mqttCd", "ts", "rssi"}
 
@@ -333,8 +335,15 @@ class wizlight:
     def register(self) -> None:
         """Call register to keep alive push updates."""
         if self.push_running:
-            asyncio.ensure_future(self.sendUDPMessage(PushManager().get().register_msg))
+            asyncio.ensure_future(
+                self._async_send_register(PushManager().get().register_msg)
+            )
             self.loop.call_later(PUSH_KEEP_ALIVE_INTERVAL, self.register)
+
+    async def _async_send_register(self, message: str) -> None:
+        """Send the registration message."""
+        with contextlib.suppress(WizLightTimeOutError):
+            await self.sendUDPMessage(message)
 
     async def start_push(self, callback: Callable) -> None:
         """Start periodic register calls to get push updates via syncPilot."""
@@ -534,10 +543,9 @@ class wizlight:
     async def sendUDPMessage(self, message: str) -> BulbResponse:
         """Send the UDP message to the bulb."""
         await self._ensure_connection()
-        timeout = 10
         data = message.encode("utf-8")
         send_interval = 0.5
-        max_send_datagrams = int(timeout / send_interval)
+        max_send_datagrams = int(TIMEOUT / send_interval)
         assert self.transport is not None
         async with self.lock:
             self.response_future = asyncio.Future()
