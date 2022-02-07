@@ -1,10 +1,14 @@
 """Tests for the Bulb API."""
+from typing import AsyncGenerator
 import pytest
+
+from unittest.mock import patch
 
 from pywizlight import SCENES, PilotBuilder, wizlight
 from pywizlight.discovery import discover_lights
 from pywizlight.exceptions import WizLightTimeOutError
 from pywizlight.tests.fake_bulb import startup_bulb
+from pywizlight.bulblibrary import BulbType, Features, KelvinRange, BulbClass
 
 
 @pytest.fixture(scope="module")
@@ -14,13 +18,17 @@ def startup_fake_bulb(request: pytest.FixtureRequest) -> None:
 
 
 @pytest.fixture()
-def correct_bulb(startup_fake_bulb: None) -> wizlight:
-    return wizlight(ip="127.0.0.1")
+async def correct_bulb(startup_fake_bulb: None) -> AsyncGenerator[wizlight, None]:
+    bulb = wizlight(ip="127.0.0.1")
+    yield bulb
+    await bulb.async_close()
 
 
 @pytest.fixture()
-def bad_bulb() -> wizlight:
-    return wizlight(ip="1.1.1.1")
+async def bad_bulb() -> AsyncGenerator[wizlight, None]:
+    bulb = wizlight(ip="1.1.1.1")
+    yield bulb
+    await bulb.async_close()
 
 
 # Non-Error states - PilotBuilder - Turn On
@@ -153,11 +161,27 @@ async def test_error_PilotBuilder_scene(correct_bulb: wizlight) -> None:
         await correct_bulb.turn_on(PilotBuilder(scene=532))
 
 
+@pytest.mark.asyncio
+async def test_fw_version(correct_bulb: wizlight) -> None:
+    """Test fetching the firmware version."""
+    bulb_type = await correct_bulb.get_bulbtype()
+    assert bulb_type == BulbType(
+        features=Features(color=True, color_tmp=True, effect=True, brightness=True),
+        name="ESP01_SHRGB_03",
+        kelvin_range=KelvinRange(max=6500, min=2200),
+        bulb_type=BulbClass.RGB,
+        fw_version="1.21.0",
+    )
+    assert correct_bulb.mac == "a8bb5006033d"
+
+
 # Error states / Timout
 @pytest.mark.asyncio
 async def test_timeout(bad_bulb: wizlight) -> None:
     """Test the timout exception after."""
-    with pytest.raises(WizLightTimeOutError):
+    with pytest.raises(WizLightTimeOutError), patch(
+        "pywizlight.bulb.SEND_INTERVAL", 0.01
+    ), patch("pywizlight.bulb.TIMEOUT", 0.01):
         await bad_bulb.getBulbConfig()
 
 
@@ -165,5 +189,7 @@ async def test_timeout(bad_bulb: wizlight) -> None:
 async def test_timeout_PilotBuilder(bad_bulb: wizlight) -> None:
     """Test Timout for Result."""
     # check if the bulb state it given as bool - mock ?
-    with pytest.raises(WizLightTimeOutError):
+    with pytest.raises(WizLightTimeOutError), patch(
+        "pywizlight.bulb.SEND_INTERVAL", 0.01
+    ), patch("pywizlight.bulb.TIMEOUT", 0.01):
         await bad_bulb.turn_on(PilotBuilder(brightness=255))

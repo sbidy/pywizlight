@@ -26,10 +26,17 @@ DW_SCENES = [9, 10, 13, 14, 29, 30, 31, 32]
 
 BulbResponse = Dict[str, Any]
 
-PUSH_KEEP_ALIVE_INTERVAL = 20
+
 TIMEOUT = 7
+SEND_INTERVAL = 0.5
+MAX_SEND_DATAGRAMS = int(TIMEOUT / SEND_INTERVAL)
+
+PUSH_KEEP_ALIVE_INTERVAL = 20
 MAX_TIME_BETWEEN_PUSH = PUSH_KEEP_ALIVE_INTERVAL + TIMEOUT
+
+
 NEVER_TIME = -120.0
+
 _IGNORE_KEYS = {"src", "mqttCd", "ts", "rssi"}
 
 
@@ -395,11 +402,13 @@ class wizlight:
             return self.bulbtype
 
         bulb_config = await self.getBulbConfig()
-        if "moduleName" not in bulb_config["result"]:
+        result = bulb_config["result"]
+        if "moduleName" not in result:
             raise ValueError("Unable to determine bulb type.")
         white_range = await self.getExtendedWhiteRange()
-        module_name = bulb_config["result"]["moduleName"]
-        self.bulbtype = BulbType.from_data(module_name, white_range)
+        module_name = result["moduleName"]
+        fw_version = result.get("fwVersion")
+        self.bulbtype = BulbType.from_data(module_name, white_range, fw_version)
         return self.bulbtype
 
     async def getWhiteRange(self) -> Optional[List[float]]:
@@ -498,19 +507,23 @@ class wizlight:
                 self.state = None
         return self.state
 
-    async def getMac(self) -> Optional[str]:
-        """Read the MAC from the bulb."""
-        resp = await self.getBulbConfig()
+    def _cache_mac_from_bulb_config(self, resp: BulbResponse) -> None:
+        """Cache the mac when we fetch bulb config to avoid fetching it again."""
         if resp is not None and "result" in resp and self.mac is None:
             self.mac = PilotParser(resp["result"]).get_mac()
-        else:
-            self.mac = None
+
+    async def getMac(self) -> Optional[str]:
+        """Read the MAC from the bulb."""
+        if not self.mac:
+            await self.getBulbConfig()
         return self.mac
 
     async def getBulbConfig(self) -> BulbResponse:
         """Return the configuration from the bulb."""
         message = r'{"method":"getSystemConfig","params":{}}'
-        return await self.sendUDPMessage(message)
+        resp = await self.sendUDPMessage(message)
+        self._cache_mac_from_bulb_config(resp)
+        return resp
 
     async def getModelConfig(self) -> Optional[BulbResponse]:
         """Return the new model capabilities from the bulb.
@@ -544,20 +557,18 @@ class wizlight:
         """Send the UDP message to the bulb."""
         await self._ensure_connection()
         data = message.encode("utf-8")
-        send_interval = 0.5
-        max_send_datagrams = int(TIMEOUT / send_interval)
         assert self.transport is not None
         async with self.lock:
             self.response_future = asyncio.Future()
-            for send in range(max_send_datagrams):
+            for send in range(MAX_SEND_DATAGRAMS):
                 attempt = send + 1
                 _LOGGER.debug(
-                    "%s: >> %s (%s/%s)", self.ip, data, attempt, max_send_datagrams
+                    "%s: >> %s (%s/%s)", self.ip, data, attempt, MAX_SEND_DATAGRAMS
                 )
                 self.transport.sendto(data, (self.ip, self.port))
                 try:
                     response = await asyncio.wait_for(
-                        asyncio.shield(self.response_future), timeout=send_interval
+                        asyncio.shield(self.response_future), timeout=SEND_INTERVAL
                     )
                 except asyncio.TimeoutError:
                     _LOGGER.debug(
@@ -565,9 +576,9 @@ class wizlight:
                         self.ip,
                         message,
                         attempt,
-                        max_send_datagrams,
+                        MAX_SEND_DATAGRAMS,
                     )
-                    if attempt == max_send_datagrams:
+                    if attempt == MAX_SEND_DATAGRAMS:
                         raise WizLightTimeOutError("The request to the bulb timed out")
                 else:
                     break
