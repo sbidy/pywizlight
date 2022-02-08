@@ -7,20 +7,12 @@ import socket
 from typing import Callable, Dict, Optional, Tuple, cast
 
 from pywizlight.protocol import WizProtocol
-from pywizlight.utils import to_wiz_json
+from pywizlight.utils import to_wiz_json, create_udp_socket
 
 _LOGGER = logging.getLogger(__name__)
 
 RESPOND_PORT = 38899
 LISTEN_PORT = 38900
-
-
-def create_udp_socket(listen_port: int) -> socket.socket:
-    """Create a udp socket used for communicating with the device."""
-    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    sock.bind(("", listen_port))
-    sock.setblocking(False)
-    return sock
 
 
 def generate_mac():
@@ -65,7 +57,7 @@ class PushManager:
         self.push_running = False
         self.lock = asyncio.Lock()
         self.loop = asyncio.get_event_loop()
-        self.subscriptions: Dict[str, Callable] = {}
+        self.subscriptions: Dict[str, Callable[[Dict, Tuple[str, int]], None]] = {}
         self.register_msg: Optional[str] = None
 
     async def start(self, target_ip: str) -> bool:
@@ -125,7 +117,7 @@ class PushManager:
 
         def _cancel():
             del self.subscriptions[mac]
-            asyncio.ensure_future(self.stop_if_no_subs())
+            asyncio.create_task(self.stop_if_no_subs())
 
         return _cancel
 
@@ -139,12 +131,9 @@ class PushManager:
             return
         method = resp.get("method")
         mac = resp.get("params", {}).get("mac")
-        if method != "syncPilot":
-            return
-        if self.push_transport:
-            data = to_wiz_json({"method": "syncPilot", "result": {"mac": mac}}).encode()
-            _LOGGER.debug("%s: PUSH ACK >> %s", (addr[0], RESPOND_PORT), data)
-            self.push_transport.sendto(data, (addr[0], RESPOND_PORT))
-        subscription = self.subscriptions.get(mac)
-        if subscription:
-            subscription(resp, addr)
+        # We used to send an response to `syncPilot` messages
+        # but the devices keeps sending them even if we do not
+        # so we no longer send them since all it effectively
+        # does it generate additional network traffic.
+        if method == "syncPilot" and mac in self.subscriptions:
+            self.subscriptions[mac](resp, addr)

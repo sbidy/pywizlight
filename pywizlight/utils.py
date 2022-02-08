@@ -1,4 +1,5 @@
 import json
+import socket
 
 
 def hex_to_percent(hex_value: float) -> float:
@@ -14,3 +15,21 @@ def percent_to_hex(percent: float) -> int:
 def to_wiz_json(dump_obj):
     """Convert an object to wiz json."""
     return json.dumps(dump_obj, separators=(",", ":"))
+
+
+def create_udp_broadcast_socket(listen_port: int) -> socket.socket:
+    """Create a udp broadcast socket used for communicating with the device."""
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+    sock.bind(("", listen_port))
+    sock.setblocking(False)
+    return sock
+
+
+def create_udp_socket(listen_port: int) -> socket.socket:
+    """Create a udp socket used for communicating with the device."""
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    sock.bind(("", listen_port))
+    sock.setblocking(False)
+    return sock

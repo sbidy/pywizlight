@@ -85,7 +85,7 @@ class BulbUDPRequestHandlerBase(socketserver.DatagramRequestHandler):
         if method == "setPilot":
             return_data = self.setPilot(json_data)
             self.wfile.write(return_data)
-        if method == "getPilot":
+        elif method == "getPilot":
             print(f"Response:{json.dumps(self.pilot_state)!r}")
             self.wfile.write(bytes(json.dumps(self.pilot_state), "utf-8"))
         elif method == "getSystemConfig":
