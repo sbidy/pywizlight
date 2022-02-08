@@ -42,7 +42,7 @@ class BulbClass(Enum):
     """Have Cool White and Warm White LEDs."""
     DW = "Dimmable White"
     """Have only Dimmable white LEDs."""
-    RGB = "RGB Bulb"
+    RGB = "RGB Tunable"
     """Have RGB LEDs."""
     SOCKET = "Socket"
     """Smart socket with only on/off."""
