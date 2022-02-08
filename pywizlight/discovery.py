@@ -3,13 +3,21 @@ import asyncio
 import dataclasses
 import json
 import logging
-import socket
 from asyncio import DatagramTransport, BaseTransport, AbstractEventLoop, Future
-from typing import TYPE_CHECKING, Dict, List, Tuple, Optional, Any
+from typing import cast, Dict, List, Tuple, Optional, Any
 
 from pywizlight import wizlight
+from pywizlight.utils import create_udp_broadcast_socket
 
 _LOGGER = logging.getLogger(__name__)
+
+PORT = 38899
+DEFAULT_WAIT_TIME = 5.0
+
+# Note: The IP and address we give the bulb does not matter because
+# we have register set to false which is telling the bulb to remove
+# the registration
+REGISTER_MESSAGE = b'{"method":"registration","params":{"phoneMac":"AAAAAAAAAAAA","register":false,"phoneIp":"1.2.3.4","id":"1"}}'  # noqa: E501
 
 
 @dataclasses.dataclass(frozen=True)
@@ -18,18 +26,6 @@ class DiscoveredBulb:
 
     ip_address: str
     mac_address: str
-
-    @staticmethod
-    def create_bulb_from_message(
-        raw_addr: Tuple[str, int], announce_message: str
-    ) -> "DiscoveredBulb":
-        """Create announce message."""
-        ip_address = raw_addr[0]
-        _LOGGER.debug(f"Found bulb with IP: {ip_address}")
-        return DiscoveredBulb(
-            ip_address=ip_address,
-            mac_address=json.loads(announce_message)["result"]["mac"],
-        )
 
 
 @dataclasses.dataclass
@@ -66,41 +62,28 @@ class BroadcastProtocol(asyncio.DatagramProtocol):
 
     def connection_made(self, transport: BaseTransport) -> None:
         """Init connection to socket and register broadcasts."""
-        if TYPE_CHECKING:
-            # TODO: if this is made a runtime check, it needs some changes (see #94)
-            assert isinstance(
-                transport, BaseTransport
-            )  # Required to keep this liskov-safe
-        self.transport = transport  # type: ignore
-        sock = transport.get_extra_info("socket")
-        sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+        self.transport = cast(DatagramTransport, transport)
         self.broadcast_registration()
 
     def broadcast_registration(self) -> None:
         """Send a registration method as UDP broadcast."""
-        # Note: The IP and address we give the bulb here don't seem to matter for our
-        # intents and purposes, so they're hardcoded to technically valid dummy data.
-        # Fix for async problems if broaddcast_registration is called twice! See #13.
-        # dirty dirty hack
         if not self.transport:
             return
-        try:
-            register_method = r'{"method":"registration","params":{"phoneMac":"AAAAAAAAAAAA","register":false,"phoneIp":"1.2.3.4","id":"1"}}'  # noqa: E501
-            self.transport.sendto(
-                register_method.encode(), (self.broadcast_address, 38899)
-            )
-            self.loop.call_later(1, self.broadcast_registration)
-        except AttributeError:
-            pass
+        self.transport.sendto(REGISTER_MESSAGE, (self.broadcast_address, 38899))
+        self.loop.call_later(1, self.broadcast_registration)
 
     def datagram_received(self, data: bytes, addr: Tuple[str, int]) -> None:
         """Receive data from broadcast."""
         _LOGGER.debug(f"Received data {data!r} from IP address {addr}")
-        decoded_message = data.decode()
-        if """"success":true""" in decoded_message:
-            bulb = DiscoveredBulb.create_bulb_from_message(addr, decoded_message)
-            self.registry.register(bulb)
+        try:
+            resp = json.loads(data.decode())
+        except json.JSONDecodeError:
+            _LOGGER.error("%s: Sent invalid message: %s", addr, data)
+            return
+        mac = resp.get("result", {}).get("mac")
+        if mac:
+            _LOGGER.debug("Found bulb with IP: %s and MAC: %s", addr[0], mac)
+            self.registry.register(DiscoveredBulb(addr[0], mac))
 
     def connection_lost(self, exc: Any) -> None:
         """Return connection error."""
@@ -109,10 +92,11 @@ class BroadcastProtocol(asyncio.DatagramProtocol):
             self.future.set_result(None)
         else:
             self.future.set_exception(exc)
+        self.transport = None
 
 
 async def find_wizlights(
-    wait_time: float = 5, broadcast_address: str = "255.255.255.255"
+    wait_time: float = DEFAULT_WAIT_TIME, broadcast_address: str = "255.255.255.255"
 ) -> List[DiscoveredBulb]:
     """Start discovery and return list of IPs of the bulbs."""
     registry = BulbRegistry()
@@ -120,27 +104,24 @@ async def find_wizlights(
     future = loop.create_future()
     transport, protocol = await loop.create_datagram_endpoint(
         lambda: BroadcastProtocol(loop, registry, broadcast_address, future),
-        local_addr=("0.0.0.0", 38899),
+        sock=create_udp_broadcast_socket(PORT),
     )
-    try:
-        await asyncio.sleep(wait_time)
-    finally:
-        transport.close()
-        await future
-        bulbs = registry.bulbs()
-        for bulb in bulbs:
-            _LOGGER.info(
-                f"Discovered bulb {bulb.ip_address} with MAC {bulb.mac_address}"
-            )
-        return bulbs
-
-
-async def discover_lights(broadcast_space: str = "255.255.255.255") -> List[wizlight]:
-    """Find lights and return list with wizlight objects."""
-    discovered_IPs = await find_wizlights(broadcast_address=broadcast_space)
-    # empty list for adding bulbs
-    bulbs = []
-    # create light entities from register
-    for entries in discovered_IPs:
-        bulbs.append(wizlight(ip=entries.ip_address, mac=entries.mac_address))
+    await asyncio.sleep(wait_time)
+    transport.close()
+    await future
+    bulbs = registry.bulbs()
+    for bulb in bulbs:
+        _LOGGER.info(f"Discovered bulb {bulb.ip_address} with MAC {bulb.mac_address}")
     return bulbs
+
+
+async def discover_lights(
+    broadcast_space: str = "255.255.255.255", wait_time: float = DEFAULT_WAIT_TIME
+) -> List[wizlight]:
+    """Find lights and return list with wizlight objects."""
+    discovered_IPs = await find_wizlights(
+        wait_time=wait_time, broadcast_address=broadcast_space
+    )
+    return [
+        wizlight(ip=entry.ip_address, mac=entry.mac_address) for entry in discovered_IPs
+    ]

@@ -35,9 +35,15 @@ async def bad_bulb() -> AsyncGenerator[wizlight, None]:
 @pytest.mark.asyncio
 async def test_Bulb_Discovery(correct_bulb: wizlight) -> None:
     """Test discovery function."""
-    bulbs = await discover_lights(broadcast_space="192.168.178.255")
+    # Use a random available port since otherwise the
+    # test may fail
+    with patch("pywizlight.discovery.PORT", 0):
+        bulbs = await discover_lights(broadcast_space="192.168.178.255", wait_time=0.02)
     for bulb in bulbs:
-        state = await bulb.updateState()
+        with patch("pywizlight.bulb.SEND_INTERVAL", 0.01), patch(
+            "pywizlight.bulb.TIMEOUT", 0.01
+        ):
+            state = await bulb.updateState()
         assert state and state.get_state() is False
 
 

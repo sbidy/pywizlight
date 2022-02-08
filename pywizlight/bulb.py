@@ -40,7 +40,7 @@ NEVER_TIME = -120.0
 _IGNORE_KEYS = {"src", "mqttCd", "ts", "rssi"}
 
 
-def states_match(old: dict[str, Any], new: dict[str, Any]) -> bool:
+def states_match(old: Dict[str, Any], new: Dict[str, Any]) -> bool:
     """Check if states match except for keys we do not want to callback on."""
     for key, val in new.items():
         if old.get(key) != val and key not in _IGNORE_KEYS:
@@ -285,6 +285,24 @@ class PilotParser:
             return None
 
 
+async def _send_udp_message_with_retry(
+    message: str,
+    transport: asyncio.DatagramTransport,
+    response_future: asyncio.Future,
+    ip: str,
+    port: int,
+) -> None:
+    """Send a UDP message multiple times until we reach the maximum or a response is recieved."""
+    data = message.encode("utf-8")
+    for send in range(MAX_SEND_DATAGRAMS):
+        if transport.is_closing() or response_future.done():
+            return
+        attempt = send + 1
+        _LOGGER.debug("%s: >> %s (%s/%s)", ip, data, attempt, MAX_SEND_DATAGRAMS)
+        transport.sendto(data, (ip, port))
+        await asyncio.sleep(SEND_INTERVAL)
+
+
 class wizlight:
     """Create an instance of a WiZ Light Bulb."""
 
@@ -333,7 +351,7 @@ class wizlight:
         if self.transport:
             return
         transport_proto = await self.loop.create_datagram_endpoint(
-            lambda: WizProtocol(on_response=self._on_response),
+            lambda: WizProtocol(on_response=self._on_response, on_error=self._on_error),
             remote_addr=(self.ip, self.port),
         )
         self.transport = cast(asyncio.DatagramTransport, transport_proto[0])
@@ -342,15 +360,17 @@ class wizlight:
     def register(self) -> None:
         """Call register to keep alive push updates."""
         if self.push_running:
-            asyncio.ensure_future(
+            asyncio.create_task(
                 self._async_send_register(PushManager().get().register_msg)
             )
             self.loop.call_later(PUSH_KEEP_ALIVE_INTERVAL, self.register)
 
     async def _async_send_register(self, message: str) -> None:
         """Send the registration message."""
-        with contextlib.suppress(WizLightTimeOutError):
+        try:
             await self.sendUDPMessage(message)
+        except (WizLightTimeOutError, WizLightConnectionError) as ex:
+            _LOGGER.debug("%s: Registration for push updates failed: %s", self.ip, ex)
 
     async def start_push(self, callback: Callable) -> None:
         """Start periodic register calls to get push updates via syncPilot."""
@@ -378,6 +398,11 @@ class wizlight:
         _LOGGER.debug("%s: << %s", self.ip, message)
         if self.response_future and not self.response_future.done():
             self.response_future.set_result(message)
+
+    def _on_error(self, exception: Optional[Exception]) -> None:
+        """Handle a protocol error."""
+        if exception and self.response_future and not self.response_future.done():
+            self.response_future.set_exception(exception)
 
     def _check_connection(self) -> None:
         """Check the connection to the bulb."""
@@ -556,40 +581,40 @@ class wizlight:
     async def sendUDPMessage(self, message: str) -> BulbResponse:
         """Send the UDP message to the bulb."""
         await self._ensure_connection()
-        data = message.encode("utf-8")
         assert self.transport is not None
         async with self.lock:
             self.response_future = asyncio.Future()
-            for send in range(MAX_SEND_DATAGRAMS):
-                attempt = send + 1
-                _LOGGER.debug(
-                    "%s: >> %s (%s/%s)", self.ip, data, attempt, MAX_SEND_DATAGRAMS
+            send_task = asyncio.create_task(
+                _send_udp_message_with_retry(
+                    message, self.transport, self.response_future, self.ip, self.port
                 )
-                self.transport.sendto(data, (self.ip, self.port))
-                try:
-                    response = await asyncio.wait_for(
-                        asyncio.shield(self.response_future), timeout=SEND_INTERVAL
-                    )
-                except asyncio.TimeoutError:
-                    _LOGGER.debug(
-                        "%s: Timed out waiting for response to %s (%s/%s)",
-                        self.ip,
-                        message,
-                        attempt,
-                        MAX_SEND_DATAGRAMS,
-                    )
-                    if attempt == MAX_SEND_DATAGRAMS:
-                        raise WizLightTimeOutError("The request to the bulb timed out")
-                else:
-                    break
-
+            )
+            try:
+                response = await asyncio.wait_for(
+                    asyncio.shield(self.response_future), timeout=TIMEOUT
+                )
+            except OSError as ex:
+                raise WizLightConnectionError(str(ex)) from ex
+            except asyncio.TimeoutError:
+                _LOGGER.debug(
+                    "%s: Timed out waiting for response to %s after %s tries.",
+                    self.ip,
+                    message,
+                    MAX_SEND_DATAGRAMS,
+                )
+                raise WizLightTimeOutError("The request to the bulb timed out")
+            finally:
+                await asyncio.sleep(0)  # Try to let the task finish without cancelation
+                if not send_task.done():
+                    send_task.cancel()
+                    with contextlib.suppress(asyncio.CancelledError):
+                        await send_task
         resp = json.loads(response.decode())
-        if "error" not in resp:
-            return resp
-        elif resp["error"]["code"] == -32601:
-            raise WizLightMethodNotFound("Method not found; maybe older bulb FW?")
-        else:
+        if "error" in resp:
+            if resp["error"]["code"] == -32601:
+                raise WizLightMethodNotFound("Method not found; maybe older bulb FW?")
             raise WizLightConnectionError(f'Error recieved: {resp["error"]}')
+        return resp
 
     async def async_close(self):
         """Close the transport."""
@@ -606,5 +631,5 @@ class wizlight:
 
     def __del__(self):
         """Close the connection when the object is destroyed."""
-        if self.transport:
+        if self.transport and not self.transport.is_closing():
             self.loop.call_soon_threadsafe(self._async_close)
