@@ -52,7 +52,7 @@ def get_initial_pilot() -> Dict[str, Any]:
         "result": {
             "mac": "ABCABCABCABC",
             "rssi": -62,
-            "src": "",
+            "src": "udp",
             "state": False,
             "sceneId": 0,
             "r": 255,

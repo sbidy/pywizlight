@@ -7,6 +7,7 @@ import pytest
 from pywizlight import SCENES, PilotBuilder, wizlight
 from pywizlight.bulblibrary import BulbClass, BulbType, Features, KelvinRange
 from pywizlight.discovery import discover_lights
+from pywizlight.bulb import states_match
 from pywizlight.exceptions import WizLightTimeOutError
 from pywizlight.tests.fake_bulb import startup_bulb
 
@@ -149,6 +150,13 @@ async def test_PilotBuilder_speed(correct_bulb: wizlight) -> None:
     assert state and state.get_speed() == 50
 
 
+@pytest.mark.asyncio
+async def test_get_source(correct_bulb: wizlight) -> None:
+    """Test getting the source."""
+    state = await correct_bulb.updateState()
+    assert state and state.get_source() == "udp"
+
+
 # ------ Error states -------------------------------------
 @pytest.mark.asyncio
 async def test_error_PilotBuilder_brightness(correct_bulb: wizlight) -> None:
@@ -265,3 +273,84 @@ async def test_timeout_PilotBuilder(bad_bulb: wizlight) -> None:
         "pywizlight.bulb.SEND_INTERVAL", 0.01
     ), patch("pywizlight.bulb.TIMEOUT", 0.01):
         await bad_bulb.turn_on(PilotBuilder(brightness=255))
+
+
+@pytest.mark.asyncio
+async def test_states_match() -> None:
+    """Test states match always sends pir updates but we ignore mqttCd, rssi, and ts."""
+    state_off_ios = {
+        "mac": "a8bb50d46a1c",
+        "rssi": -70,
+        "src": "ios",
+        "mqttCd": 0,
+        "ts": 1644440635,
+        "state": False,
+        "sceneId": 0,
+    }
+    state_on_ios = {
+        "mac": "a8bb50d46a1c",
+        "rssi": -45,
+        "src": "ios",
+        "mqttCd": 0,
+        "ts": 1644440662,
+        "state": False,
+        "sceneId": 27,
+        "speed": 100,
+        "dimming": 100,
+    }
+    state_on_hb = {
+        "mac": "a8bb50d46a1c",
+        "rssi": -45,
+        "src": "hb",
+        "mqttCd": 0,
+        "ts": 1644440642,
+        "state": False,
+        "sceneId": 27,
+        "speed": 100,
+        "dimming": 100,
+    }
+    ios_scene27 = {
+        "mac": "a8bb50d46a1c",
+        "rssi": -48,
+        "src": "ios",
+        "state": True,
+        "sceneId": 27,
+        "speed": 100,
+        "dimming": 100,
+    }
+    ios_off = {
+        "mac": "a8bb50d46a1c",
+        "rssi": -69,
+        "src": "ios",
+        "state": False,
+        "sceneId": 0,
+    }
+    occupancy_detected_scene27 = {
+        "mac": "a8bb50d46a1c",
+        "rssi": -48,
+        "src": "pir",
+        "state": True,
+        "sceneId": 27,
+        "speed": 100,
+        "dimming": 100,
+    }
+    occupancy_not_detected = {
+        "mac": "a8bb50d46a1c",
+        "rssi": -69,
+        "src": "pir",
+        "state": False,
+        "sceneId": 0,
+    }
+
+    assert states_match(state_off_ios, state_off_ios)
+    assert not states_match(state_off_ios, state_on_ios)
+    assert states_match(
+        state_on_ios, state_on_hb
+    )  # source change does not matter unless its a PIR
+    assert not states_match(
+        ios_scene27, occupancy_detected_scene27
+    )  # source change matters since its a PIR
+    assert states_match(occupancy_detected_scene27, occupancy_detected_scene27)
+    assert not states_match(
+        ios_off, occupancy_not_detected
+    )  # source change matters since its a PIR
