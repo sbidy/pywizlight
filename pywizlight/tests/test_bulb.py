@@ -111,6 +111,14 @@ async def test_PilotBuilder_hucolor(correct_bulb: wizlight) -> None:
 
 
 @pytest.mark.asyncio
+async def test_setting_rgbw(correct_bulb: wizlight) -> None:
+    """Test setting rgbw."""
+    await correct_bulb.turn_on(PilotBuilder(rgbw=(1, 2, 3, 4)))
+    state = await correct_bulb.updateState()
+    assert state and state.get_rgbw() == (1, 2, 3, 4)
+
+
+@pytest.mark.asyncio
 async def test_PilotBuilder_scene(correct_bulb: wizlight) -> None:
     """Test scene."""
     await correct_bulb.turn_on(PilotBuilder(scene=1))

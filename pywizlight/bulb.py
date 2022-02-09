@@ -38,6 +38,13 @@ NEVER_TIME = -120.0
 
 _IGNORE_KEYS = {"src", "mqttCd", "ts", "rssi"}
 
+RGB_ORDER = ["r", "g", "b"]
+RGB_COLORS = set(RGB_ORDER)
+RGBW_ORDER = ["r", "g", "b", "w"]
+RGBW_COLORS = set(RGBW_ORDER)
+RGBWW_ORDER = ["r", "g", "b", "c", "w"]
+RGBWW_COLORS = set(RGBWW_ORDER)
+
 
 def states_match(old: Dict[str, Any], new: Dict[str, Any]) -> bool:
     """Check if states match except for keys we do not want to callback on."""
@@ -45,6 +52,15 @@ def states_match(old: Dict[str, Any], new: Dict[str, Any]) -> bool:
         if old.get(key) != val and key not in _IGNORE_KEYS:
             return False
     return True
+
+
+def _rgb_in_range_or_raise(rgb: Tuple[Union[float, int], ...]) -> None:
+    if not (0 <= rgb[0] < 256):
+        raise ValueError("Red is not in range between 0-255.")
+    if not (0 <= rgb[1] < 256):
+        raise ValueError("Green is not in range between 0-255.")
+    if not (0 <= rgb[2] < 256):
+        raise ValueError("Blue is not in range between 0-255.")
 
 
 class PilotBuilder:
@@ -57,6 +73,8 @@ class PilotBuilder:
         speed: Optional[int] = None,
         scene: Optional[int] = None,
         rgb: Optional[Tuple[float, float, float]] = None,
+        rgbw: Optional[Tuple[int, int, int, int]] = None,
+        rgbww: Optional[Tuple[int, int, int, int, int]] = None,
         hucolor: Optional[Tuple[float, float]] = None,
         brightness: Optional[int] = None,
         colortemp: Optional[int] = None,
@@ -64,23 +82,26 @@ class PilotBuilder:
     ) -> None:
         """Set the parameter."""
         self.pilot_params: Dict[str, Any] = {"state": state}
-
-        if warm_white is not None:
-            self._set_warm_white(warm_white)
-        if cold_white is not None:
-            self._set_cold_white(cold_white)
         if speed is not None:
             self._set_speed(speed)
         if scene is not None:
             self._set_scene(scene)
-        if rgb is not None:
-            self._set_rgb(rgb)
         if brightness is not None:
             self._set_brightness(brightness)
-        if colortemp is not None:
+        if rgb is not None:
+            self._set_rgb(rgb)
+        elif rgbw is not None:
+            self._set_rgbw(rgbw)
+        elif rgbww is not None:
+            self._set_rgbww(rgbww)
+        elif colortemp is not None:
             self._set_colortemp(colortemp)
-        if hucolor is not None:
+        elif hucolor is not None:
             self._set_hs_color(hucolor)
+        if warm_white is not None:
+            self._set_warm_white(warm_white)
+        if cold_white is not None:
+            self._set_cold_white(cold_white)
 
     def set_pilot_message(self) -> str:
         """Return the pilot message."""
@@ -117,25 +138,30 @@ class PilotBuilder:
             raise ValueError("Scene is not available. Only 0 to 32 are supported")
         self.pilot_params["sceneId"] = scene_id
 
+    def _set_rgbw(self, rgbw: Tuple[int, int, int, int]) -> None:
+        """Set the RGBW color state of the bulb."""
+        _rgb_in_range_or_raise(rgbw)
+        self.pilot_params.update({key: rgbw[idx] for idx, key in enumerate(RGB_ORDER)})
+        self._set_warm_white(rgbw[3])
+
+    def _set_rgbww(self, rgbww: Tuple[int, int, int, int, int]) -> None:
+        """Set the RGBWW color state of the bulb."""
+        _rgb_in_range_or_raise(rgbww)
+        params = self.pilot_params
+        params.update({key: rgbww[idx] for idx, key in enumerate(RGB_ORDER)})
+        self._set_cold_white(rgbww[3])
+        self._set_warm_white(rgbww[4])
+
     def _set_rgb(self, values: Tuple[float, float, float]) -> None:
         """Set the RGB color state of the bulb."""
-
         # Setup the tuples for the RGB values
         red, green, blue = values
-        if not (0 <= red < 256):
-            raise ValueError("Red is not in range between 0-255.")
-        if not (0 <= green < 256):
-            raise ValueError("Green is not in range between 0-255.")
-        if not (0 <= blue < 256):
-            raise ValueError("Blue is not in range between 0-255.")
+        _rgb_in_range_or_raise(values)
         # Get the RGB+CW values
         rgb_out, cw = rgb2rgbcw(values)
         # Extract the RGB values
-        red, green, blue = rgb_out
-        # Set the RGB values
-        self.pilot_params["r"] = red
-        self.pilot_params["g"] = green
-        self.pilot_params["b"] = blue
+        params = self.pilot_params
+        params.update({key: rgb_out[idx] for idx, key in enumerate(RGB_ORDER)})
         # No CW because of full RGB color
         if cw is not None:
             # Use the existing set_warm_white function to set the CW values
@@ -145,17 +171,10 @@ class PilotBuilder:
         """Set the HS color state of the bulb."""
         # Transform the HS values to RGB+CW values
         rgb, cw = hs2rgbcw(values)
-        red, green, blue = rgb
-        if not (0 <= red < 256):
-            raise ValueError("Red is not in range between 0-255.")
-        if not (0 <= green < 256):
-            raise ValueError("Green is not in range between 0-255.")
-        if not (0 <= blue < 256):
-            raise ValueError("Blue is not in range between 0-255.")
+        _rgb_in_range_or_raise(rgb)
         # Set the RGB values
-        self.pilot_params["r"] = red
-        self.pilot_params["g"] = green
-        self.pilot_params["b"] = blue
+        params = self.pilot_params
+        params.update({key: rgb[idx] for idx, key in enumerate(RGB_ORDER)})
         if cw is not None:
             # Use the existing set_warm_white function to set the CW values
             self._set_warm_white(cw)
@@ -236,17 +255,30 @@ class PilotParser:
 
     def get_rgb(self) -> Union[Tuple[None, None, None], Vector]:
         """Get the RGB color state of the bulb and turns it on."""
-        if (
-            "r" in self.pilotResult
-            and "g" in self.pilotResult
-            and "b" in self.pilotResult
-        ):
-            r = self.pilotResult["r"]
-            g = self.pilotResult["g"]
-            b = self.pilotResult["b"]
-            return float(r), float(g), float(b)
-            # no RGB color value was set
+        state = self.pilotResult
+        if RGB_COLORS.issubset(state):
+            return tuple(int(state[val]) for val in RGB_ORDER)
+        # no RGB color value was set
         return None, None, None
+
+    def get_rgbw(self) -> Optional[Tuple[int, int, int, int]]:
+        """Get the RGBW color of the device."""
+        state = self.pilotResult
+        if not RGBW_COLORS.issubset(state):
+            return None
+        return cast(
+            Tuple[int, int, int, int], tuple(int(state[val]) for val in RGBW_ORDER)
+        )
+
+    def get_rgbww(self) -> Optional[Tuple[int, int, int, int, int]]:
+        """Get the RGBWW color of the device."""
+        state = self.pilotResult
+        if not RGBWW_COLORS.issubset(state):
+            return None
+        return cast(
+            Tuple[int, int, int, int, int],
+            tuple(int(state[val]) for val in RGBWW_ORDER),
+        )
 
     def get_brightness(self) -> Optional[int]:
         """Get the value of the brightness 0-255."""
