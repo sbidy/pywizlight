@@ -12,7 +12,7 @@ RGB -- Fullstack bulb
 """
 import dataclasses
 from enum import Enum
-from typing import Optional, List
+from typing import List, Optional
 
 from pywizlight.exceptions import WizLightNotKnownBulb
 
@@ -71,10 +71,16 @@ class BulbType:
     kelvin_range: Optional[KelvinRange]
     bulb_type: BulbClass
     fw_version: Optional[str]
+    white_channels: Optional[int]
+    white_to_color_ratio: Optional[int]
 
     @staticmethod
     def from_data(
-        module_name: str, kelvin_list: Optional[List[float]], fw_version: Optional[str]
+        module_name: str,
+        kelvin_list: Optional[List[float]],
+        fw_version: Optional[str],
+        white_channels: Optional[int],
+        white_to_color_ratio: Optional[int],
     ) -> "BulbType":
         if kelvin_list:
             kelvin_range: Optional[KelvinRange] = KelvinRange(
@@ -107,4 +113,6 @@ class BulbType:
             features=features,
             kelvin_range=kelvin_range,
             fw_version=fw_version,
+            white_channels=white_channels,
+            white_to_color_ratio=white_to_color_ratio,
         )

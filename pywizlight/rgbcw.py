@@ -1,9 +1,11 @@
 """Manages the RGBCW color."""
 import logging
 from math import atan2, cos, pi
-from typing import Tuple, Iterable
+from typing import Iterable, Tuple
 
 from .vec import (
+    EPSILON,
+    Vector,
     vecAdd,
     vecDot,
     vecFormat,
@@ -11,8 +13,6 @@ from .vec import (
     vecInt,
     vecLen,
     vecMul,
-    EPSILON,
-    Vector,
 )
 
 _LOGGER = logging.getLogger(__name__)

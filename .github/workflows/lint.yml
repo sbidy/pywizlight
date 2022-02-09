@@ -27,7 +27,7 @@ jobs:
           python-version: 3.8
 
       - name: Install Python dependencies
-        run: pip install black flake8 mypy pytest pytest-cov -e .
+        run: pip install black flake8 mypy pytest pytest-cov pytest-asyncio -e .
 
       - name: Run linters
         uses: samuelmeuli/lint-action@v1

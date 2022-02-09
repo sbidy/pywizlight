@@ -4,6 +4,46 @@ import socketserver
 import threading
 from typing import Any, Callable, Dict
 
+MODULE_CONFIGS = {
+    "ESP01_SHRGB_03": {
+        "ps": 1,
+        "pwmFreq": 1000,
+        "pwmRange": [3, 100],
+        "wcr": 30,
+        "nowc": 1,
+        "cctRange": [2200, 2700, 4800, 6500],
+        "renderFactor": [171, 255, 75, 255, 43, 85, 0, 0, 0, 0],
+    },
+    "ESP10_SOCKET_06": {
+        "ps": 1,
+        "pwmFreq": 200,
+        "pwmRange": [1, 100],
+        "wcr": 20,
+        "nowc": 2,
+        "cctRange": [2700, 2700, 2700, 2700],
+        "renderFactor": [255, 0, 255, 255, 0, 0, 0, 0, 0, 0],
+    },
+    "ESP05_SHDW_21": {
+        "ps": 1,
+        "pwmFreq": 1000,
+        "pwmRange": [5, 100],
+        "wcr": 20,
+        "nowc": 1,
+        "cctRange": [2700, 2700, 2700, 2700],
+        "renderFactor": [255, 0, 255, 255, 0, 0, 0, 0, 0, 0],
+    },
+    "ESP20_SHRGB_01ABI": {
+        "ps": 0,
+        "pwmFreq": 2000,
+        "pwmRange": [5, 100],
+        "wcr": 80,
+        "nowc": 2,
+        "cctRange": [2700, 2700, 6500, 6500],
+        "renderFactor": [255, 0, 255, 255, 0, 0, 0, 81, 245, 178],
+        "drvIface": 0,
+    },
+}
+
 
 def get_initial_pilot() -> Dict[str, Any]:
     return {
@@ -45,19 +85,11 @@ def get_initial_sys_config() -> Dict[str, Any]:
     }
 
 
-def get_initial_model_config() -> Dict[str, Any]:
+def get_initial_model_config(module_name: str) -> Dict[str, Any]:
     return {
         "method": "getModelConfig",
         "env": "pro",
-        "result": {
-            "ps": 1,
-            "pwmFreq": 1000,
-            "pwmRange": [3, 100],
-            "wcr": 30,
-            "nowc": 1,
-            "cctRange": [2200, 2700, 4800, 6500],
-            "renderFactor": [171, 255, 75, 255, 43, 85, 0, 0, 0, 0],
-        },
+        "result": MODULE_CONFIGS[module_name],
     }
 
 
@@ -106,7 +138,7 @@ def make_udp_fake_bulb_server(module_name: str) -> socketserver.ThreadingUDPServ
     """Configure a fake bulb instance."""
     pilot_state = get_initial_pilot()
     sys_config = get_initial_sys_config()
-    model_config = get_initial_model_config()
+    model_config = get_initial_model_config(module_name)
     sys_config["result"]["moduleName"] = module_name
 
     BulbUDPRequestHandler = type(

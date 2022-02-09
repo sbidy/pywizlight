@@ -2,41 +2,16 @@
 import asyncio
 import json
 import logging
-import random
-import socket
 from typing import Callable, Dict, Optional, Tuple, cast
 
+from pywizlight.models import DiscoveredBulb
 from pywizlight.protocol import WizProtocol
-from pywizlight.utils import to_wiz_json, create_udp_socket
+from pywizlight.utils import create_udp_socket, generate_mac, get_source_ip, to_wiz_json
 
 _LOGGER = logging.getLogger(__name__)
 
 RESPOND_PORT = 38899
 LISTEN_PORT = 38900
-
-
-def generate_mac():
-    """Generates a fake mac address."""
-    return "{}{}{}{}{}{}{}{}{}{}{}{}".format(
-        *(random.SystemRandom().choice("0123456789abcdef") for _ in range(12))
-    )
-
-
-def get_source_ip(target_ip: str) -> Optional[str]:
-    """Return the source ip that will reach target_ip."""
-    test_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    test_sock.setblocking(False)  # must be non-blocking for async
-    try:
-        test_sock.connect((target_ip, 1))
-        return cast(str, test_sock.getsockname()[0])
-    except Exception:  # pylint: disable=broad-except
-        _LOGGER.debug(
-            "The system could not auto detect the source ip for %s on your operating system",
-            target_ip,
-        )
-        return None
-    finally:
-        test_sock.close()
 
 
 class PushManager:
@@ -55,10 +30,17 @@ class PushManager:
         self.push_transport: Optional[asyncio.DatagramTransport] = None
         self.push_protocol: Optional[WizProtocol] = None
         self.push_running = False
+        self.discovery_callback: Optional[Callable[[DiscoveredBulb], None]] = None
         self.lock = asyncio.Lock()
         self.loop = asyncio.get_event_loop()
         self.subscriptions: Dict[str, Callable[[Dict, Tuple[str, int]], None]] = {}
         self.register_msg: Optional[str] = None
+
+    def set_discovery_callback(
+        self, callback: Optional[Callable[[DiscoveredBulb], None]]
+    ) -> None:
+        """Set the callback to run when there is a new discovery."""
+        self.discovery_callback = callback
 
     async def start(self, target_ip: str) -> bool:
         """Start listening for push updates on LISTEN_PORT if we are not already listening."""
@@ -106,6 +88,7 @@ class PushManager:
             if not self.push_running or self.subscriptions:
                 return
             self.push_running = False
+            self.discovery_callback = None
             if self.push_transport:
                 self.push_transport.close()
                 self.push_transport = None
@@ -135,5 +118,7 @@ class PushManager:
         # but the devices keeps sending them even if we do not
         # so we no longer send them since all it effectively
         # does it generate additional network traffic.
+        if method == "firstBeat" and self.discovery_callback:
+            self.discovery_callback(DiscoveredBulb(addr[0], mac))
         if method == "syncPilot" and mac in self.subscriptions:
             self.subscriptions[mac](resp, addr)

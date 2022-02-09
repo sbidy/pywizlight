@@ -1,14 +1,14 @@
 """Tests for the Bulb API."""
 from typing import AsyncGenerator
-import pytest
-
 from unittest.mock import patch
 
+import pytest
+
 from pywizlight import SCENES, PilotBuilder, wizlight
+from pywizlight.bulblibrary import BulbClass, BulbType, Features, KelvinRange
 from pywizlight.discovery import discover_lights
 from pywizlight.exceptions import WizLightTimeOutError
 from pywizlight.tests.fake_bulb import startup_bulb
-from pywizlight.bulblibrary import BulbType, Features, KelvinRange, BulbClass
 
 
 @pytest.fixture(scope="module")
@@ -18,7 +18,9 @@ def startup_fake_bulb(request: pytest.FixtureRequest) -> None:
 
 
 @pytest.fixture()
-async def correct_bulb(startup_fake_bulb: None) -> AsyncGenerator[wizlight, None]:
+async def correct_bulb(
+    startup_fake_bulb: pytest.FixtureRequest,
+) -> AsyncGenerator[wizlight, None]:
     bulb = wizlight(ip="127.0.0.1")
     yield bulb
     await bulb.async_close()
@@ -100,12 +102,31 @@ async def test_PilotBuilder_rgb(correct_bulb: wizlight) -> None:
 
 
 @pytest.mark.asyncio
+async def test_PilotBuilder_hucolor(correct_bulb: wizlight) -> None:
+    """Test RGB Value via hucolor."""
+    await correct_bulb.turn_on(PilotBuilder(hucolor=(100, 50)))
+    state = await correct_bulb.updateState()
+
+    assert state and state.get_rgb() == (88.0, 255.0, 0.0)
+
+
+@pytest.mark.asyncio
 async def test_PilotBuilder_scene(correct_bulb: wizlight) -> None:
-    """Test Screen."""
+    """Test scene."""
     await correct_bulb.turn_on(PilotBuilder(scene=1))
     state = await correct_bulb.updateState()
 
     assert state and state.get_scene() == SCENES[1]
+
+
+@pytest.mark.asyncio
+async def test_PilotBuilder_speed(correct_bulb: wizlight) -> None:
+    """Test speed."""
+    await correct_bulb.turn_on(PilotBuilder(scene=1, speed=50))
+    state = await correct_bulb.updateState()
+
+    assert state and state.get_scene() == SCENES[1]
+    assert state and state.get_speed() == 50
 
 
 # ------ Error states -------------------------------------
@@ -161,10 +182,24 @@ async def test_error_PilotBuilder_blue(correct_bulb: wizlight) -> None:
 
 
 @pytest.mark.asyncio
+async def test_error_PilotBuilder_cold_white(correct_bulb: wizlight) -> None:
+    """Error Cold White Value."""
+    with pytest.raises(ValueError):
+        await correct_bulb.turn_on(PilotBuilder(cold_white=9999))
+
+
+@pytest.mark.asyncio
 async def test_error_PilotBuilder_scene(correct_bulb: wizlight) -> None:
-    """Error Screen."""
+    """Error scene."""
     with pytest.raises(ValueError):
         await correct_bulb.turn_on(PilotBuilder(scene=532))
+
+
+@pytest.mark.asyncio
+async def test_error_PilotBuilder_speed(correct_bulb: wizlight) -> None:
+    """Error speed."""
+    with pytest.raises(ValueError):
+        await correct_bulb.turn_on(PilotBuilder(speed=532))
 
 
 @pytest.mark.asyncio
@@ -177,6 +212,8 @@ async def test_fw_version(correct_bulb: wizlight) -> None:
         kelvin_range=KelvinRange(max=6500, min=2200),
         bulb_type=BulbClass.RGB,
         fw_version="1.21.0",
+        white_channels=1,
+        white_to_color_ratio=30,
     )
     assert correct_bulb.mac == "a8bb5006033d"
 
