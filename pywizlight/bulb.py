@@ -3,26 +3,25 @@ import asyncio
 import contextlib
 import json
 import logging
-import socket
 import time
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union, cast
 
-from pywizlight.bulblibrary import BulbClass, BulbType
+from pywizlight.bulblibrary import BulbType
 from pywizlight.exceptions import (
     WizLightConnectionError,
     WizLightMethodNotFound,
     WizLightTimeOutError,
 )
+from pywizlight.models import DiscoveredBulb
 from pywizlight.protocol import WizProtocol
 from pywizlight.push_manager import PushManager
 from pywizlight.rgbcw import hs2rgbcw, rgb2rgbcw
-from pywizlight.scenes import SCENES
-from pywizlight.utils import hex_to_percent, percent_to_hex
+from pywizlight.scenes import SCENES, SCENES_BY_CLASS
+from pywizlight.utils import hex_to_percent, percent_to_hex, to_wiz_json
 from pywizlight.vec import Vector
 
 _LOGGER = logging.getLogger(__name__)
-TW_SCENES = [6, 9, 10, 11, 12, 13, 14, 15, 16, 18, 29, 30, 31, 32]
-DW_SCENES = [9, 10, 13, 14, 29, 30, 31, 32]
+
 
 BulbResponse = Dict[str, Any]
 
@@ -85,42 +84,38 @@ class PilotBuilder:
 
     def set_pilot_message(self) -> str:
         """Return the pilot message."""
-        return json.dumps({"method": "setPilot", "params": self.pilot_params})
+        return to_wiz_json({"method": "setPilot", "params": self.pilot_params})
 
     def set_state_message(self, state: bool) -> str:
         """Return the setState message. It doesn't change the current status of the light."""
         self.pilot_params["state"] = state
-        return json.dumps({"method": "setState", "params": self.pilot_params})
+        return to_wiz_json({"method": "setState", "params": self.pilot_params})
 
     def _set_warm_white(self, value: int) -> None:
         """Set the value of the warm white led."""
-        if 0 <= value < 256:
-            self.pilot_params["w"] = value
-        else:
+        if not 0 <= value < 256:
             raise ValueError("Value must be between 0 and 255")
+        self.pilot_params["w"] = value
 
     def _set_cold_white(self, value: int) -> None:
         """Set the value of the cold white led."""
-        if 0 <= value < 256:
-            self.pilot_params["c"] = value
-        else:
+        if not 0 <= value < 256:
             raise ValueError("Value must be between 0 and 255")
+        self.pilot_params["c"] = value
 
     def _set_speed(self, value: int) -> None:
         """Set the color changing speed in precent (0-100)."""
         # This applies only to changing effects.
-        if 0 < value < 101:
-            self.pilot_params["speed"] = value
-        else:
+        if not 0 < value < 101:
             raise ValueError("Value must be between 0 and 100")
+        self.pilot_params["speed"] = value
 
     def _set_scene(self, scene_id: int) -> None:
         """Set the scene by id."""
-        if scene_id in SCENES:
-            self.pilot_params["sceneId"] = scene_id
-        else:
+        if scene_id not in SCENES:
             # id not in SCENES !
             raise ValueError("Scene is not available. Only 0 to 32 are supported")
+        self.pilot_params["sceneId"] = scene_id
 
     def _set_rgb(self, values: Tuple[float, float, float]) -> None:
         """Set the RGB color state of the bulb."""
@@ -168,22 +163,27 @@ class PilotBuilder:
     def _set_brightness(self, value: int) -> None:
         """Set the value of the brightness 0-255."""
         percent = hex_to_percent(value)
-        # hardware limitation - values less than 10% are not supported
-        if percent < 10:
-            percent = 10
         if percent > 101:
             raise ValueError("Max value can be 100% with 255.")
-        self.pilot_params["dimming"] = percent
+        # hardware limitation - values less than 10% are not supported
+        self.pilot_params["dimming"] = max(10, percent)
 
     def _set_colortemp(self, kelvin: int) -> None:
         """Set the color temperature for the white led in the bulb."""
         # normalize the kelvin values - should be removed
-        if kelvin < 1000:
-            kelvin = 1000
-        if kelvin > 10000:
-            kelvin = 10000
+        self.pilot_params["temp"] = min(10000, max(1000, kelvin))
 
-        self.pilot_params["temp"] = kelvin
+
+def _extract_bool(response: BulbResponse, key: str) -> Optional[bool]:
+    return bool(response[key]) if key in response else None
+
+
+def _extract_str(response: BulbResponse, key: str) -> Optional[str]:
+    return str(response[key]) if key in response else None
+
+
+def _extract_int(response: BulbResponse, key: str) -> Optional[int]:
+    return int(response[key]) if key in response else None
 
 
 class PilotParser:
@@ -195,31 +195,21 @@ class PilotParser:
 
     def get_state(self) -> Optional[bool]:
         """Return the state of the bulb."""
-        if "state" in self.pilotResult:
-            return bool(self.pilotResult["state"])
-        else:
-            return None
+        return _extract_bool(self.pilotResult, "state")
 
     def get_mac(self) -> Optional[str]:
         """Return MAC from the bulb."""
-        if "mac" in self.pilotResult:
-            return str(self.pilotResult["mac"])
-        else:
-            return None
+        return _extract_str(self.pilotResult, "mac")
 
     def get_warm_white(self) -> Optional[int]:
         """Get the value of the warm white led."""
-        if "w" in self.pilotResult:
-            return int(self.pilotResult["w"])
-        else:
-            return None
+        return _extract_int(self.pilotResult, "w")
 
     def get_white_range(self) -> Optional[List[float]]:
         """Get the value of the whiteRange property."""
         if "whiteRange" in self.pilotResult:
             return [float(x) for x in self.pilotResult["whiteRange"]]
-        else:
-            return None
+        return None
 
     def get_extended_white_range(self) -> Optional[List[float]]:
         """Get the value of the extended whiteRange property."""
@@ -228,33 +218,21 @@ class PilotParser:
         # New after v1.22 FW - "cctRange":[2200,2700,6500,6500]
         elif "cctRange" in self.pilotResult:
             return [float(x) for x in self.pilotResult["cctRange"]]
-        else:
-            return None
+        return None
 
     def get_speed(self) -> Optional[int]:
         """Get the color changing speed."""
-        if "speed" in self.pilotResult:
-            return int(self.pilotResult["speed"])
-        else:
-            return None
+        return _extract_int(self.pilotResult, "speed")
 
     def get_scene(self) -> Optional[str]:
         """Get the current scene name."""
         if "schdPsetId" in self.pilotResult:  # rhythm
             return SCENES[1000]
-
-        scene_id = self.pilotResult["sceneId"]
-        if scene_id in SCENES:
-            return SCENES[scene_id]
-        else:
-            return None
+        return SCENES.get(self.pilotResult["sceneId"])
 
     def get_cold_white(self) -> Optional[int]:
         """Get the value of the cold white led."""
-        if "c" in self.pilotResult:
-            return int(self.pilotResult["c"])
-        else:
-            return None
+        return _extract_int(self.pilotResult, "c")
 
     def get_rgb(self) -> Union[Tuple[None, None, None], Vector]:
         """Get the RGB color state of the bulb and turns it on."""
@@ -267,9 +245,8 @@ class PilotParser:
             g = self.pilotResult["g"]
             b = self.pilotResult["b"]
             return float(r), float(g), float(b)
-        else:
             # no RGB color value was set
-            return None, None, None
+        return None, None, None
 
     def get_brightness(self) -> Optional[int]:
         """Get the value of the brightness 0-255."""
@@ -279,10 +256,7 @@ class PilotParser:
 
     def get_colortemp(self) -> Optional[int]:
         """Get the color temperature from the bulb."""
-        if "temp" in self.pilotResult:
-            return int(self.pilotResult["temp"])
-        else:
-            return None
+        return _extract_int(self.pilotResult, "temp")
 
 
 async def _send_udp_message_with_retry(
@@ -311,7 +285,6 @@ class wizlight:
     def __init__(
         self,
         ip: str,
-        connect_on_init: bool = False,
         port: int = 38899,
         mac: Optional[str] = None,
     ) -> None:
@@ -321,6 +294,7 @@ class wizlight:
         self.state: Optional[PilotParser] = None
         self.mac = mac
         self.bulbtype: Optional[BulbType] = None
+        self.modelConfig: Optional[Dict] = None
         self.whiteRange: Optional[List[float]] = None
         self.extwhiteRange: Optional[List[float]] = None
         self.transport: Optional[asyncio.DatagramTransport] = None
@@ -328,14 +302,12 @@ class wizlight:
 
         self.lock = asyncio.Lock()
         self.loop = asyncio.get_event_loop()
-        self.push_callback: Optional[Callable] = None
+        self.push_callback: Optional[Callable[[PilotParser], None]] = None
         self.response_future: Optional[asyncio.Future] = None
         self.push_cancel: Optional[Callable] = None
         self.last_push: float = NEVER_TIME
         self.push_running: bool = False
-        # check the state on init
-        if connect_on_init:
-            self._check_connection()
+        # Check connection removed as it did blocking I/O in the event loop
 
     @property
     def status(self) -> Optional[bool]:
@@ -372,7 +344,9 @@ class wizlight:
         except (WizLightTimeOutError, WizLightConnectionError) as ex:
             _LOGGER.debug("%s: Registration for push updates failed: %s", self.ip, ex)
 
-    async def start_push(self, callback: Callable) -> None:
+    async def start_push(
+        self, callback: Optional[Callable[[PilotParser], None]]
+    ) -> None:
         """Start periodic register calls to get push updates via syncPilot."""
         _LOGGER.debug("Enabling push updates for %s", self.mac)
         self.push_callback = callback
@@ -381,6 +355,12 @@ class wizlight:
         if await push_manager.start(self.ip):
             self.push_running = True
             self.register()
+
+    def set_discovery_callback(
+        self, callback: Optional[Callable[[DiscoveredBulb], None]]
+    ) -> None:
+        """Set the callback for when a new device is discovered."""
+        PushManager().get().set_discovery_callback(callback)
 
     def _on_push(self, resp: dict, addr: Tuple[str, int]) -> None:
         """Handle a syncPilot from the device."""
@@ -404,23 +384,6 @@ class wizlight:
         if exception and self.response_future and not self.response_future.done():
             self.response_future.set_exception(exception)
 
-    def _check_connection(self) -> None:
-        """Check the connection to the bulb."""
-        message = r'{"method":"getPilot","params":{}}'
-        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        sock.settimeout(2)
-        try:
-            # send a udp package
-            sock.sendto(bytes(message, "utf-8"), (self.ip, self.port))
-            # get response data
-            data, addr = sock.recvfrom(1024)
-            if data:
-                return
-        except socket.timeout:
-            raise WizLightTimeOutError(
-                "No connection was established by initialization."
-            )
-
     async def get_bulbtype(self) -> BulbType:
         """Return the bulb type as BulbType object."""
         if self.bulbtype is not None:
@@ -433,7 +396,12 @@ class wizlight:
         white_range = await self.getExtendedWhiteRange()
         module_name = result["moduleName"]
         fw_version = result.get("fwVersion")
-        self.bulbtype = BulbType.from_data(module_name, white_range, fw_version)
+        model_result = self.modelConfig["result"] if self.modelConfig else {}
+        white_channels = model_result.get("nowc")
+        white_to_color_ratio = model_result.get("wcr")
+        self.bulbtype = BulbType.from_data(
+            module_name, white_range, fw_version, white_channels, white_to_color_ratio
+        )
         return self.bulbtype
 
     async def getWhiteRange(self) -> Optional[List[float]]:
@@ -454,15 +422,13 @@ class wizlight:
 
         # First for FW > 1.22
         resp = await self.getModelConfig()
-        if resp is not None and "result" in resp:
-            self.extwhiteRange = PilotParser(resp["result"]).get_extended_white_range()
-        else:
+        if resp is None or "result" not in resp:
             # For old FW < 1.22
             resp = await self.getUserConfig()
-            if "result" in resp:
-                self.extwhiteRange = PilotParser(
-                    resp["result"]
-                ).get_extended_white_range()
+
+        if "result" in resp:
+            self.extwhiteRange = PilotParser(resp["result"]).get_extended_white_range()
+
         return self.extwhiteRange
 
     async def getSupportedScenes(self) -> List[str]:
@@ -473,29 +439,19 @@ class wizlight:
         if self.bulbtype is None:
             await self.get_bulbtype()
         assert self.bulbtype  # Should have gotten set by get_bulbtype
-        # return for TW
-        if self.bulbtype.bulb_type == BulbClass.TW:
-            return [SCENES[key] for key in TW_SCENES]
-        # retrun for DW
-        if self.bulbtype.bulb_type == BulbClass.DW:
-            return [SCENES[key] for key in DW_SCENES]
-        # return for RGB - all scenes supported
-        return list(SCENES.values())
+        return SCENES_BY_CLASS.get(self.bulbtype.bulb_type, [])
 
     async def turn_off(self) -> None:
         """Turn the light off."""
-        message = r'{"method":"setPilot","params":{"state":false}}'
-        await self.sendUDPMessage(message)
+        await self.sendUDPMessage(r'{"method":"setPilot","params":{"state":false}}')
 
     async def reboot(self) -> None:
         """Reboot the bulb."""
-        message = r'{"method":"reboot","params":{}}'
-        await self.sendUDPMessage(message)
+        await self.sendUDPMessage(r'{"method":"reboot","params":{}}')
 
     async def reset(self) -> None:
         """Reset the bulb to factory defaults."""
-        message = r'{"method":"reset","params":{}}'
-        await self.sendUDPMessage(message)
+        await self.sendUDPMessage(r'{"method":"reset","params":{}}')
 
     async def turn_on(self, pilot_builder: PilotBuilder = PilotBuilder()) -> None:
         """Turn the light on with defined message.
@@ -524,8 +480,7 @@ class wizlight:
         {"method": "getPilot", "id": 24}
         """
         if self.last_push + MAX_TIME_BETWEEN_PUSH < time.monotonic():
-            message = r'{"method":"getPilot","params":{}}'
-            resp = await self.sendUDPMessage(message)
+            resp = await self.sendUDPMessage(r'{"method":"getPilot","params":{}}')
             if resp is not None and "result" in resp:
                 self.state = PilotParser(resp["result"])
             else:
@@ -545,8 +500,7 @@ class wizlight:
 
     async def getBulbConfig(self) -> BulbResponse:
         """Return the configuration from the bulb."""
-        message = r'{"method":"getSystemConfig","params":{}}'
-        resp = await self.sendUDPMessage(message)
+        resp = await self.sendUDPMessage(r'{"method":"getSystemConfig","params":{}}')
         self._cache_mac_from_bulb_config(resp)
         return resp
 
@@ -554,16 +508,16 @@ class wizlight:
         """Return the new model capabilities from the bulb.
         Only available in bulb FW >1.22!
         """
-        try:
-            message = r'{"method":"getModelConfig","params":{}}'
-            return await self.sendUDPMessage(message)
-        except WizLightMethodNotFound:
-            return None
+        if self.modelConfig is None:
+            with contextlib.suppress(WizLightMethodNotFound):
+                self.modelConfig = await self.sendUDPMessage(
+                    r'{"method":"getModelConfig","params":{}}'
+                )
+        return self.modelConfig
 
     async def getUserConfig(self) -> BulbResponse:
         """Return the user configuration from the bulb."""
-        message = r'{"method":"getUserConfig","params":{}}'
-        return await self.sendUDPMessage(message)
+        return await self.sendUDPMessage(r'{"method":"getUserConfig","params":{}}')
 
     async def lightSwitch(self) -> None:
         """Turn the light bulb on or off like a switch."""

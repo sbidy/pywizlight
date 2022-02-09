@@ -1,0 +1,32 @@
+"""Tests for the Bulb API with a light strip."""
+from typing import AsyncGenerator
+
+import pytest
+
+from pywizlight import wizlight
+from pywizlight.bulblibrary import BulbClass, BulbType, Features, KelvinRange
+from pywizlight.tests.fake_bulb import startup_bulb
+
+
+@pytest.fixture()
+async def light_strip() -> AsyncGenerator[wizlight, None]:
+    shutdown = startup_bulb(module_name="ESP20_SHRGB_01ABI")
+    bulb = wizlight(ip="127.0.0.1")
+    yield bulb
+    await bulb.async_close()
+    shutdown()
+
+
+@pytest.mark.asyncio
+async def test_model_description_light_strip(light_strip: wizlight) -> None:
+    """Test fetching the model description for a light strip."""
+    bulb_type = await light_strip.get_bulbtype()
+    assert bulb_type == BulbType(
+        features=Features(color=True, color_tmp=True, effect=True, brightness=True),
+        name="ESP20_SHRGB_01ABI",
+        kelvin_range=KelvinRange(max=6500, min=2700),
+        bulb_type=BulbClass.RGB,
+        fw_version="1.21.0",
+        white_channels=2,
+        white_to_color_ratio=80,
+    )

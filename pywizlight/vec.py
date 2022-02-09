@@ -2,8 +2,8 @@
 
     A bunch of utility functions, just so we don't have to bring in any external dependencies.
 """
-from math import sqrt, sin, cos
-from operator import mul, sub, add
+from math import cos, sin, sqrt
+from operator import add, mul, sub
 from typing import Tuple
 
 # a small value, really close to zero, more than adequate for our 3 orders of magnitude

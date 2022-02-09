@@ -1,12 +1,12 @@
 """Discover bulbs in a network."""
 import asyncio
-import dataclasses
 import json
 import logging
-from asyncio import DatagramTransport, BaseTransport, AbstractEventLoop, Future
-from typing import cast, Dict, List, Tuple, Optional, Any
+from asyncio import AbstractEventLoop, BaseTransport, DatagramTransport, Future
+from typing import Any, List, Optional, Tuple, cast
 
 from pywizlight import wizlight
+from pywizlight.models import BulbRegistry, DiscoveredBulb
 from pywizlight.utils import create_udp_broadcast_socket
 
 _LOGGER = logging.getLogger(__name__)
@@ -18,29 +18,6 @@ DEFAULT_WAIT_TIME = 5.0
 # we have register set to false which is telling the bulb to remove
 # the registration
 REGISTER_MESSAGE = b'{"method":"registration","params":{"phoneMac":"AAAAAAAAAAAA","register":false,"phoneIp":"1.2.3.4","id":"1"}}'  # noqa: E501
-
-
-@dataclasses.dataclass(frozen=True)
-class DiscoveredBulb:
-    """Representation of discovered bulb."""
-
-    ip_address: str
-    mac_address: str
-
-
-@dataclasses.dataclass
-class BulbRegistry:
-    """Representation of the bulb registry."""
-
-    bulbs_by_mac: Dict[str, DiscoveredBulb] = dataclasses.field(default_factory=dict)
-
-    def register(self, bulb: DiscoveredBulb) -> None:
-        """Register a new bulb."""
-        self.bulbs_by_mac[bulb.mac_address] = bulb
-
-    def bulbs(self) -> List[DiscoveredBulb]:
-        """Get all present bulbs."""
-        return list(self.bulbs_by_mac.values())
 
 
 class BroadcastProtocol(asyncio.DatagramProtocol):
@@ -69,7 +46,7 @@ class BroadcastProtocol(asyncio.DatagramProtocol):
         """Send a registration method as UDP broadcast."""
         if not self.transport:
             return
-        self.transport.sendto(REGISTER_MESSAGE, (self.broadcast_address, 38899))
+        self.transport.sendto(REGISTER_MESSAGE, (self.broadcast_address, PORT))
         self.loop.call_later(1, self.broadcast_registration)
 
     def datagram_received(self, data: bytes, addr: Tuple[str, int]) -> None:

@@ -3,3 +3,5 @@ source = pywizlight
 
 omit =
      pywizlight/tests/*
+     pywizlight/_version.py
+     pywizlight/cli.py
