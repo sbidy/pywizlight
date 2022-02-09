@@ -3,7 +3,7 @@ from typing import AsyncGenerator
 
 import pytest
 
-from pywizlight import wizlight
+from pywizlight import PilotBuilder, wizlight
 from pywizlight.bulblibrary import BulbClass, BulbType, Features, KelvinRange
 from pywizlight.tests.fake_bulb import startup_bulb
 
@@ -15,6 +15,14 @@ async def light_strip() -> AsyncGenerator[wizlight, None]:
     yield bulb
     await bulb.async_close()
     shutdown()
+
+
+@pytest.mark.asyncio
+async def test_setting_rgbww(light_strip: wizlight) -> None:
+    """Test setting rgbww."""
+    await light_strip.turn_on(PilotBuilder(rgbww=(1, 2, 3, 4, 5)))
+    state = await light_strip.updateState()
+    assert state and state.get_rgbww() == (1, 2, 3, 4, 5)
 
 
 @pytest.mark.asyncio
