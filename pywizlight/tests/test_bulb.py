@@ -125,6 +125,18 @@ async def test_PilotBuilder_scene(correct_bulb: wizlight) -> None:
     state = await correct_bulb.updateState()
 
     assert state and state.get_scene() == SCENES[1]
+    state.pilotResult["schdPsetId"] = True
+    assert state.get_scene() == SCENES[1000]
+
+
+@pytest.mark.asyncio
+async def test_PilotBuilder_scene_empty(correct_bulb: wizlight) -> None:
+    """Test scene with no scene set."""
+    state = await correct_bulb.updateState()
+    assert state is not None
+    if "sceneId" in state.pilotResult:
+        del state.pilotResult["sceneId"]
+    assert state and state.get_scene() is None
 
 
 @pytest.mark.asyncio
