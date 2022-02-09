@@ -226,6 +226,15 @@ async def test_fw_version(correct_bulb: wizlight) -> None:
     assert correct_bulb.mac == "a8bb5006033d"
 
 
+@pytest.mark.asyncio
+async def test_get_mac(correct_bulb: wizlight) -> None:
+    """Test getting the mac address."""
+    mac = await correct_bulb.getMac()
+    assert mac == "a8bb5006033d"
+    mac = await correct_bulb.getMac()
+    assert mac == "a8bb5006033d"
+
+
 # Error states / Timout
 @pytest.mark.asyncio
 async def test_timeout(bad_bulb: wizlight) -> None:
