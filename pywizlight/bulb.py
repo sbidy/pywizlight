@@ -247,6 +247,8 @@ class PilotParser:
         """Get the current scene name."""
         if "schdPsetId" in self.pilotResult:  # rhythm
             return SCENES[1000]
+        if "sceneId" not in self.pilotResult:
+            return None
         return SCENES.get(self.pilotResult["sceneId"])
 
     def get_cold_white(self) -> Optional[int]:
