@@ -141,6 +141,22 @@ SYSTEM_CONFIGS = {
             "ping": 0,
         },
     },
+    ("ESP03_SHRGB3_01ABI", "1.16.64"): {
+        "method": "getSystemConfig",
+        "env": "pro",
+        "result": {
+            "mac": "a8bb50fd92e5",
+            "homeId": 5385975,
+            "roomId": 0,
+            "homeLock": False,
+            "pairingLock": False,
+            "typeId": 0,
+            "moduleName": "ESP03_SHRGB3_01ABI",
+            "fwVersion": "1.16.64",
+            "groupId": 0,
+            "drvConf": [20, 1],
+        },
+    },
 }
 
 USER_CONFIGS = {
@@ -157,7 +173,22 @@ USER_CONFIGS = {
             "opMode": 0,
             "po": False,
         },
-    }
+    },
+    ("ESP03_SHRGB3_01ABI", "1.16.64"): {
+        "method": "getUserConfig",
+        "env": "pro",
+        "result": {
+            "fadeIn": 450,
+            "fadeOut": 500,
+            "fadeNight": False,
+            "dftDim": 100,
+            "pwmRange": [0, 100],
+            "whiteRange": [2700, 6500],
+            "extRange": [2700, 6500],
+            "opMode": 0,
+            "po": False,
+        },
+    },
 }
 
 
