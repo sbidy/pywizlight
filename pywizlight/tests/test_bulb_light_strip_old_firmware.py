@@ -10,7 +10,7 @@ from pywizlight.tests.fake_bulb import startup_bulb
 
 @pytest.fixture()
 async def light_strip() -> AsyncGenerator[wizlight, None]:
-    shutdown = startup_bulb(module_name="ESP20_SHRGB_01ABI", firmware_version="1.25.0")
+    shutdown = startup_bulb(module_name="ESP20_SHRGB_01ABI", firmware_version="1.21.4")
     bulb = wizlight(ip="127.0.0.1")
     yield bulb
     await bulb.async_close()
@@ -34,7 +34,7 @@ async def test_model_description_light_strip(light_strip: wizlight) -> None:
         name="ESP20_SHRGB_01ABI",
         kelvin_range=KelvinRange(max=6500, min=2700),
         bulb_type=BulbClass.RGB,
-        fw_version="1.25.0",
+        fw_version="1.21.4",
         white_channels=2,
         white_to_color_ratio=80,
     )
