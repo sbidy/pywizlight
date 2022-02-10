@@ -107,6 +107,8 @@ class PushManager:
     def _on_push(self, message: bytes, addr: Tuple[str, int]) -> None:
         """Handle a response from the device."""
         _LOGGER.debug("%s: PUSH << %s", addr, message)
+        if message == b"test":
+            return  # App sends these to test connectivity
         try:
             resp = json.loads(message.decode())
         except json.JSONDecodeError:
