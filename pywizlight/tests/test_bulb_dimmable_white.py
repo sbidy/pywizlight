@@ -10,7 +10,7 @@ from pywizlight.tests.fake_bulb import startup_bulb
 
 @pytest.fixture()
 async def dimmable_bulb() -> AsyncGenerator[wizlight, None]:
-    shutdown = startup_bulb(module_name="ESP05_SHDW_21")
+    shutdown = startup_bulb(module_name="ESP05_SHDW_21", firmware_version="1.25.0")
     bulb = wizlight(ip="127.0.0.1")
     yield bulb
     await bulb.async_close()
@@ -26,7 +26,7 @@ async def test_model_description_dimmable_bulb(dimmable_bulb: wizlight) -> None:
         name="ESP05_SHDW_21",
         kelvin_range=KelvinRange(max=2700, min=2700),
         bulb_type=BulbClass.DW,
-        fw_version="1.21.0",
+        fw_version="1.25.0",
         white_channels=1,
         white_to_color_ratio=20,
     )

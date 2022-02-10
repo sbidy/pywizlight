@@ -439,11 +439,16 @@ class wizlight:
         if "moduleName" not in result:
             raise ValueError("Unable to determine bulb type.")
         white_range = await self.getExtendedWhiteRange()
+        white_to_color_ratio = None
+        white_channels = None
+        if "drvConf" in result:
+            # For old FW < 1.22
+            white_to_color_ratio, white_channels = result["drvConf"]
         module_name = result["moduleName"]
         fw_version = result.get("fwVersion")
         model_result = self.modelConfig["result"] if self.modelConfig else {}
-        white_channels = model_result.get("nowc")
-        white_to_color_ratio = model_result.get("wcr")
+        white_channels = model_result.get("nowc", white_channels)
+        white_to_color_ratio = model_result.get("wcr", white_to_color_ratio)
         self.bulbtype = BulbType.from_data(
             module_name, white_range, fw_version, white_channels, white_to_color_ratio
         )

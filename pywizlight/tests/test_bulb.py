@@ -14,7 +14,7 @@ from pywizlight.tests.fake_bulb import startup_bulb
 
 @pytest.fixture(scope="module")
 def startup_fake_bulb(request: pytest.FixtureRequest) -> None:
-    shutdown = startup_bulb(module_name="ESP01_SHRGB_03")
+    shutdown = startup_bulb(module_name="ESP01_SHRGB_03", firmware_version="1.25.0")
     request.addfinalizer(shutdown)
 
 
@@ -239,7 +239,7 @@ async def test_fw_version(correct_bulb: wizlight) -> None:
         name="ESP01_SHRGB_03",
         kelvin_range=KelvinRange(max=6500, min=2200),
         bulb_type=BulbClass.RGB,
-        fw_version="1.21.0",
+        fw_version="1.25.0",
         white_channels=1,
         white_to_color_ratio=30,
     )
