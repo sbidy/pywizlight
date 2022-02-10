@@ -36,7 +36,6 @@ MAX_TIME_BETWEEN_PUSH = PUSH_KEEP_ALIVE_INTERVAL + TIMEOUT
 
 NEVER_TIME = -120.0
 
-_IGNORE_KEYS = {"src", "mqttCd", "ts", "rssi"}
 
 RGB_ORDER = ["r", "g", "b"]
 RGB_COLORS = set(RGB_ORDER)
@@ -45,11 +44,19 @@ RGBW_COLORS = set(RGBW_ORDER)
 RGBWW_ORDER = ["r", "g", "b", "c", "w"]
 RGBWW_COLORS = set(RGBWW_ORDER)
 
+_IGNORE_STATE_KEYS = {"mqttCd", "ts", "rssi"}
+PIR_SOURCE = "pir"
+
 
 def states_match(old: Dict[str, Any], new: Dict[str, Any]) -> bool:
     """Check if states match except for keys we do not want to callback on."""
+    old_src = old.get("src")
+    new_src = new.get("src")
+    # Always send the update when there is a PIR change.
+    if new_src != old_src and PIR_SOURCE in (old_src, new_src):
+        return False
     for key, val in new.items():
-        if old.get(key) != val and key not in _IGNORE_KEYS:
+        if key != "src" and old.get(key) != val and key not in _IGNORE_STATE_KEYS:
             return False
     return True
 
@@ -215,6 +222,10 @@ class PilotParser:
     def get_state(self) -> Optional[bool]:
         """Return the state of the bulb."""
         return _extract_bool(self.pilotResult, "state")
+
+    def get_source(self) -> Optional[str]:
+        """Return the source of the state change."""
+        return _extract_str(self.pilotResult, "src")
 
     def get_mac(self) -> Optional[str]:
         """Return MAC from the bulb."""
