@@ -47,13 +47,29 @@ RGBWW_COLORS = set(RGBWW_ORDER)
 _IGNORE_STATE_KEYS = {"mqttCd", "ts", "rssi"}
 PIR_SOURCE = "pir"
 
+WIZMOTE_BUTTON_MAP = {
+    "wfa1": "on",
+    "wfa2": "off",
+    "wfa3": "night",
+    "wfa8": "decrease_brightness",
+    "wfa9": "increase_brightness",
+    "wfa16": "1",
+    "wfa17": "2",
+    "wfa18": "3",
+    "wfa19": "4",
+}
+
+ALWAYS_SEND_SRCS = set([PIR_SOURCE, *WIZMOTE_BUTTON_MAP])
+
 
 def states_match(old: Dict[str, Any], new: Dict[str, Any]) -> bool:
     """Check if states match except for keys we do not want to callback on."""
     old_src = old.get("src")
     new_src = new.get("src")
-    # Always send the update when there is a PIR change.
-    if new_src != old_src and PIR_SOURCE in (old_src, new_src):
+    # Always send the update when there is a PIR change or button press.
+    if new_src != old_src and (
+        new_src in ALWAYS_SEND_SRCS or old_src in ALWAYS_SEND_SRCS
+    ):
         return False
     for key, val in new.items():
         if key != "src" and old.get(key) != val and key not in _IGNORE_STATE_KEYS:

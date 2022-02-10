@@ -276,7 +276,7 @@ async def test_timeout_PilotBuilder(bad_bulb: wizlight) -> None:
 
 
 @pytest.mark.asyncio
-async def test_states_match() -> None:
+async def test_states_match_with_occupancy() -> None:
     """Test states match always sends pir updates but we ignore mqttCd, rssi, and ts."""
     state_off_ios = {
         "mac": "a8bb50d46a1c",
@@ -354,3 +354,48 @@ async def test_states_match() -> None:
     assert not states_match(
         ios_off, occupancy_not_detected
     )  # source change matters since its a PIR
+
+
+@pytest.mark.asyncio
+async def test_states_match_with_button() -> None:
+    """Test states match always sends button updates but we ignore mqttCd, rssi, and ts."""
+
+    button_on_press = {
+        "mac": "a8bb50d46a1c",
+        "rssi": -48,
+        "src": "wfa1",
+        "state": True,
+    }
+    button_off_press = {
+        "mac": "a8bb50d46a1c",
+        "rssi": -69,
+        "src": "wfa2",
+        "state": False,
+        "sceneId": 0,
+    }
+    button_1_press_state_false = {
+        "mac": "a8bb50d46a1c",
+        "rssi": -69,
+        "src": "wfa16",
+        "state": False,
+        "sceneId": 0,
+    }
+    button_1_press_state_true = {
+        "mac": "a8bb50d46a1c",
+        "rssi": -69,
+        "src": "wfa16",
+        "state": True,
+        "sceneId": 0,
+    }
+    ios_off = {
+        "mac": "a8bb50d46a1c",
+        "rssi": -69,
+        "src": "ios",
+        "state": False,
+        "sceneId": 0,
+    }
+    assert not states_match(button_on_press, button_off_press)
+    assert not states_match(button_1_press_state_false, button_1_press_state_true)
+    assert not states_match(
+        ios_off, button_1_press_state_false
+    )  # source change matters since its a button
