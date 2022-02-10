@@ -6,6 +6,8 @@ import logging
 import time
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union, cast
 
+from pywizlight.exceptions import WizLightNotKnownBulb
+
 from pywizlight.bulblibrary import BulbType
 from pywizlight.exceptions import (
     WizLightConnectionError,
@@ -453,7 +455,9 @@ class wizlight:
         bulb_config = await self.getBulbConfig()
         result = bulb_config["result"]
         if "moduleName" not in result:
-            raise ValueError("Unable to determine bulb type.")
+            raise WizLightNotKnownBulb(
+                "Unable to determine the bulb type; moduleName is missing from getSystemConfig"
+            )
         white_range = await self.getExtendedWhiteRange()
         white_to_color_ratio = None
         white_channels = None

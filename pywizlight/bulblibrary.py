@@ -82,19 +82,14 @@ class BulbType:
         white_channels: Optional[int],
         white_to_color_ratio: Optional[int],
     ) -> "BulbType":
-        if kelvin_list:
-            kelvin_range: Optional[KelvinRange] = KelvinRange(
-                min=int(min(kelvin_list)), max=int(max(kelvin_list))
-            )
-        else:
-            kelvin_range = None
-
         try:
             # parse the features from name
             _identifier = module_name.split("_")[1]
         # Throw exception if index can not be found
         except IndexError:
-            raise WizLightNotKnownBulb("The bulb type can not be determined!")
+            raise WizLightNotKnownBulb(
+                f"The bulb type could not be determined from the module name: {module_name}"
+            )
 
         if "RGB" in _identifier:  # full RGB bulb
             bulb_type = BulbClass.RGB
@@ -104,6 +99,17 @@ class BulbType:
             bulb_type = BulbClass.SOCKET
         else:  # Plain brightness-only bulb
             bulb_type = BulbClass.DW
+
+        if kelvin_list:
+            kelvin_range: Optional[KelvinRange] = KelvinRange(
+                min=int(min(kelvin_list)), max=int(max(kelvin_list))
+            )
+        elif bulb_type in (BulbClass.RGB, BulbClass.TW):
+            raise WizLightNotKnownBulb(
+                f"Unable to determine required kelvin range for a {bulb_type.value} device"
+            )
+        else:
+            kelvin_range = None
 
         features = FEATURE_MAP[bulb_type]
 

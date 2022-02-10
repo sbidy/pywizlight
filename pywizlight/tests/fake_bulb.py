@@ -58,6 +58,20 @@ MODULE_CONFIGS = {
             "drvIface": 0,
         },
     },
+    ("ESP21_SHTW_01", "1.25.0"): {
+        "method": "getModelConfig",
+        "env": "pro",
+        "result": {
+            "ps": 2,
+            "pwmFreq": 5000,
+            "pwmRange": [1, 100],
+            "wcr": 20,
+            "nowc": 1,
+            "cctRange": [2700, 2700, 5000, 5000],
+            "renderFactor": [255, 0, 255, 255, 0, 0, 0, 0, 0, 0],
+            "drvIface": 0,
+        },
+    },
 }
 
 SYSTEM_CONFIGS = {
@@ -157,6 +171,36 @@ SYSTEM_CONFIGS = {
             "drvConf": [20, 1],
         },
     },
+    ("ESP20_SHRGBC_01", "1.21.4"): {
+        "method": "getSystemConfig",
+        "env": "pro",
+        "result": {
+            "mac": "6c2990e493bc",
+            "homeId": 5385975,
+            "roomId": 8016844,
+            "moduleName": "ESP20_SHRGBC_01",
+            "fwVersion": "1.21.4",
+            "groupId": 0,
+            "drvConf": [30, 1],
+            "ewf": [200, 255, 150, 255, 0, 0, 40],
+            "ewfHex": "c8ff96ff000028",
+            "ping": 0,
+        },
+    },
+    ("ESP21_SHTW_01", "1.25.0"): {
+        "method": "getSystemConfig",
+        "env": "pro",
+        "result": {
+            "mac": "6c29905a067c",
+            "homeId": 5385975,
+            "roomId": 8016844,
+            "rgn": "eu",
+            "moduleName": "ESP21_SHTW_01",
+            "fwVersion": "1.25.0",
+            "groupId": 0,
+            "ping": 0,
+        },
+    },
 }
 
 USER_CONFIGS = {
@@ -187,6 +231,20 @@ USER_CONFIGS = {
             "extRange": [2700, 6500],
             "opMode": 0,
             "po": False,
+        },
+    },
+    ("ESP20_SHRGBC_01", "1.21.4"): {
+        "method": "getUserConfig",
+        "env": "pro",
+        "result": {
+            "fadeIn": 500,
+            "fadeOut": 500,
+            "dftDim": 100,
+            "pwmRange": [0, 100],
+            "whiteRange": [2700, 6500],
+            "extRange": [2200, 6500],
+            "opMode": 0,
+            "po": True,
         },
     },
 }
