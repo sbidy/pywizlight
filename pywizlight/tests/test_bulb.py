@@ -5,9 +5,9 @@ from unittest.mock import patch
 import pytest
 
 from pywizlight import SCENES, PilotBuilder, wizlight
+from pywizlight.bulb import states_match
 from pywizlight.bulblibrary import BulbClass, BulbType, Features, KelvinRange
 from pywizlight.discovery import discover_lights
-from pywizlight.bulb import states_match
 from pywizlight.exceptions import WizLightTimeOutError
 from pywizlight.tests.fake_bulb import startup_bulb
 
