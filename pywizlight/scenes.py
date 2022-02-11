@@ -44,7 +44,7 @@ TW_SCENES = [6, 9, 10, 11, 12, 13, 14, 15, 16, 18, 29, 30, 31, 32]
 DW_SCENES = [9, 10, 13, 14, 29, 30, 31, 32]
 
 SCENES_BY_CLASS: Dict[BulbClass, List[str]] = {
-    BulbClass.RGB: list(cast(Iterable, SCENES)),
+    BulbClass.RGB: list(cast(Iterable, SCENES.values())),
     BulbClass.TW: [SCENES[key] for key in TW_SCENES],
     BulbClass.DW: [SCENES[key] for key in DW_SCENES],
 }

@@ -30,3 +30,9 @@ async def test_model_description_socket(socket: wizlight) -> None:
         white_channels=2,
         white_to_color_ratio=20,
     )
+
+
+@pytest.mark.asyncio
+async def test_supported_scenes(socket: wizlight) -> None:
+    """Test supported scenes."""
+    assert await socket.getSupportedScenes() == []

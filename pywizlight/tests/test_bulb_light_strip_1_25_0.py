@@ -26,6 +26,46 @@ async def test_setting_rgbww(light_strip: wizlight) -> None:
 
 
 @pytest.mark.asyncio
+async def test_supported_scenes(light_strip: wizlight) -> None:
+    """Test supported scenes."""
+    assert await light_strip.getSupportedScenes() == [
+        "Ocean",
+        "Romance",
+        "Sunset",
+        "Party",
+        "Fireplace",
+        "Cozy",
+        "Forest",
+        "Pastel Colors",
+        "Wake up",
+        "Bedtime",
+        "Warm White",
+        "Daylight",
+        "Cool white",
+        "Night light",
+        "Focus",
+        "Relax",
+        "True colors",
+        "TV time",
+        "Plantgrowth",
+        "Spring",
+        "Summer",
+        "Fall",
+        "Deepdive",
+        "Jungle",
+        "Mojito",
+        "Club",
+        "Christmas",
+        "Halloween",
+        "Candlelight",
+        "Golden white",
+        "Pulse",
+        "Steampunk",
+        "Rhythm",
+    ]
+
+
+@pytest.mark.asyncio
 async def test_model_description_light_strip(light_strip: wizlight) -> None:
     """Test fetching the model description for a light strip."""
     bulb_type = await light_strip.get_bulbtype()
