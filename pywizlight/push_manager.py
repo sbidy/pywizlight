@@ -32,7 +32,6 @@ class PushManager:
         self.push_running = False
         self.discovery_callback: Optional[Callable[[DiscoveredBulb], None]] = None
         self.lock = asyncio.Lock()
-        self.loop = asyncio.get_event_loop()
         self.subscriptions: Dict[str, Callable[[Dict, Tuple[str, int]], None]] = {}
         self.register_msg: Optional[str] = None
 
@@ -71,9 +70,11 @@ class PushManager:
                     "method": "registration",
                 }
             )
-            push_transport_proto = await self.loop.create_datagram_endpoint(
-                lambda: WizProtocol(on_response=self._on_push),
-                sock=sock,
+            push_transport_proto = (
+                await asyncio.get_event_loop().create_datagram_endpoint(
+                    lambda: WizProtocol(on_response=self._on_push),
+                    sock=sock,
+                )
             )
             self.push_transport = cast(
                 asyncio.DatagramTransport, push_transport_proto[0]

@@ -6,6 +6,7 @@
 
 ![Update Docs](https://github.com/sbidy/pywizlight/workflows/Update%20Docs/badge.svg)
 [![Lint](https://github.com/sbidy/pywizlight/actions/workflows/lint.yml/badge.svg)](https://github.com/sbidy/pywizlight/actions/workflows/lint.yml)
+[![codecov][code-cover-shield]][code-coverage]
 
 
 # pywizlight
@@ -317,3 +318,6 @@ scene mode:
 rhythm mode:
 
 `{'method': 'getPilot', 'env': 'pro', 'result': {'mac': 'a8bb50a4f94d', 'rssi': -63, 'src': '', 'state': True, 'sceneId': 14, 'speed': 100, 'dimming': 100, 'schdPsetId': 9}}`
+
+[code-coverage]: https://codecov.io/gh/sbidy/pywizlight
+[code-cover-shield]: https://codecov.io/gh/sbidy/pywizlight/branch/master/graph/badge.svg
