@@ -4,8 +4,8 @@ from typing import AsyncGenerator
 import pytest
 
 from pywizlight import wizlight
-from pywizlight.tests.fake_bulb import startup_bulb
 from pywizlight.exceptions import WizLightNotKnownBulb
+from pywizlight.tests.fake_bulb import startup_bulb
 
 
 @pytest.fixture()

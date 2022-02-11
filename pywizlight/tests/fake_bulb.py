@@ -1,9 +1,9 @@
 """Start up a fake bulb to test features without a real bulb."""
-import json
-from typing import cast, Any, Callable, Dict, Tuple
-from pywizlight.protocol import WizProtocol
 import asyncio
+import json
+from typing import Any, Callable, Dict, Tuple, cast
 
+from pywizlight.protocol import WizProtocol
 
 MODULE_CONFIGS = {
     ("ESP01_SHRGB_03", "1.25.0"): {
@@ -390,6 +390,7 @@ class BulbUDPRequestHandler:
     sys_config: Dict[str, Any]  # Will be set by constructor for the actual class
     model_config: Dict[str, Any]  # Will be set by constructor for the actual class
     user_config: Dict[str, Any]
+    registration: Dict[str, Any]
     transport: asyncio.DatagramTransport
 
     def handle(self, resp: bytes, addr: Tuple[str, int]) -> None:
@@ -415,6 +416,8 @@ class BulbUDPRequestHandler:
             self.transport.sendto(bytes(json.dumps(self.model_config), "utf-8"), addr)
         elif method == "getUserConfig":
             self.transport.sendto(bytes(json.dumps(self.user_config), "utf-8"), addr)
+        elif method == "registration":
+            self.transport.sendto(bytes(json.dumps(self.registration), "utf-8"), addr)
         else:
             raise RuntimeError(f"No handler for {method}")
 
@@ -434,9 +437,27 @@ async def make_udp_fake_bulb_server(
     handler.sys_config = get_initial_sys_config(module_name, firmware_version)
     handler.model_config = get_initial_model_config(module_name, firmware_version)
     handler.user_config = get_initial_user_config(module_name, firmware_version)
+    handler.registration = {
+        "method": "registration",
+        "env": "pro",
+        "result": {"mac": "a8bb5006033d", "success": True},
+    }
 
     transport_proto = await asyncio.get_event_loop().create_datagram_endpoint(
         lambda: WizProtocol(on_response=handler.handle),
+        local_addr=("127.0.0.1", 0),
+    )
+    handler.transport = cast(asyncio.DatagramTransport, transport_proto[0])
+    return transport_proto
+
+
+async def make_udp_fake_bulb_push_server() -> Tuple[
+    asyncio.BaseTransport, asyncio.BaseProtocol
+]:
+    """Configure a fake push instance."""
+    handler = BulbUDPRequestHandler()
+    transport_proto = await asyncio.get_event_loop().create_datagram_endpoint(
+        lambda: WizProtocol(on_response=lambda resp, addr: None),
         local_addr=("127.0.0.1", 0),
     )
     handler.transport = cast(asyncio.DatagramTransport, transport_proto[0])
