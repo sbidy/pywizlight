@@ -392,7 +392,7 @@ class BulbUDPRequestHandler:
     user_config: Dict[str, Any]
     transport: asyncio.DatagramTransport
 
-    def handle(self, resp: dict, addr: Tuple[str, int]) -> None:
+    def handle(self, resp: bytes, addr: Tuple[str, int]) -> None:
         """Handle the request."""
         data = resp.strip()
         print(f"Request:{data!r}")
@@ -427,7 +427,7 @@ class BulbUDPRequestHandler:
 
 async def make_udp_fake_bulb_server(
     module_name: str, firmware_version: str
-) -> Tuple[asyncio.BaseTransport, asyncio.Protocol]:
+) -> Tuple[asyncio.BaseTransport, asyncio.BaseProtocol]:
     """Configure a fake bulb instance."""
     handler = BulbUDPRequestHandler()
     handler.pilot_state = get_initial_pilot()
