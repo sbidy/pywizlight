@@ -10,8 +10,10 @@ from pywizlight.tests.fake_bulb import startup_bulb
 
 @pytest.fixture()
 async def turnable_bulb() -> AsyncGenerator[wizlight, None]:
-    shutdown = startup_bulb(module_name="ESP21_SHTW_01", firmware_version="1.25.0")
-    bulb = wizlight(ip="127.0.0.1")
+    shutdown, port = await startup_bulb(
+        module_name="ESP21_SHTW_01", firmware_version="1.25.0"
+    )
+    bulb = wizlight(ip="127.0.0.1", port=port)
     yield bulb
     await bulb.async_close()
     shutdown()

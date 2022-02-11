@@ -12,19 +12,15 @@ from pywizlight.exceptions import WizLightTimeOutError
 from pywizlight.tests.fake_bulb import startup_bulb
 
 
-@pytest.fixture(scope="module")
-def startup_fake_bulb(request: pytest.FixtureRequest) -> None:
-    shutdown = startup_bulb(module_name="ESP01_SHRGB_03", firmware_version="1.25.0")
-    request.addfinalizer(shutdown)
-
-
 @pytest.fixture()
-async def correct_bulb(
-    startup_fake_bulb: pytest.FixtureRequest,
-) -> AsyncGenerator[wizlight, None]:
-    bulb = wizlight(ip="127.0.0.1")
+async def correct_bulb() -> AsyncGenerator[wizlight, None]:
+    shutdown, port = await startup_bulb(
+        module_name="ESP01_SHRGB_03", firmware_version="1.25.0"
+    )
+    bulb = wizlight(ip="127.0.0.1", port=port)
     yield bulb
     await bulb.async_close()
+    shutdown()
 
 
 @pytest.fixture()

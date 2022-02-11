@@ -10,8 +10,10 @@ from pywizlight.exceptions import WizLightNotKnownBulb
 
 @pytest.fixture()
 async def invalid_module_bulb() -> AsyncGenerator[wizlight, None]:
-    shutdown = startup_bulb(module_name="INVALID", firmware_version="1.16.64")
-    bulb = wizlight(ip="127.0.0.1")
+    shutdown, port = await startup_bulb(
+        module_name="INVALID", firmware_version="1.16.64"
+    )
+    bulb = wizlight(ip="127.0.0.1", port=port)
     yield bulb
     await bulb.async_close()
     shutdown()

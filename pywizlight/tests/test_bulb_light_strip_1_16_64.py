@@ -10,10 +10,10 @@ from pywizlight.tests.fake_bulb import startup_bulb
 
 @pytest.fixture()
 async def light_strip() -> AsyncGenerator[wizlight, None]:
-    shutdown = startup_bulb(
+    shutdown, port = await startup_bulb(
         module_name="ESP03_SHRGB3_01ABI", firmware_version="1.16.64"
     )
-    bulb = wizlight(ip="127.0.0.1")
+    bulb = wizlight(ip="127.0.0.1", port=port)
     yield bulb
     await bulb.async_close()
     shutdown()
