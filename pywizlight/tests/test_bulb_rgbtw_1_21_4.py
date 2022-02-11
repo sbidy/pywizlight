@@ -9,7 +9,7 @@ from pywizlight.tests.fake_bulb import startup_bulb
 
 
 @pytest.fixture()
-async def dimmable_bulb() -> AsyncGenerator[wizlight, None]:
+async def rgbtw_bulb() -> AsyncGenerator[wizlight, None]:
     shutdown = startup_bulb(module_name="ESP20_SHRGBC_01", firmware_version="1.21.4")
     bulb = wizlight(ip="127.0.0.1")
     yield bulb
@@ -18,9 +18,9 @@ async def dimmable_bulb() -> AsyncGenerator[wizlight, None]:
 
 
 @pytest.mark.asyncio
-async def test_model_description_dimmable_bulb(dimmable_bulb: wizlight) -> None:
+async def test_model_description_dimmable_bulb(rgbtw_bulb: wizlight) -> None:
     """Test fetching the model description dimmable bulb."""
-    bulb_type = await dimmable_bulb.get_bulbtype()
+    bulb_type = await rgbtw_bulb.get_bulbtype()
     assert bulb_type == BulbType(
         features=Features(color=True, color_tmp=True, effect=True, brightness=True),
         name="ESP20_SHRGBC_01",
@@ -33,9 +33,9 @@ async def test_model_description_dimmable_bulb(dimmable_bulb: wizlight) -> None:
 
 
 @pytest.mark.asyncio
-async def test_supported_scenes(dimmable_bulb: wizlight) -> None:
+async def test_supported_scenes(rgbtw_bulb: wizlight) -> None:
     """Test supported scenes."""
-    assert await dimmable_bulb.getSupportedScenes() == [
+    assert await rgbtw_bulb.getSupportedScenes() == [
         "Ocean",
         "Romance",
         "Sunset",

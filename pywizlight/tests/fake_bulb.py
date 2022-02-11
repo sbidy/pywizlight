@@ -72,6 +72,47 @@ MODULE_CONFIGS = {
             "drvIface": 0,
         },
     },
+    ("MISSING", "1.16.64"): {
+        "method": "getModelConfig",
+        "env": "pro",
+        "result": {
+            "ps": 2,
+            "pwmFreq": 5000,
+            "pwmRange": [1, 100],
+            "wcr": 20,
+            "nowc": 1,
+            "cctRange": [2700, 2700, 5000, 5000],
+            "renderFactor": [255, 0, 255, 255, 0, 0, 0, 0, 0, 0],
+            "drvIface": 0,
+        },
+    },
+    ("MISSING_KELVIN", "1.16.64"): {
+        "method": "getModelConfig",
+        "env": "pro",
+        "result": {
+            "ps": 2,
+            "pwmFreq": 5000,
+            "pwmRange": [1, 100],
+            "wcr": 20,
+            "nowc": 1,
+            "renderFactor": [255, 0, 255, 255, 0, 0, 0, 0, 0, 0],
+            "drvIface": 0,
+        },
+    },
+    ("INVALID", "1.16.64"): {
+        "method": "getModelConfig",
+        "env": "pro",
+        "result": {
+            "ps": 2,
+            "pwmFreq": 5000,
+            "pwmRange": [1, 100],
+            "wcr": 20,
+            "nowc": 1,
+            "cctRange": [2700, 2700, 5000, 5000],
+            "renderFactor": [255, 0, 255, 255, 0, 0, 0, 0, 0, 0],
+            "drvIface": 0,
+        },
+    },
 }
 
 SYSTEM_CONFIGS = {
@@ -82,7 +123,7 @@ SYSTEM_CONFIGS = {
             "mac": "a8bb5006033d",
             "homeId": 653906,
             "roomId": 989983,
-            "moduleName": "",
+            "moduleName": "ESP01_SHRGB_03",
             "fwVersion": "1.25.0",
             "groupId": 0,
             "drvConf": [30, 1],
@@ -98,7 +139,7 @@ SYSTEM_CONFIGS = {
             "mac": "a8bb5006033d",
             "homeId": 653906,
             "roomId": 989983,
-            "moduleName": "",
+            "moduleName": "ESP10_SOCKET_06",
             "fwVersion": "1.25.0",
             "groupId": 0,
             "drvConf": [20, 2],
@@ -114,7 +155,7 @@ SYSTEM_CONFIGS = {
             "mac": "a8bb5006033d",
             "homeId": 653906,
             "roomId": 989983,
-            "moduleName": "",
+            "moduleName": "ESP05_SHDW_21",
             "fwVersion": "1.25.0",
             "groupId": 0,
             "drvConf": [20, 1],
@@ -130,7 +171,7 @@ SYSTEM_CONFIGS = {
             "mac": "a8bb5006033d",
             "homeId": 653906,
             "roomId": 989983,
-            "moduleName": "",
+            "moduleName": "ESP20_SHRGB_01ABI",
             "fwVersion": "1.25.0",
             "groupId": 0,
             "drvConf": [80, 2],
@@ -146,7 +187,7 @@ SYSTEM_CONFIGS = {
             "mac": "a8bb5006033d",
             "homeId": 653906,
             "roomId": 989983,
-            "moduleName": "",
+            "moduleName": "ESP20_SHRGB_01ABI",
             "fwVersion": "1.21.4",
             "groupId": 0,
             "drvConf": [80, 2],
@@ -196,6 +237,47 @@ SYSTEM_CONFIGS = {
             "roomId": 8016844,
             "rgn": "eu",
             "moduleName": "ESP21_SHTW_01",
+            "fwVersion": "1.25.0",
+            "groupId": 0,
+            "ping": 0,
+        },
+    },
+    ("MISSING_KELVIN", "1.16.64"): {
+        "method": "getSystemConfig",
+        "env": "pro",
+        "result": {
+            "mac": "6c29905a067c",
+            "homeId": 5385975,
+            "roomId": 8016844,
+            "rgn": "eu",
+            "moduleName": "ESP21_SHTW_01",
+            "fwVersion": "1.25.0",
+            "groupId": 0,
+            "ping": 0,
+        },
+    },
+    ("MISSING", "1.16.64"): {
+        "method": "getSystemConfig",
+        "env": "pro",
+        "result": {
+            "mac": "6c29905a067c",
+            "homeId": 5385975,
+            "roomId": 8016844,
+            "rgn": "eu",
+            "fwVersion": "1.25.0",
+            "groupId": 0,
+            "ping": 0,
+        },
+    },
+    ("INVALID", "1.16.64"): {
+        "method": "getSystemConfig",
+        "env": "pro",
+        "result": {
+            "mac": "6c29905a067c",
+            "homeId": 5385975,
+            "roomId": 8016844,
+            "rgn": "eu",
+            "moduleName": "INVALID",
             "fwVersion": "1.25.0",
             "groupId": 0,
             "ping": 0,
@@ -349,7 +431,6 @@ def make_udp_fake_bulb_server(
     sys_config = get_initial_sys_config(module_name, firmware_version)
     model_config = get_initial_model_config(module_name, firmware_version)
     user_config = get_initial_user_config(module_name, firmware_version)
-    sys_config["result"]["moduleName"] = module_name
 
     BulbUDPRequestHandler = type(
         "BulbUDPRequestHandler",
