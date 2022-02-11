@@ -28,6 +28,8 @@ _LOGGER = logging.getLogger(__name__)
 BulbResponse = Dict[str, Any]
 
 
+PORT = 38899
+
 TIMEOUT = 7
 SEND_INTERVAL = 0.5
 MAX_SEND_DATAGRAMS = int(TIMEOUT / SEND_INTERVAL)
@@ -348,7 +350,7 @@ class wizlight:
     def __init__(
         self,
         ip: str,
-        port: int = 38899,
+        port: int = PORT,
         mac: Optional[str] = None,
     ) -> None:
         """Create instance with the IP address of the bulb."""

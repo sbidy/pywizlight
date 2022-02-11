@@ -1,8 +1,9 @@
 """Start up a fake bulb to test features without a real bulb."""
 import json
-import socketserver
-import threading
-from typing import Any, Callable, Dict
+from typing import cast, Any, Callable, Dict, Tuple
+from pywizlight.protocol import WizProtocol
+import asyncio
+
 
 MODULE_CONFIGS = {
     ("ESP01_SHRGB_03", "1.25.0"): {
@@ -382,37 +383,38 @@ def get_initial_user_config(module_name: str, firmware_version: str) -> Dict[str
 BULB_JSON_ERROR = b'{"env":"pro","error":{"code":-32700,"message":"Parse error"}}'
 
 
-class BulbUDPRequestHandlerBase(socketserver.DatagramRequestHandler):
+class BulbUDPRequestHandler:
     """Class for UDP handler."""
 
     pilot_state: Dict[str, Any]  # Will be set by constructor for the actual class
     sys_config: Dict[str, Any]  # Will be set by constructor for the actual class
     model_config: Dict[str, Any]  # Will be set by constructor for the actual class
     user_config: Dict[str, Any]
+    transport: asyncio.DatagramTransport
 
-    def handle(self) -> None:
+    def handle(self, resp: dict, addr: Tuple[str, int]) -> None:
         """Handle the request."""
-        data = self.rfile.readline().strip()
+        data = resp.strip()
         print(f"Request:{data!r}")
         try:
             json_data: Dict[str, Any] = dict(json.loads(data.decode()))
         except json.JSONDecodeError:
-            self.wfile.write(BULB_JSON_ERROR)
+            self.transport.sendto(BULB_JSON_ERROR, addr)
             return
 
         method = str(json_data["method"])
         if method == "setPilot":
             return_data = self.setPilot(json_data)
-            self.wfile.write(return_data)
+            self.transport.sendto(return_data, addr)
         elif method == "getPilot":
             print(f"Response:{json.dumps(self.pilot_state)!r}")
-            self.wfile.write(bytes(json.dumps(self.pilot_state), "utf-8"))
+            self.transport.sendto(bytes(json.dumps(self.pilot_state), "utf-8"), addr)
         elif method == "getSystemConfig":
-            self.wfile.write(bytes(json.dumps(self.sys_config), "utf-8"))
+            self.transport.sendto(bytes(json.dumps(self.sys_config), "utf-8"), addr)
         elif method == "getModelConfig":
-            self.wfile.write(bytes(json.dumps(self.model_config), "utf-8"))
+            self.transport.sendto(bytes(json.dumps(self.model_config), "utf-8"), addr)
         elif method == "getUserConfig":
-            self.wfile.write(bytes(json.dumps(self.user_config), "utf-8"))
+            self.transport.sendto(bytes(json.dumps(self.user_config), "utf-8"), addr)
         else:
             raise RuntimeError(f"No handler for {method}")
 
@@ -423,38 +425,28 @@ class BulbUDPRequestHandlerBase(socketserver.DatagramRequestHandler):
         return b'{"method":"setPilot","env":"pro","result":{"success":true}}'
 
 
-def make_udp_fake_bulb_server(
+async def make_udp_fake_bulb_server(
     module_name: str, firmware_version: str
-) -> socketserver.ThreadingUDPServer:
+) -> Tuple[asyncio.BaseTransport, asyncio.Protocol]:
     """Configure a fake bulb instance."""
-    pilot_state = get_initial_pilot()
-    sys_config = get_initial_sys_config(module_name, firmware_version)
-    model_config = get_initial_model_config(module_name, firmware_version)
-    user_config = get_initial_user_config(module_name, firmware_version)
+    handler = BulbUDPRequestHandler()
+    handler.pilot_state = get_initial_pilot()
+    handler.sys_config = get_initial_sys_config(module_name, firmware_version)
+    handler.model_config = get_initial_model_config(module_name, firmware_version)
+    handler.user_config = get_initial_user_config(module_name, firmware_version)
 
-    BulbUDPRequestHandler = type(
-        "BulbUDPRequestHandler",
-        (BulbUDPRequestHandlerBase,),
-        {
-            "pilot_state": pilot_state,
-            "sys_config": sys_config,
-            "model_config": model_config,
-            "user_config": user_config,
-        },
+    transport_proto = await asyncio.get_event_loop().create_datagram_endpoint(
+        lambda: WizProtocol(on_response=handler.handle),
+        local_addr=("127.0.0.1", 0),
     )
-
-    udp_server = socketserver.ThreadingUDPServer(
-        server_address=("127.0.0.1", 38899),
-        RequestHandlerClass=BulbUDPRequestHandler,
-    )
-    return udp_server
+    handler.transport = cast(asyncio.DatagramTransport, transport_proto[0])
+    return transport_proto
 
 
-def startup_bulb(
+async def startup_bulb(
     module_name: str = "ESP01_SHRGB_03", firmware_version: str = "1.25.0"
-) -> Callable[[], Any]:
+) -> Tuple[Callable[[], Any], int]:
     """Start up the bulb. Returns a function to shut it down."""
-    server = make_udp_fake_bulb_server(module_name, firmware_version)
-    thread = threading.Thread(target=server.serve_forever)
-    thread.start()
-    return server.shutdown
+    transport_proto = await make_udp_fake_bulb_server(module_name, firmware_version)
+    transport = cast(asyncio.DatagramTransport, transport_proto[0])
+    return transport.close, transport.get_extra_info("sockname")[1]
