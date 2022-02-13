@@ -96,6 +96,11 @@ def _rgb_in_range_or_raise(rgb: Tuple[Union[float, int], ...]) -> None:
         raise ValueError("Blue is not in range between 0-255.")
 
 
+def _validate_speed_or_raise(speed: int) -> None:
+    if not 10 <= speed <= 200:
+        raise ValueError("Value must be between 10 and 200")
+
+
 class PilotBuilder:
     """Get information from the bulb."""
 
@@ -158,10 +163,9 @@ class PilotBuilder:
         self.pilot_params["c"] = value
 
     def _set_speed(self, value: int) -> None:
-        """Set the color changing speed value (20-200)."""
+        """Set the effect changing speed (10-200)."""
         # This applies only to changing effects.
-        if not 19 < value < 201:
-            raise ValueError("Value must be between 20 and 200")
+        _validate_speed_or_raise(value)
         self.pilot_params["speed"] = value
 
     def _set_scene(self, scene_id: int) -> None:
@@ -280,13 +284,17 @@ class PilotParser:
         """Get the color changing speed."""
         return _extract_int(self.pilotResult, "speed")
 
+    def get_scene_id(self) -> Optional[int]:
+        if "schdPsetId" in self.pilotResult:  # rhythm
+            return 1000
+        return self.pilotResult.get("sceneId")
+
     def get_scene(self) -> Optional[str]:
         """Get the current scene name."""
-        if "schdPsetId" in self.pilotResult:  # rhythm
-            return SCENES[1000]
-        if "sceneId" not in self.pilotResult:
+        scene_id = self.get_scene_id()
+        if scene_id is None:
             return None
-        return SCENES.get(self.pilotResult["sceneId"])
+        return SCENES.get(scene_id)
 
     def get_cold_white(self) -> Optional[int]:
         """Get the value of the cold white led."""
@@ -540,6 +548,14 @@ class wizlight:
     async def reset(self) -> None:
         """Reset the bulb to factory defaults."""
         await self.sendUDPMessage(r'{"method":"reset","params":{}}')
+
+    async def set_speed(self, speed: int) -> None:
+        """Set the effect speed."""
+        # If we have state: True in the setPilot, the speed does not change
+        _validate_speed_or_raise(speed)
+        await self.sendUDPMessage(
+            to_wiz_json({"method": "setPilot", "params": {"speed": speed}})
+        )
 
     async def turn_on(self, pilot_builder: PilotBuilder = PilotBuilder()) -> None:
         """Turn the light on with defined message.
