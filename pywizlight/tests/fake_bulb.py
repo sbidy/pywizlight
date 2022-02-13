@@ -5,7 +5,7 @@ from typing import Any, Callable, Dict, Tuple, cast
 
 from pywizlight.protocol import WizProtocol
 
-MODULE_CONFIGS = {
+MODULE_CONFIGS = {  # AKA getModelConfig
     ("ESP01_SHRGB_03", "1.25.0"): {
         "method": "getModelConfig",
         "env": "pro",
@@ -116,7 +116,7 @@ MODULE_CONFIGS = {
     },
 }
 
-SYSTEM_CONFIGS = {
+SYSTEM_CONFIGS = {  # AKA getSystemConfig
     ("ESP01_SHRGB_03", "1.25.0"): {
         "method": "getSystemConfig",
         "env": "pro",
@@ -284,9 +284,25 @@ SYSTEM_CONFIGS = {
             "ping": 0,
         },
     },
+    ("ESP01_SHRGB1C_31", "1.17.1"): {
+        "method": "getSystemConfig",
+        "env": "pro",
+        "result": {
+            "mac": "a8bb50bdf8d7",
+            "homeId": 5385975,
+            "roomId": 0,
+            "homeLock": False,
+            "pairingLock": False,
+            "typeId": 0,
+            "moduleName": "ESP01_SHRGB1C_31",
+            "fwVersion": "1.17.1",
+            "groupId": 0,
+            "drvConf": [20, 2],
+        },
+    },
 }
 
-USER_CONFIGS = {
+USER_CONFIGS = {  # AKA getUserConfig
     ("ESP20_SHRGB_01ABI", "1.21.4"): {
         "method": "getUserConfig",
         "env": "pro",
@@ -328,6 +344,20 @@ USER_CONFIGS = {
             "extRange": [2200, 6500],
             "opMode": 0,
             "po": True,
+        },
+    },
+    ("ESP01_SHRGB1C_31", "1.17.1"): {
+        "method": "getUserConfig",
+        "env": "pro",
+        "result": {
+            "fadeIn": 450,
+            "fadeOut": 500,
+            "fadeNight": False,
+            "dftDim": 100,
+            "pwmRange": [0, 100],
+            "whiteRange": [2700, 6500],
+            "extRange": [2700, 6500],
+            "po": False,
         },
     },
 }
