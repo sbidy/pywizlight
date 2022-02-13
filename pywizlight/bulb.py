@@ -30,9 +30,15 @@ BulbResponse = Dict[str, Any]
 
 PORT = 38899
 
-TIMEOUT = 7
-SEND_INTERVAL = 0.5
-MAX_SEND_DATAGRAMS = int(TIMEOUT / SEND_INTERVAL)
+# Progressive backoff config
+# ===============================================================
+# We send datagrams at 0, 0.75, 2.25, 5.25, 8.25, 11.25
+# We wait up to 11s for the last response before declaring failure
+# ================================================================
+TIMEOUT = 13  # How long we will wait total
+MAX_SEND_DATAGRAMS = 6  # The maximum datagrams we send
+FIRST_SEND_INTERVAL = 0.75  # This is the first wait time
+MAX_BACKOFF = 3  # This is how far we will backoff
 
 PUSH_KEEP_ALIVE_INTERVAL = 20
 MAX_TIME_BETWEEN_PUSH = PUSH_KEEP_ALIVE_INTERVAL + TIMEOUT
@@ -333,13 +339,24 @@ async def _send_udp_message_with_retry(
 ) -> None:
     """Send a UDP message multiple times until we reach the maximum or a response is recieved."""
     data = message.encode("utf-8")
+    send_wait = FIRST_SEND_INTERVAL
+    total_waited = 0.0
     for send in range(MAX_SEND_DATAGRAMS):
         if transport.is_closing() or response_future.done():
             return
         attempt = send + 1
-        _LOGGER.debug("%s: >> %s (%s/%s)", ip, data, attempt, MAX_SEND_DATAGRAMS)
+        _LOGGER.debug(
+            "%s: >> %s (%s/%s) backoff=%s",
+            ip,
+            data,
+            attempt,
+            MAX_SEND_DATAGRAMS,
+            total_waited,
+        )
         transport.sendto(data, (ip, port))
-        await asyncio.sleep(SEND_INTERVAL)
+        await asyncio.sleep(send_wait)
+        total_waited += send_wait
+        send_wait = min(send_wait * 2, MAX_BACKOFF)
 
 
 class wizlight:
@@ -397,9 +414,8 @@ class wizlight:
     def register(self) -> None:
         """Call register to keep alive push updates."""
         if self.push_running:
-            asyncio.create_task(
-                self._async_send_register(PushManager().get().register_msg)
-            )
+            push_manager = PushManager().get()
+            asyncio.create_task(self._async_send_register(push_manager.register_msg))
             self.loop.call_later(PUSH_KEEP_ALIVE_INTERVAL, self.register)
 
     async def _async_send_register(self, message: str) -> None:

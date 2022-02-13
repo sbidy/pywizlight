@@ -39,7 +39,7 @@ async def test_Bulb_Discovery(correct_bulb: wizlight) -> None:
     with patch("pywizlight.discovery.PORT", 0):
         bulbs = await discover_lights(broadcast_space="192.168.178.255", wait_time=0.02)
     for bulb in bulbs:
-        with patch("pywizlight.bulb.SEND_INTERVAL", 0.01), patch(
+        with patch("pywizlight.bulb.FIRST_SEND_INTERVAL", 0.01), patch(
             "pywizlight.bulb.TIMEOUT", 0.01
         ):
             state = await bulb.updateState()
@@ -256,7 +256,7 @@ async def test_get_mac(correct_bulb: wizlight) -> None:
 async def test_timeout(bad_bulb: wizlight) -> None:
     """Test the timout exception after."""
     with pytest.raises(WizLightTimeOutError), patch(
-        "pywizlight.bulb.SEND_INTERVAL", 0.01
+        "pywizlight.bulb.FIRST_SEND_INTERVAL", 0.01
     ), patch("pywizlight.bulb.TIMEOUT", 0.01):
         await bad_bulb.getBulbConfig()
 
@@ -266,7 +266,7 @@ async def test_timeout_PilotBuilder(bad_bulb: wizlight) -> None:
     """Test Timout for Result."""
     # check if the bulb state it given as bool - mock ?
     with pytest.raises(WizLightTimeOutError), patch(
-        "pywizlight.bulb.SEND_INTERVAL", 0.01
+        "pywizlight.bulb.FIRST_SEND_INTERVAL", 0.01
     ), patch("pywizlight.bulb.TIMEOUT", 0.01):
         await bad_bulb.turn_on(PilotBuilder(brightness=255))
 
