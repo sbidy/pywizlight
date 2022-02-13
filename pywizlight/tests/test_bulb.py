@@ -147,6 +147,14 @@ async def test_PilotBuilder_speed(correct_bulb: wizlight) -> None:
 
 
 @pytest.mark.asyncio
+async def test_set_speed(correct_bulb: wizlight) -> None:
+    """Set speed."""
+    await correct_bulb.set_speed(125)
+    state = await correct_bulb.updateState()
+    assert state and state.get_speed() == 125
+
+
+@pytest.mark.asyncio
 async def test_get_source(correct_bulb: wizlight) -> None:
     """Test getting the source."""
     state = await correct_bulb.updateState()
@@ -224,6 +232,13 @@ async def test_error_PilotBuilder_speed(correct_bulb: wizlight) -> None:
     """Error speed."""
     with pytest.raises(ValueError):
         await correct_bulb.turn_on(PilotBuilder(speed=532))
+
+
+@pytest.mark.asyncio
+async def test_error_set_speed(correct_bulb: wizlight) -> None:
+    """Error speed."""
+    with pytest.raises(ValueError):
+        await correct_bulb.set_speed(532)
 
 
 @pytest.mark.asyncio
