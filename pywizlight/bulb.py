@@ -206,7 +206,7 @@ class PilotBuilder:
         rgb, cw = hs2rgbcw(values)
         _rgb_in_range_or_raise(rgb)
         # Set the RGB values
-        params = self.pilot_paramsP
+        params = self.pilot_params
         params.update({key: rgb[idx] for idx, key in enumerate(RGB_ORDER)})
         if cw is not None:
             # Use the existing set_warm_white function to set the CW values
