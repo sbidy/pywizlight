@@ -158,7 +158,7 @@ class PilotBuilder:
         self.pilot_params["c"] = value
 
     def _set_speed(self, value: int) -> None:
-        """Set the color changing speed in precent (20-200)."""
+        """Set the color changing speed value (20-200)."""
         # This applies only to changing effects.
         if not 19 < value < 201:
             raise ValueError("Value must be between 20 and 200")
@@ -206,7 +206,7 @@ class PilotBuilder:
         rgb, cw = hs2rgbcw(values)
         _rgb_in_range_or_raise(rgb)
         # Set the RGB values
-        params = self.pilot_params
+        params = self.pilot_paramsP
         params.update({key: rgb[idx] for idx, key in enumerate(RGB_ORDER)})
         if cw is not None:
             # Use the existing set_warm_white function to set the CW values
