@@ -158,10 +158,10 @@ class PilotBuilder:
         self.pilot_params["c"] = value
 
     def _set_speed(self, value: int) -> None:
-        """Set the color changing speed in precent (0-100)."""
+        """Set the color changing speed in precent (20-200)."""
         # This applies only to changing effects.
-        if not 0 < value < 101:
-            raise ValueError("Value must be between 0 and 100")
+        if not 19 < value < 201:
+            raise ValueError("Value must be between 20 and 200")
         self.pilot_params["speed"] = value
 
     def _set_scene(self, scene_id: int) -> None:
