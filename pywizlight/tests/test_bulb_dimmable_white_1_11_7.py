@@ -30,10 +30,10 @@ async def test_model_description_dimmable_bulb(dimmable_bulb: wizlight) -> None:
     bulb_type = await dimmable_bulb.get_bulbtype()
     assert bulb_type == BulbType(
         features=Features(color=False, color_tmp=False, effect=False, brightness=True),
-        name="ESP05_SHDW_21",
-        kelvin_range=KelvinRange(max=2700, min=2700),
+        name="ESP06_SHDW9_01",
+        kelvin_range=KelvinRange(max=6500, min=2700),
         bulb_type=BulbClass.DW,
-        fw_version="1.25.0",
+        fw_version="1.11.7",
         white_channels=1,
         white_to_color_ratio=20,
     )
