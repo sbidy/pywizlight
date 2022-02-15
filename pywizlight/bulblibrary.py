@@ -53,8 +53,8 @@ FEATURE_MAP = {
     BulbClass.RGB: Features(brightness=True, color=True, effect=True, color_tmp=True),
     # TODO: TW supports effects but only "some"; improve the mapping to supported effects
     BulbClass.TW: Features(brightness=True, color=False, effect=True, color_tmp=True),
-    # Dimmable white only supports brightness
-    BulbClass.DW: Features(brightness=True, color=False, effect=False, color_tmp=False),
+    # Dimmable white only supports brightness and some basic effects
+    BulbClass.DW: Features(brightness=True, color=False, effect=True, color_tmp=False),
     # Socket supports only on/off
     BulbClass.SOCKET: Features(
         brightness=False, color=False, effect=False, color_tmp=False
