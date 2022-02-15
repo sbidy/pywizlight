@@ -300,6 +300,37 @@ SYSTEM_CONFIGS = {  # AKA getSystemConfig
             "drvConf": [20, 2],
         },
     },
+    ("ESP14_SHTW1C_01", "1.18.0"): {
+        "method": "getSystemConfig",
+        "env": "pro",
+        "result": {
+            "mac": "a8bb503ea5f4",
+            "homeId": 5385975,
+            "roomId": 0,
+            "homeLock": False,
+            "pairingLock": False,
+            "typeId": 0,
+            "moduleName": "ESP14_SHTW1C_01",
+            "fwVersion": "1.18.0",
+            "groupId": 0,
+            "drvConf": [20, 1],
+        },
+    },
+    ("ESP06_SHDW9_01", "1.11.7"): {
+        "method": "getSystemConfig",
+        "env": "",
+        "result": {
+            "mac": "a8bb509f71d1",
+            "homeId": 0,
+            "homeLock": False,
+            "pairingLock": False,
+            "typeId": 0,
+            "moduleName": "ESP06_SHDW9_01",
+            "fwVersion": "1.11.7",
+            "groupId": 0,
+            "drvConf": [20, 1],
+        },
+    },
 }
 
 USER_CONFIGS = {  # AKA getUserConfig
@@ -358,6 +389,34 @@ USER_CONFIGS = {  # AKA getUserConfig
             "whiteRange": [2700, 6500],
             "extRange": [2700, 6500],
             "po": False,
+        },
+    },
+    ("ESP14_SHTW1C_01", "1.18.0"): {
+        "method": "getUserConfig",
+        "env": "pro",
+        "result": {
+            "fadeIn": 450,
+            "fadeOut": 500,
+            "fadeNight": False,
+            "dftDim": 100,
+            "pwmRange": [0, 100],
+            "whiteRange": [2700, 6500],
+            "extRange": [2700, 6500],
+            "opMode": 0,
+            "po": False,
+        },
+    },
+    ("ESP06_SHDW9_01", "1.11.7"): {
+        "method": "getUserConfig",
+        "env": "pro",
+        "result": {
+            "fadeIn": 450,
+            "fadeOut": 500,
+            "fadeNight": False,
+            "dftDim": 100,
+            "pwmRange": [0, 100],
+            "whiteRange": [2700, 6500],
+            "extRange": [2700, 6500],
         },
     },
 }
