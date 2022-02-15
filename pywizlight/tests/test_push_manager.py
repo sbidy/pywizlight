@@ -93,7 +93,9 @@ async def test_push_updates(socket_push: wizlight) -> None:
 
 
 @pytest.mark.asyncio
-async def test_discovery_by_firstbeat(socket_push: wizlight) -> None:
+async def test_discovery_by_firstbeat(
+    socket_push: wizlight, caplog: pytest.LogCaptureFixture
+) -> None:
     """Test discovery from first beat."""
     bulb_type = await socket_push.get_bulbtype()
     assert bulb_type == BulbType(
@@ -131,6 +133,10 @@ async def test_discovery_by_firstbeat(socket_push: wizlight) -> None:
         ("127.0.0.1", push_port),
     )
     push_transport.sendto(
+        b"GARBAGE",
+        ("127.0.0.1", push_port),
+    )
+    push_transport.sendto(
         to_wiz_json(
             {
                 "method": "firstBeat",
@@ -144,3 +150,4 @@ async def test_discovery_by_firstbeat(socket_push: wizlight) -> None:
     assert last_discovery is not None
     assert last_discovery == DiscoveredBulb("127.0.0.1", socket_push.mac)
     push_transport.close()
+    assert "GARBAGE" in caplog.text
