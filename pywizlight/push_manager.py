@@ -34,6 +34,11 @@ class PushManager:
         self.lock = asyncio.Lock()
         self.subscriptions: Dict[str, Callable[[Dict, Tuple[str, int]], None]] = {}
         self.register_msg: Optional[str] = None
+        self.fail_reason: Optional[str] = None
+
+    @property
+    def diagnostics(self) -> dict:
+        return {"running": self.push_running, "fail_reason": self.fail_reason}
 
     def set_discovery_callback(
         self, callback: Optional[Callable[[DiscoveredBulb], None]]
@@ -48,16 +53,19 @@ class PushManager:
                 return True
             source_ip = get_source_ip(target_ip)
             if not source_ip:
+                self.fail_reason = "Could not determine source ip"
                 _LOGGER.warning(
                     "Could not determine source ip, falling back to polling"
                 )
                 return False
             try:
                 sock = create_udp_socket(LISTEN_PORT)
-            except OSError:
+            except OSError as ex:
+                self.fail_reason = f"Port {LISTEN_PORT} is in use: {ex}"
                 _LOGGER.warning(
-                    "Port %s is in use, cannot listen for push updates, falling back to polling",
+                    "Port %s is in use: %s, cannot listen for push updates, falling back to polling",
                     LISTEN_PORT,
+                    ex,
                 )
                 return False
             self.register_msg = to_wiz_json(
@@ -81,6 +89,7 @@ class PushManager:
             )
             self.push_protocol = cast(WizProtocol, push_transport_proto[1])
             self.push_running = True
+            self.fail_reason = None
             return True
 
     async def stop_if_no_subs(self) -> None:

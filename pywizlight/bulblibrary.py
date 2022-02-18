@@ -74,6 +74,12 @@ class BulbType:
     white_channels: Optional[int]
     white_to_color_ratio: Optional[int]
 
+    def as_dict(self):
+        """Convert to a dict."""
+        dict_self = dataclasses.asdict(self)
+        dict_self["bulb_type"] = self.bulb_type.name
+        return dict_self
+
     @staticmethod
     def from_data(
         module_name: str,
