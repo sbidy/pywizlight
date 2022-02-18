@@ -6,12 +6,12 @@ import logging
 import time
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union, cast
 
-from pywizlight.exceptions import WizLightNotKnownBulb
-
+from pywizlight._version import __version__ as pywizlight_version
 from pywizlight.bulblibrary import BulbType
 from pywizlight.exceptions import (
     WizLightConnectionError,
     WizLightMethodNotFound,
+    WizLightNotKnownBulb,
     WizLightTimeOutError,
 )
 from pywizlight.models import DiscoveredBulb
@@ -70,6 +70,11 @@ WIZMOTE_BUTTON_MAP = {
 }
 
 ALWAYS_SEND_SRCS = set([PIR_SOURCE, *WIZMOTE_BUTTON_MAP])
+
+HISTORY_RECIEVE = "receive"
+HISTORY_SEND = "send"
+HISTORY_PUSH = "push"
+HISTORY_MSG_TYPES = (HISTORY_RECIEVE, HISTORY_SEND, HISTORY_PUSH)
 
 
 def states_match(old: Dict[str, Any], new: Dict[str, Any]) -> bool:
@@ -141,14 +146,14 @@ class PilotBuilder:
         if cold_white is not None:
             self._set_cold_white(cold_white)
 
-    def set_pilot_message(self) -> str:
+    def set_pilot_message(self) -> Dict:
         """Return the pilot message."""
-        return to_wiz_json({"method": "setPilot", "params": self.pilot_params})
+        return {"method": "setPilot", "params": self.pilot_params}
 
-    def set_state_message(self, state: bool) -> str:
+    def set_state_message(self, state: bool) -> Dict:
         """Return the setState message. It doesn't change the current status of the light."""
         self.pilot_params["state"] = state
-        return to_wiz_json({"method": "setState", "params": self.pilot_params})
+        return {"method": "setState", "params": self.pilot_params}
 
     def _set_warm_white(self, value: int) -> None:
         """Set the value of the warm white led."""
@@ -367,6 +372,27 @@ async def _send_udp_message_with_retry(
         send_wait = min(send_wait * 2, MAX_BACKOFF)
 
 
+class WizHistory:
+    """Create a history instance for diagnostics."""
+
+    def __init__(self):
+        """Init the diagnostics instance."""
+        self._history: Dict[str, Dict] = {
+            msg_type: {} for msg_type in HISTORY_MSG_TYPES
+        }
+        self._last_error: Optional[str] = None
+
+    def get(self) -> Dict:
+        return {**self._history, "last_error": self._last_error}
+
+    def error(self, msg: str) -> None:
+        self._last_error = msg
+
+    def message(self, msg_type: str, decoded: Dict) -> None:
+        if "method" in decoded:
+            self._history[msg_type][decoded["method"]] = decoded
+
+
 class wizlight:
     """Create an instance of a WiZ Light Bulb."""
 
@@ -389,6 +415,7 @@ class wizlight:
         self.extwhiteRange: Optional[List[float]] = None
         self.transport: Optional[asyncio.DatagramTransport] = None
         self.protocol: Optional[WizProtocol] = None
+        self.history = WizHistory()
 
         self.lock = asyncio.Lock()
         self.loop = asyncio.get_event_loop()
@@ -398,6 +425,21 @@ class wizlight:
         self.last_push: float = NEVER_TIME
         self.push_running: bool = False
         # Check connection removed as it did blocking I/O in the event loop
+
+    @property
+    def diagnostics(self) -> dict:
+        """Get diagnostics for the device."""
+        return {
+            "state": self.state.pilotResult if self.state else None,
+            "white_range": self.whiteRange,
+            "extended_white_range": self.extwhiteRange,
+            "bulb_type": self.bulbtype.as_dict() if self.bulbtype else None,
+            "last_push": self.last_push,
+            "push_running": self.push_running,
+            "version": pywizlight_version,
+            "history": self.history.get(),
+            "push_manager": PushManager().get().diagnostics,
+        }
 
     @property
     def status(self) -> Optional[bool]:
@@ -435,15 +477,17 @@ class wizlight:
 
     async def start_push(
         self, callback: Optional[Callable[[PilotParser], None]]
-    ) -> None:
+    ) -> bool:
         """Start periodic register calls to get push updates via syncPilot."""
         _LOGGER.debug("Enabling push updates for %s", self.mac)
         self.push_callback = callback
         push_manager = PushManager().get()
         self.push_cancel = push_manager.register(self.mac, self._on_push)
-        if await push_manager.start(self.ip):
-            self.push_running = True
-            self.register()
+        if not await push_manager.start(self.ip):
+            return False
+        self.push_running = True
+        self.register()
+        return True
 
     def set_discovery_callback(
         self, callback: Optional[Callable[[DiscoveredBulb], None]]
@@ -453,6 +497,7 @@ class wizlight:
 
     def _on_push(self, resp: dict, addr: Tuple[str, int]) -> None:
         """Handle a syncPilot from the device."""
+        self.history.message(HISTORY_PUSH, resp)
         self.last_push = time.monotonic()
         old_state = self.state.pilotResult if self.state else None
         new_state = resp["params"]
@@ -470,6 +515,7 @@ class wizlight:
 
     def _on_error(self, exception: Optional[Exception]) -> None:
         """Handle a protocol error."""
+        self.history.error(str(exception))
         if exception and self.response_future and not self.response_future.done():
             self.response_future.set_exception(exception)
 
@@ -539,23 +585,21 @@ class wizlight:
 
     async def turn_off(self) -> None:
         """Turn the light off."""
-        await self.sendUDPMessage(r'{"method":"setPilot","params":{"state":false}}')
+        await self.send({"method": "setPilot", "params": {"state": False}})
 
     async def reboot(self) -> None:
         """Reboot the bulb."""
-        await self.sendUDPMessage(r'{"method":"reboot","params":{}}')
+        await self.send({"method": "reboot", "params": {}})
 
     async def reset(self) -> None:
         """Reset the bulb to factory defaults."""
-        await self.sendUDPMessage(r'{"method":"reset","params":{}}')
+        await self.send({"method": "reset", "params": {}})
 
     async def set_speed(self, speed: int) -> None:
         """Set the effect speed."""
         # If we have state: True in the setPilot, the speed does not change
         _validate_speed_or_raise(speed)
-        await self.sendUDPMessage(
-            to_wiz_json({"method": "setPilot", "params": {"speed": speed}})
-        )
+        await self.send({"method": "setPilot", "params": {"speed": speed}})
 
     async def turn_on(self, pilot_builder: PilotBuilder = PilotBuilder()) -> None:
         """Turn the light on with defined message.
@@ -563,7 +607,7 @@ class wizlight:
         :param pilot_builder: PilotBuilder object to set the turn on state, defaults to PilotBuilder()
         :type pilot_builder: [type], optional
         """
-        await self.sendUDPMessage(pilot_builder.set_pilot_message())
+        await self.send(pilot_builder.set_pilot_message())
 
     async def set_state(self, pilot_builder: PilotBuilder = PilotBuilder()) -> None:
         """Set the state of the bulb with defined message. Doesn't turn on the light.
@@ -572,7 +616,7 @@ class wizlight:
         :type pilot_builder: [type], optional
         """
         # TODO: self.status could be None, in which case casting it to a bool might not be what we really want
-        await self.sendUDPMessage(pilot_builder.set_state_message(bool(self.status)))
+        await self.send(pilot_builder.set_state_message(bool(self.status)))
 
     # ---------- Helper Functions ------------
     async def updateState(self) -> Optional[PilotParser]:
@@ -584,7 +628,7 @@ class wizlight:
         {"method": "getPilot", "id": 24}
         """
         if self.last_push + MAX_TIME_BETWEEN_PUSH < time.monotonic():
-            resp = await self.sendUDPMessage(r'{"method":"getPilot","params":{}}')
+            resp = await self.send({"method": "getPilot", "params": {}})
             if resp is not None and "result" in resp:
                 self.state = PilotParser(resp["result"])
             else:
@@ -604,7 +648,7 @@ class wizlight:
 
     async def getBulbConfig(self) -> BulbResponse:
         """Return the configuration from the bulb."""
-        resp = await self.sendUDPMessage(r'{"method":"getSystemConfig","params":{}}')
+        resp = await self.send({"method": "getSystemConfig", "params": {}})
         self._cache_mac_from_bulb_config(resp)
         return resp
 
@@ -614,14 +658,14 @@ class wizlight:
         """
         if self.modelConfig is None:
             with contextlib.suppress(WizLightMethodNotFound):
-                self.modelConfig = await self.sendUDPMessage(
-                    r'{"method":"getModelConfig","params":{}}'
+                self.modelConfig = await self.send(
+                    {"method": "getModelConfig", "params": {}}
                 )
         return self.modelConfig
 
     async def getUserConfig(self) -> BulbResponse:
         """Return the user configuration from the bulb."""
-        return await self.sendUDPMessage(r'{"method":"getUserConfig","params":{}}')
+        return await self.send({"method": "getUserConfig", "params": {}})
 
     async def lightSwitch(self) -> None:
         """Turn the light bulb on or off like a switch."""
@@ -635,6 +679,11 @@ class wizlight:
         else:
             # if the light is off - turn on
             await self.turn_on()
+
+    async def send(self, message: Dict) -> BulbResponse:
+        """Serialize a dict to json and send it to device over UDP."""
+        self.history.message(HISTORY_SEND, message)
+        return await self.sendUDPMessage(to_wiz_json(message))
 
     async def sendUDPMessage(self, message: str) -> BulbResponse:
         """Send the UDP message to the bulb."""
@@ -668,6 +717,7 @@ class wizlight:
                     with contextlib.suppress(asyncio.CancelledError):
                         await send_task
         resp = json.loads(response.decode())
+        self.history.message(HISTORY_RECIEVE, resp)
         if "error" in resp:
             if resp["error"]["code"] == -32601:
                 raise WizLightMethodNotFound("Method not found; maybe older bulb FW?")

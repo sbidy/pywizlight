@@ -31,6 +31,36 @@ async def socket_push() -> AsyncGenerator[wizlight, None]:
 
 
 @pytest.mark.asyncio
+async def test_push_update_fail_no_source_ip(socket_push: wizlight) -> None:
+    """Test push updates fails when we cannot get the sourrce ip."""
+    last_data = PilotParser({})
+    data_event = asyncio.Event()
+
+    def _on_push(data: PilotParser) -> None:
+        nonlocal last_data
+        last_data = data
+        data_event.set()
+
+    with patch("pywizlight.push_manager.get_source_ip", return_value=None):
+        assert await socket_push.start_push(_on_push) is False
+
+
+@pytest.mark.asyncio
+async def test_push_update_fail_port_in_use(socket_push: wizlight) -> None:
+    """Test push updates fails when the port is in use."""
+    last_data = PilotParser({})
+    data_event = asyncio.Event()
+
+    def _on_push(data: PilotParser) -> None:
+        nonlocal last_data
+        last_data = data
+        data_event.set()
+
+    with patch("pywizlight.push_manager.create_udp_socket", side_effect=OSError):
+        assert await socket_push.start_push(_on_push) is False
+
+
+@pytest.mark.asyncio
 async def test_push_updates(socket_push: wizlight) -> None:
     """Test push updates."""
     bulb_type = await socket_push.get_bulbtype()
@@ -52,7 +82,7 @@ async def test_push_updates(socket_push: wizlight) -> None:
         data_event.set()
 
     with patch("pywizlight.push_manager.LISTEN_PORT", 0):
-        await socket_push.start_push(_on_push)
+        assert await socket_push.start_push(_on_push) is True
 
     push_manager = PushManager().get()
     push_port = push_manager.push_transport.get_extra_info("sockname")[1]
@@ -89,6 +119,17 @@ async def test_push_updates(socket_push: wizlight) -> None:
     update = await socket_push.updateState()
     assert update is not None
     assert update.pilotResult == params
+
+    diagnostics = socket_push.diagnostics
+    assert diagnostics["bulb_type"]["bulb_type"] == "SOCKET"
+    assert diagnostics["history"]["last_error"] is None
+    assert diagnostics["push_running"] is True
+    assert (
+        diagnostics["history"]["push"]["syncPilot"]["params"]["mac"] == "a8bb5006033d"
+    )
+    assert diagnostics["push_manager"]["running"] is True
+    assert diagnostics["push_manager"]["fail_reason"] is None
+
     push_transport.close()
 
 
@@ -116,7 +157,7 @@ async def test_discovery_by_firstbeat(
         discovery_event.set()
 
     with patch("pywizlight.push_manager.LISTEN_PORT", 0):
-        await socket_push.start_push(lambda data: None)
+        assert await socket_push.start_push(lambda data: None) is True
 
     assert socket_push.mac is not None
     socket_push.set_discovery_callback(_on_discovery)

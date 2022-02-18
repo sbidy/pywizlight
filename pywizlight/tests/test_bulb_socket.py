@@ -35,6 +35,16 @@ async def test_model_description_socket(socket: wizlight) -> None:
 
 
 @pytest.mark.asyncio
+async def test_diagnostics(socket: wizlight) -> None:
+    """Test fetching diagnostics."""
+    await socket.get_bulbtype()
+    diagnostics = socket.diagnostics
+    assert diagnostics["bulb_type"]["bulb_type"] == "SOCKET"
+    assert diagnostics["history"]["last_error"] is None
+    assert diagnostics["push_running"] is False
+
+
+@pytest.mark.asyncio
 async def test_supported_scenes(socket: wizlight) -> None:
     """Test supported scenes."""
     assert await socket.getSupportedScenes() == []
