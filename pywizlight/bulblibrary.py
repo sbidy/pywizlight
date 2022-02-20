@@ -12,10 +12,13 @@ RGB -- Fullstack bulb
 31 -- Related to the hardware revision
 """
 import dataclasses
+import logging
 from enum import Enum
 from typing import List, Optional
 
 from pywizlight.exceptions import WizLightNotKnownBulb
+
+_LOGGER = logging.getLogger(__name__)
 
 
 @dataclasses.dataclass(frozen=True)
@@ -49,6 +52,8 @@ class BulbClass(Enum):
     SOCKET = "Socket"
     """Smart socket with only on/off."""
 
+
+KNOWN_TYPE_IDS = {0: BulbClass.DW}
 
 _BASE_FEATURE_MAP = {
     # RGB supports effects and tuneable white
@@ -87,7 +92,7 @@ class BulbType:
     """BulbType object to define functions and features of the bulb."""
 
     features: Features
-    name: str
+    name: Optional[str]
     kelvin_range: Optional[KelvinRange]
     bulb_type: BulbClass
     fw_version: Optional[str]
@@ -107,24 +112,39 @@ class BulbType:
         fw_version: Optional[str],
         white_channels: Optional[int],
         white_to_color_ratio: Optional[int],
+        type_id: Optional[int],
     ) -> "BulbType":
-        try:
-            # parse the features from name
-            _identifier = module_name.split("_")[1]
-        # Throw exception if index can not be found
-        except IndexError:
+        if module_name:
+            try:
+                # parse the features from name
+                _identifier = module_name.split("_")[1]
+            # Throw exception if index can not be found
+            except IndexError:
+                raise WizLightNotKnownBulb(
+                    f"The bulb type could not be determined from the module name: {module_name}"
+                )
+            if "RGB" in _identifier:  # full RGB bulb
+                bulb_type = BulbClass.RGB
+            elif "TW" in _identifier:  # Non RGB but tunable white bulb
+                bulb_type = BulbClass.TW
+            elif "SOCKET" in _identifier:  # A smart socket
+                bulb_type = BulbClass.SOCKET
+            else:  # Plain brightness-only bulb
+                bulb_type = BulbClass.DW
+            dual_head = "DH" in _identifier
+        elif type_id is not None:
+            if type_id not in KNOWN_TYPE_IDS:
+                _LOGGER.warning(
+                    "Unknown typeId: %s, please report what kind of bulb "
+                    "this is at https://github.com/sbidy/pywizlight/issues/new",
+                    type_id,
+                )
+            bulb_type = KNOWN_TYPE_IDS.get(type_id, BulbClass.DW)
+            dual_head = False
+        else:
             raise WizLightNotKnownBulb(
-                f"The bulb type could not be determined from the module name: {module_name}"
+                f"The bulb type could not be determined from the module name: {module_name} or type_id"
             )
-
-        if "RGB" in _identifier:  # full RGB bulb
-            bulb_type = BulbClass.RGB
-        elif "TW" in _identifier:  # Non RGB but tunable white bulb
-            bulb_type = BulbClass.TW
-        elif "SOCKET" in _identifier:  # A smart socket
-            bulb_type = BulbClass.SOCKET
-        else:  # Plain brightness-only bulb
-            bulb_type = BulbClass.DW
 
         if kelvin_list:
             kelvin_range: Optional[KelvinRange] = KelvinRange(
@@ -137,9 +157,7 @@ class BulbType:
         else:
             kelvin_range = None
 
-        features = Features(
-            **_BASE_FEATURE_MAP[bulb_type], dual_head="DH" in _identifier
-        )
+        features = Features(**_BASE_FEATURE_MAP[bulb_type], dual_head=dual_head)
 
         return BulbType(
             bulb_type=bulb_type,
