@@ -106,6 +106,11 @@ def _validate_speed_or_raise(speed: int) -> None:
         raise ValueError("Value must be between 10 and 200")
 
 
+def _validate_ratio_or_raise(ratio: int) -> None:
+    if not 0 <= ratio <= 100:
+        raise ValueError("Value must be between 0 and 100")
+
+
 class PilotBuilder:
     """Get information from the bulb."""
 
@@ -122,11 +127,14 @@ class PilotBuilder:
         brightness: Optional[int] = None,
         colortemp: Optional[int] = None,
         state: bool = True,
+        ratio: Optional[int] = None,
     ) -> None:
         """Set the parameter."""
         self.pilot_params: Dict[str, Any] = {"state": state}
         if speed is not None:
             self._set_speed(speed)
+        if ratio is not None:
+            self._set_ratio(ratio)
         if scene is not None:
             self._set_scene(scene)
         if brightness is not None:
@@ -172,6 +180,11 @@ class PilotBuilder:
         # This applies only to changing effects.
         _validate_speed_or_raise(value)
         self.pilot_params["speed"] = value
+
+    def _set_ratio(self, value: int) -> None:
+        """Set the ratio between the up and down light (1-100)."""
+        _validate_ratio_or_raise(value)
+        self.pilot_params["ratio"] = value
 
     def _set_scene(self, scene_id: int) -> None:
         """Set the scene by id."""
@@ -288,6 +301,10 @@ class PilotParser:
     def get_speed(self) -> Optional[int]:
         """Get the color changing speed."""
         return _extract_int(self.pilotResult, "speed")
+
+    def get_ratio(self) -> Optional[int]:
+        """Get the ratio between the up and down light."""
+        return _extract_int(self.pilotResult, "ratio")
 
     def get_scene_id(self) -> Optional[int]:
         if "schdPsetId" in self.pilotResult:  # rhythm
@@ -600,6 +617,11 @@ class wizlight:
         # If we have state: True in the setPilot, the speed does not change
         _validate_speed_or_raise(speed)
         await self.send({"method": "setPilot", "params": {"speed": speed}})
+
+    async def set_ratio(self, ratio: int) -> None:
+        """Set the ratio between the up and down light."""
+        _validate_ratio_or_raise(ratio)
+        await self.send({"method": "setPilot", "params": {"ratio": ratio}})
 
     async def turn_on(self, pilot_builder: PilotBuilder = PilotBuilder()) -> None:
         """Turn the light on with defined message.

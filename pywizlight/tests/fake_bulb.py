@@ -331,6 +331,22 @@ SYSTEM_CONFIGS = {  # AKA getSystemConfig
             "drvConf": [20, 1],
         },
     },
+    ("ESP20_DHRGB_01B", "1.21.40"): {
+        "method": "getSystemConfig",
+        "env": "pro",
+        "result": {
+            "mac": "d8a01199cf31",
+            "homeId": 5385975,
+            "roomId": 8201410,
+            "moduleName": "ESP20_DHRGB_01B",
+            "fwVersion": "1.21.40",
+            "groupId": 0,
+            "drvConf": [20, 2],
+            "ewf": [200, 255, 150, 255, 0, 0, 40],
+            "ewfHex": "c8ff96ff000028",
+            "ping": 0,
+        },
+    },
 }
 
 USER_CONFIGS = {  # AKA getUserConfig
@@ -417,6 +433,20 @@ USER_CONFIGS = {  # AKA getUserConfig
             "pwmRange": [0, 100],
             "whiteRange": [2700, 6500],
             "extRange": [2700, 6500],
+        },
+    },
+    ("ESP20_DHRGB_01B", "1.21.40"): {
+        "method": "getUserConfig",
+        "env": "pro",
+        "result": {
+            "fadeIn": 500,
+            "fadeOut": 500,
+            "dftDim": 100,
+            "pwmRange": [0, 100],
+            "whiteRange": [2700, 6500],
+            "extRange": [2200, 6500],
+            "opMode": 0,
+            "po": True,
         },
     },
 }

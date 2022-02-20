@@ -65,7 +65,13 @@ async def test_push_updates(socket_push: wizlight) -> None:
     """Test push updates."""
     bulb_type = await socket_push.get_bulbtype()
     assert bulb_type == BulbType(
-        features=Features(color=False, color_tmp=False, effect=False, brightness=False),
+        features=Features(
+            color=False,
+            color_tmp=False,
+            effect=False,
+            brightness=False,
+            dual_head=False,
+        ),
         name="ESP10_SOCKET_06",
         kelvin_range=KelvinRange(max=2700, min=2700),
         bulb_type=BulbClass.SOCKET,
@@ -140,7 +146,13 @@ async def test_discovery_by_firstbeat(
     """Test discovery from first beat."""
     bulb_type = await socket_push.get_bulbtype()
     assert bulb_type == BulbType(
-        features=Features(color=False, color_tmp=False, effect=False, brightness=False),
+        features=Features(
+            color=False,
+            color_tmp=False,
+            effect=False,
+            brightness=False,
+            dual_head=False,
+        ),
         name="ESP10_SOCKET_06",
         kelvin_range=KelvinRange(max=2700, min=2700),
         bulb_type=BulbClass.SOCKET,

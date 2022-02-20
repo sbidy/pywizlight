@@ -24,7 +24,13 @@ async def test_model_description_socket(socket: wizlight) -> None:
     """Test fetching the model description of a socket is None."""
     bulb_type = await socket.get_bulbtype()
     assert bulb_type == BulbType(
-        features=Features(color=False, color_tmp=False, effect=False, brightness=False),
+        features=Features(
+            color=False,
+            color_tmp=False,
+            effect=False,
+            brightness=False,
+            dual_head=False,
+        ),
         name="ESP10_SOCKET_06",
         kelvin_range=KelvinRange(max=2700, min=2700),
         bulb_type=BulbClass.SOCKET,
