@@ -463,6 +463,20 @@ USER_CONFIGS = {  # AKA getUserConfig
             "extRange": [2700, 6500],
         },
     },
+    ("ESP20_DHRGB_01B", "1.21.40"): {
+        "method": "getUserConfig",
+        "env": "pro",
+        "result": {
+            "fadeIn": 500,
+            "fadeOut": 500,
+            "dftDim": 100,
+            "pwmRange": [0, 100],
+            "whiteRange": [2700, 6500],
+            "extRange": [2200, 6500],
+            "opMode": 0,
+            "po": True,
+        },
+    },
     ("1.8.0-MISSING-TYPEID-0", "1.8.0"): {
         "method": "getUserConfig",
         "env": "pro",

@@ -131,7 +131,7 @@ class BulbType:
                 bulb_type = BulbClass.SOCKET
             else:  # Plain brightness-only bulb
                 bulb_type = BulbClass.DW
-
+            dual_head = "DH" in _identifier
         elif type_id is not None:
             if type_id not in KNOWN_TYPE_IDS:
                 _LOGGER.warning(
@@ -140,6 +140,7 @@ class BulbType:
                     type_id,
                 )
             bulb_type = KNOWN_TYPE_IDS.get(type_id, BulbClass.DW)
+            dual_head = False
         else:
             raise WizLightNotKnownBulb(
                 f"The bulb type could not be determined from the module name: {module_name} or type_id"
@@ -156,9 +157,7 @@ class BulbType:
         else:
             kelvin_range = None
 
-        features = Features(
-            **_BASE_FEATURE_MAP[bulb_type], dual_head="DH" in _identifier
-        )
+        features = Features(**_BASE_FEATURE_MAP[bulb_type], dual_head=dual_head)
 
         return BulbType(
             bulb_type=bulb_type,

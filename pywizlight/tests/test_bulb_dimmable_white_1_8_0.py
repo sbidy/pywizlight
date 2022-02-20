@@ -24,7 +24,9 @@ async def test_model_description_dimmable_bulb(dimmable_bulb: wizlight) -> None:
     """Test fetching the model description dimmable bulb."""
     bulb_type = await dimmable_bulb.get_bulbtype()
     assert bulb_type == BulbType(
-        features=Features(color=False, color_tmp=False, effect=True, brightness=True),
+        features=Features(
+            color=False, color_tmp=False, effect=True, brightness=True, dual_head=False
+        ),
         name=None,
         kelvin_range=None,
         bulb_type=BulbClass.DW,

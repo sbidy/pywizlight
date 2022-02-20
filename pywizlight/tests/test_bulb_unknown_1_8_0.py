@@ -26,7 +26,9 @@ async def test_model_description_unknown_bulb(
     """Test fetching the model description for an unknown bulb."""
     bulb_type = await unknown_bulb.get_bulbtype()
     assert bulb_type == BulbType(
-        features=Features(color=False, color_tmp=False, effect=True, brightness=True),
+        features=Features(
+            color=False, color_tmp=False, effect=True, brightness=True, dual_head=False
+        ),
         name=None,
         kelvin_range=None,
         bulb_type=BulbClass.DW,
