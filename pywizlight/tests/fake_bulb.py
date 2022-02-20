@@ -117,6 +117,34 @@ MODULE_CONFIGS = {  # AKA getModelConfig
 }
 
 SYSTEM_CONFIGS = {  # AKA getSystemConfig
+    ("1.8.0-MISSING-TYPEID-0", "1.8.0"): {
+        "method": "getSystemConfig",
+        "env": "pro",
+        "result": {
+            "mac": "a8bb502054e3",
+            "homeId": 5385975,
+            "homeLock": False,
+            "pairingLock": False,
+            "typeId": 0,
+            "fwVersion": "1.8.0",
+            "groupId": 0,
+            "drvConf": [20, 1],
+        },
+    },
+    ("1.8.0-MISSING-TYPEID-1", "1.8.0"): {
+        "method": "getSystemConfig",
+        "env": "pro",
+        "result": {
+            "mac": "a8bb502054e3",
+            "homeId": 5385975,
+            "homeLock": False,
+            "pairingLock": False,
+            "typeId": 1,
+            "fwVersion": "1.8.0",
+            "groupId": 0,
+            "drvConf": [20, 1],
+        },
+    },
     ("ESP01_SHRGB_03", "1.25.0"): {
         "method": "getSystemConfig",
         "env": "pro",
@@ -417,6 +445,30 @@ USER_CONFIGS = {  # AKA getUserConfig
             "pwmRange": [0, 100],
             "whiteRange": [2700, 6500],
             "extRange": [2700, 6500],
+        },
+    },
+    ("1.8.0-MISSING-TYPEID-0", "1.8.0"): {
+        "method": "getUserConfig",
+        "env": "pro",
+        "result": {
+            "fadeIn": 500,
+            "fadeOut": 500,
+            "fadeNight": False,
+            "dftDim": 100,
+            "pwmRange": [5, 100],
+            "whiteRange": [2700, 2700],
+        },
+    },
+    ("1.8.0-MISSING-TYPEID-1", "1.8.0"): {
+        "method": "getUserConfig",
+        "env": "pro",
+        "result": {
+            "fadeIn": 500,
+            "fadeOut": 500,
+            "fadeNight": False,
+            "dftDim": 100,
+            "pwmRange": [5, 100],
+            "whiteRange": [2700, 2700],
         },
     },
 }

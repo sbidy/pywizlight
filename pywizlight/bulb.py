@@ -11,7 +11,6 @@ from pywizlight.bulblibrary import BulbType
 from pywizlight.exceptions import (
     WizLightConnectionError,
     WizLightMethodNotFound,
-    WizLightNotKnownBulb,
     WizLightTimeOutError,
 )
 from pywizlight.models import DiscoveredBulb
@@ -526,23 +525,25 @@ class wizlight:
 
         bulb_config = await self.getBulbConfig()
         result = bulb_config["result"]
-        if "moduleName" not in result:
-            raise WizLightNotKnownBulb(
-                "Unable to determine the bulb type; moduleName is missing from getSystemConfig"
-            )
         white_range = await self.getExtendedWhiteRange()
         white_to_color_ratio = None
         white_channels = None
         if "drvConf" in result:
             # For old FW < 1.22
             white_to_color_ratio, white_channels = result["drvConf"]
-        module_name = result["moduleName"]
+        module_name = result.get("moduleName")  # Not present in 1.8.0 firmware!
         fw_version = result.get("fwVersion")
+        type_id = result.get("typeId")
         model_result = self.modelConfig["result"] if self.modelConfig else {}
         white_channels = model_result.get("nowc", white_channels)
         white_to_color_ratio = model_result.get("wcr", white_to_color_ratio)
         self.bulbtype = BulbType.from_data(
-            module_name, white_range, fw_version, white_channels, white_to_color_ratio
+            module_name,
+            white_range,
+            fw_version,
+            white_channels,
+            white_to_color_ratio,
+            type_id,
         )
         return self.bulbtype
 
