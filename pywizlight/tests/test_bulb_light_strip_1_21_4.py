@@ -32,7 +32,9 @@ async def test_model_description_light_strip(light_strip: wizlight) -> None:
     """Test fetching the model description for a light strip."""
     bulb_type = await light_strip.get_bulbtype()
     assert bulb_type == BulbType(
-        features=Features(color=True, color_tmp=True, effect=True, brightness=True),
+        features=Features(
+            color=True, color_tmp=True, effect=True, brightness=True, dual_head=False
+        ),
         name="ESP20_SHRGB_01ABI",
         kelvin_range=KelvinRange(max=6500, min=2700),
         bulb_type=BulbClass.RGB,

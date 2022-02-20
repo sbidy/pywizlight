@@ -246,7 +246,9 @@ async def test_fw_version(correct_bulb: wizlight) -> None:
     """Test fetching the firmware version."""
     bulb_type = await correct_bulb.get_bulbtype()
     assert bulb_type == BulbType(
-        features=Features(color=True, color_tmp=True, effect=True, brightness=True),
+        features=Features(
+            color=True, color_tmp=True, effect=True, brightness=True, dual_head=False
+        ),
         name="ESP01_SHRGB_03",
         kelvin_range=KelvinRange(max=6500, min=2200),
         bulb_type=BulbClass.RGB,

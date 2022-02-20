@@ -3,6 +3,7 @@
 Bulb Type detection:
 ESP01_SHDW1C_31
 ESP01 -- defines the module family (WiFi only bulb in this case)
+DH -- Dual Head light
 SH -- Single Head light (most bulbs are single heads) / LED Strip
 TW -- Tunable White - can only control CCT and dimming; no color
 DW -- Dimmable White (most filament bulbs)
@@ -28,6 +29,7 @@ class Features:
     color_tmp: bool
     effect: bool
     brightness: bool
+    dual_head: bool
 
 
 @dataclasses.dataclass(frozen=True)
@@ -53,17 +55,35 @@ class BulbClass(Enum):
 
 KNOWN_TYPE_IDS = {0: BulbClass.DW}
 
-FEATURE_MAP = {
+_BASE_FEATURE_MAP = {
     # RGB supports effects and tuneable white
-    BulbClass.RGB: Features(brightness=True, color=True, effect=True, color_tmp=True),
+    BulbClass.RGB: {
+        "brightness": True,
+        "color": True,
+        "effect": True,
+        "color_tmp": True,
+    },
     # TODO: TW supports effects but only "some"; improve the mapping to supported effects
-    BulbClass.TW: Features(brightness=True, color=False, effect=True, color_tmp=True),
+    BulbClass.TW: {
+        "brightness": True,
+        "color": False,
+        "effect": True,
+        "color_tmp": True,
+    },
     # Dimmable white only supports brightness and some basic effects
-    BulbClass.DW: Features(brightness=True, color=False, effect=True, color_tmp=False),
+    BulbClass.DW: {
+        "brightness": True,
+        "color": False,
+        "effect": True,
+        "color_tmp": False,
+    },
     # Socket supports only on/off
-    BulbClass.SOCKET: Features(
-        brightness=False, color=False, effect=False, color_tmp=False
-    ),
+    BulbClass.SOCKET: {
+        "brightness": False,
+        "color": False,
+        "effect": False,
+        "color_tmp": False,
+    },
 }
 
 
@@ -136,7 +156,9 @@ class BulbType:
         else:
             kelvin_range = None
 
-        features = FEATURE_MAP[bulb_type]
+        features = Features(
+            **_BASE_FEATURE_MAP[bulb_type], dual_head="DH" in _identifier
+        )
 
         return BulbType(
             bulb_type=bulb_type,

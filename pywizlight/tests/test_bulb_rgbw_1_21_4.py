@@ -24,7 +24,9 @@ async def test_model_description_rgbw_bulb(rgbw_bulb: wizlight) -> None:
     """Test fetching the model description rgbw bulb."""
     bulb_type = await rgbw_bulb.get_bulbtype()
     assert bulb_type == BulbType(
-        features=Features(color=True, color_tmp=True, effect=True, brightness=True),
+        features=Features(
+            color=True, color_tmp=True, effect=True, brightness=True, dual_head=False
+        ),
         name="ESP20_SHRGBC_01",
         kelvin_range=KelvinRange(max=6500, min=2200),
         bulb_type=BulbClass.RGB,
