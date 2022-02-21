@@ -68,6 +68,7 @@ async def turn_on(ip: str, k: int, brightness: int) -> None:
         await bulb.turn_on(PilotBuilder(colortemp=k, brightness=brightness))
     else:
         click.echo("Error - values are not correct. Type --help for help.")
+    await bulb.async_close()
 
 
 @main.command("set-state")
@@ -93,6 +94,7 @@ async def set_state(ip: str, k: int, brightness: int) -> None:
         await bulb.set_state(PilotBuilder(colortemp=k, brightness=brightness))
     else:
         click.echo("Error - values are not correct. Type --help for help.")
+    await bulb.async_close()
 
 
 @main.command("off")
@@ -103,6 +105,7 @@ async def turn_off(ip: str) -> None:
     click.echo(f"Turning off {ip}")
     bulb = wizlight(ip)
     await bulb.turn_off()
+    await bulb.async_close()
 
 
 @main.command("state")
@@ -111,11 +114,13 @@ async def turn_off(ip: str) -> None:
 async def state(ip: str) -> None:
     """Get the current state of a given bulb."""
     click.echo(f"Get the state from {ip}")
-    bulb_state = await wizlight(ip).updateState()
+    bulb = wizlight(ip)
+    bulb_state = await bulb.updateState()
     if bulb_state:
         click.echo(bulb_state.pilotResult)
     else:
         click.echo("Did not get state from bulb")
+    await bulb.async_close()
 
 
 if __name__ == "__main__":
