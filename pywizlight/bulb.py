@@ -436,6 +436,7 @@ class wizlight:
         self.lock = asyncio.Lock()
         self.loop = asyncio.get_event_loop()
         self.push_callback: Optional[Callable[[PilotParser], None]] = None
+        self.response_method: Optional[str] = None
         self.response_future: Optional[asyncio.Future] = None
         self.push_cancel: Optional[Callable] = None
         self.last_push: float = NEVER_TIME
@@ -484,10 +485,10 @@ class wizlight:
             asyncio.create_task(self._async_send_register(push_manager.register_msg))
             self.loop.call_later(PUSH_KEEP_ALIVE_INTERVAL, self.register)
 
-    async def _async_send_register(self, message: str) -> None:
+    async def _async_send_register(self, message: dict) -> None:
         """Send the registration message."""
         try:
-            await self.sendUDPMessage(message)
+            await self.send(message)
         except (WizLightTimeOutError, WizLightConnectionError) as ex:
             _LOGGER.debug("%s: Registration for push updates failed: %s", self.ip, ex)
 
@@ -526,8 +527,25 @@ class wizlight:
     def _on_response(self, message: bytes, addr: Tuple[str, int]) -> None:
         """Handle a response from the device."""
         _LOGGER.debug("%s: << %s", self.ip, message)
-        if self.response_future and not self.response_future.done():
-            self.response_future.set_result(message)
+        if not self.response_future or self.response_future.done():
+            return
+        decoded_message = message.decode()
+        try:
+            decoded = json.loads(decoded_message)
+        except json.JSONDecodeError as ex:
+            _LOGGER.warning("%s: Failed to decode message: %s", self.ip, message)
+            self.response_future.set_exception(
+                WizLightConnectionError(
+                    f"{self.ip}: Failed to decode json: {decoded_message}: {ex}"
+                )
+            )
+            return
+        if decoded.get("method") != self.response_method:
+            # This may be a late arriving answer to a request
+            # we retried since the device did not respond the first time
+            _LOGGER.debug("%s: Ignoring unsolicted response: %s", self.ip, decoded)
+            return
+        self.response_future.set_result(decoded)
 
     def _on_error(self, exception: Optional[Exception]) -> None:
         """Handle a protocol error."""
@@ -703,16 +721,14 @@ class wizlight:
             # if the light is off - turn on
             await self.turn_on()
 
-    async def send(self, message: Dict) -> BulbResponse:
+    async def send(self, msg_dict: Dict) -> BulbResponse:
         """Serialize a dict to json and send it to device over UDP."""
-        self.history.message(HISTORY_SEND, message)
-        return await self.sendUDPMessage(to_wiz_json(message))
-
-    async def sendUDPMessage(self, message: str) -> BulbResponse:
-        """Send the UDP message to the bulb."""
+        self.history.message(HISTORY_SEND, msg_dict)
+        message = to_wiz_json(msg_dict)
         await self._ensure_connection()
         assert self.transport is not None
         async with self.lock:
+            self.response_method = msg_dict["method"]
             self.response_future = asyncio.Future()
             send_task = asyncio.create_task(
                 _send_udp_message_with_retry(
@@ -720,7 +736,7 @@ class wizlight:
                 )
             )
             try:
-                response = await asyncio.wait_for(
+                resp = await asyncio.wait_for(
                     asyncio.shield(self.response_future), timeout=TIMEOUT
                 )
             except OSError as ex:
@@ -739,7 +755,6 @@ class wizlight:
                     send_task.cancel()
                     with contextlib.suppress(asyncio.CancelledError):
                         await send_task
-        resp = json.loads(response.decode())
         self.history.message(HISTORY_RECIEVE, resp)
         if "error" in resp:
             if resp["error"]["code"] == -32601:

@@ -116,7 +116,7 @@ MODULE_CONFIGS = {  # AKA getModelConfig
     },
 }
 
-SYSTEM_CONFIGS = {  # AKA getSystemConfig
+SYSTEM_CONFIGS: Dict[Tuple[str, str], Any] = {  # AKA getSystemConfig
     ("1.8.0-MISSING-TYPEID-0", "1.8.0"): {
         "method": "getSystemConfig",
         "env": "pro",
@@ -375,9 +375,10 @@ SYSTEM_CONFIGS = {  # AKA getSystemConfig
             "ping": 0,
         },
     },
+    ("BROKEN_JSON", "1.0.0"): json.JSONDecodeError,
 }
 
-USER_CONFIGS = {  # AKA getUserConfig
+USER_CONFIGS: Dict[Tuple[str, str], Any] = {  # AKA getUserConfig
     ("ESP20_SHRGB_01ABI", "1.21.4"): {
         "method": "getUserConfig",
         "env": "pro",
@@ -501,6 +502,20 @@ USER_CONFIGS = {  # AKA getUserConfig
             "whiteRange": [2700, 2700],
         },
     },
+    ("BROKEN_JSON", "1.0.0"): json.JSONDecodeError,
+}
+
+MODEL_CONFIG_NOT_FOUND = {
+    "method": "getModelConfig",
+    "env": "pro",
+    "error": {"code": -32601, "message": "Method not found"},
+}
+
+
+USER_CONFIG_NOT_FOUND = {
+    "method": "getUserConfig",
+    "env": "pro",
+    "error": {"code": -32601, "message": "Method not found"},
 }
 
 
@@ -532,23 +547,12 @@ def get_initial_sys_config(module_name: str, firmware_version: str) -> Dict[str,
 def get_initial_model_config(module_name: str, firmware_version: str) -> Dict[str, Any]:
     return MODULE_CONFIGS.get(
         (module_name, firmware_version),
-        {
-            "method": "getModelConfig",
-            "env": "pro",
-            "error": {"code": -32601, "message": "Method not found"},
-        },
+        MODEL_CONFIG_NOT_FOUND,
     )
 
 
 def get_initial_user_config(module_name: str, firmware_version: str) -> Dict[str, Any]:
-    return USER_CONFIGS.get(
-        (module_name, firmware_version),
-        {
-            "method": "getUserConfig",
-            "env": "pro",
-            "error": {"code": -32601, "message": "Method not found"},
-        },
-    )
+    return USER_CONFIGS.get((module_name, firmware_version), USER_CONFIG_NOT_FOUND)
 
 
 BULB_JSON_ERROR = b'{"env":"pro","error":{"code":-32700,"message":"Parse error"}}'
@@ -582,12 +586,33 @@ class BulbUDPRequestHandler:
             print(f"Response:{json.dumps(self.pilot_state)!r}")
             self.transport.sendto(bytes(json.dumps(self.pilot_state), "utf-8"), addr)
         elif method == "getSystemConfig":
-            self.transport.sendto(bytes(json.dumps(self.sys_config), "utf-8"), addr)
+            if self.sys_config == json.JSONDecodeError:
+                self.transport.sendto(b"garbage", addr)
+                self.transport.sendto(b"garbage", addr)
+            else:
+                self.transport.sendto(bytes(json.dumps(self.sys_config), "utf-8"), addr)
+                # Simulate late response coming in twice
+                self.transport.sendto(bytes(json.dumps(self.sys_config), "utf-8"), addr)
         elif method == "getModelConfig":
             self.transport.sendto(bytes(json.dumps(self.model_config), "utf-8"), addr)
         elif method == "getUserConfig":
-            self.transport.sendto(bytes(json.dumps(self.user_config), "utf-8"), addr)
+            # Simulate late response of model config missing to ensure
+            # it does not break getUserConfig
+            self.transport.sendto(
+                bytes(json.dumps(MODEL_CONFIG_NOT_FOUND), "utf-8"), addr
+            )
+            if self.user_config == json.JSONDecodeError:
+                self.transport.sendto(b"garbage", addr)
+            else:
+                self.transport.sendto(
+                    bytes(json.dumps(self.user_config), "utf-8"), addr
+                )
         elif method == "registration":
+            # Simulate late response of model config missing to ensure
+            # it does not break registration
+            self.transport.sendto(
+                bytes(json.dumps(MODEL_CONFIG_NOT_FOUND), "utf-8"), addr
+            )
             self.transport.sendto(bytes(json.dumps(self.registration), "utf-8"), addr)
         else:
             raise RuntimeError(f"No handler for {method}")

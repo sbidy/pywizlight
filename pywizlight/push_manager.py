@@ -6,7 +6,7 @@ from typing import Callable, Dict, Optional, Tuple, cast
 
 from pywizlight.models import DiscoveredBulb
 from pywizlight.protocol import WizProtocol
-from pywizlight.utils import create_udp_socket, generate_mac, get_source_ip, to_wiz_json
+from pywizlight.utils import create_udp_socket, generate_mac, get_source_ip
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -33,7 +33,7 @@ class PushManager:
         self.discovery_callback: Optional[Callable[[DiscoveredBulb], None]] = None
         self.lock = asyncio.Lock()
         self.subscriptions: Dict[str, Callable[[Dict, Tuple[str, int]], None]] = {}
-        self.register_msg: Optional[str] = None
+        self.register_msg: Optional[Dict] = None
         self.fail_reason: Optional[str] = None
 
     @property
@@ -68,16 +68,14 @@ class PushManager:
                     ex,
                 )
                 return False
-            self.register_msg = to_wiz_json(
-                {
-                    "params": {
-                        "phoneIp": source_ip,
-                        "register": True,
-                        "phoneMac": generate_mac(),
-                    },
-                    "method": "registration",
-                }
-            )
+            self.register_msg = {
+                "params": {
+                    "phoneIp": source_ip,
+                    "register": True,
+                    "phoneMac": generate_mac(),
+                },
+                "method": "registration",
+            }
             push_transport_proto = (
                 await asyncio.get_event_loop().create_datagram_endpoint(
                     lambda: WizProtocol(on_response=self._on_push),
