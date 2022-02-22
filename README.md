@@ -11,7 +11,7 @@
 
 # pywizlight
 
-A Python connector for WiZ light bulbs.
+A Python connector for [WiZ](https://www.wizconnected.com/en/consumer/) devices.
 
 ## Install
 
