@@ -177,6 +177,22 @@ SYSTEM_CONFIGS: Dict[Tuple[str, str], Any] = {  # AKA getSystemConfig
             "ping": 0,
         },
     },
+    ("ESP10_SOCKET_06", "1.16.71"): {
+        "method": "getSystemConfig",
+        "env": "pro",
+        "result": {
+            "mac": "a8bb50df7693",
+            "homeId": 5385975,
+            "roomId": 8201410,
+            "homeLock": False,
+            "pairingLock": False,
+            "typeId": 0,
+            "moduleName": "ESP10_SOCKET_06",
+            "fwVersion": "1.16.71",
+            "groupId": 0,
+            "drvConf": [20, 2],
+        },
+    },
     ("ESP05_SHDW_21", "1.25.0"): {
         "method": "getSystemConfig",
         "env": "pro",
@@ -503,6 +519,20 @@ USER_CONFIGS: Dict[Tuple[str, str], Any] = {  # AKA getUserConfig
         },
     },
     ("BROKEN_JSON", "1.0.0"): json.JSONDecodeError,
+    ("ESP10_SOCKET_06", "1.16.71"): {
+        "method": "getUserConfig",
+        "env": "pro",
+        "result": {
+            "fadeIn": 450,
+            "fadeOut": 500,
+            "fadeNight": False,
+            "dftDim": 100,
+            "pwmRange": [0, 100],
+            "whiteRange": [2700, 6500],
+            "extRange": [2700, 6500],
+            "po": False,
+        },
+    },
 }
 
 MODEL_CONFIG_NOT_FOUND = {
