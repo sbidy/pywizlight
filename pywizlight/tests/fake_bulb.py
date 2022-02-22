@@ -114,6 +114,43 @@ MODULE_CONFIGS = {  # AKA getModelConfig
             "drvIface": 0,
         },
     },
+    ("ESP20_SHRGB_01BT", "1.23.70"): {
+        "method": "getModelConfig",
+        "env": "pro",
+        "result": {
+            "ps": 1,
+            "pwmFreq": 2000,
+            "pwmRange": [0, 100],
+            "wcr": 20,
+            "nowc": 2,
+            "cctRange": [2200, 2700, 6500, 6500],
+            "renderFactor": [200, 255, 255, 150, 0, 0, 40, 0, 0, 0],
+            "hasAdjMinDim": 0,
+            "hasTapSensor": 1,
+            "i2cTapSensor": [
+                {
+                    "chip": "SC7A22",
+                    "whoami": [24, 25, 15, 19],
+                    "freq": 100,
+                    "shockWin": 40,
+                },
+                {
+                    "chip": "IIS2DLPC",
+                    "whoami": [24, 25, 15, 68],
+                    "freq": 100,
+                    "shockWin": 40,
+                },
+                {
+                    "chip": "DA262",
+                    "whoami": [38, 39, 1, 19],
+                    "freq": 100,
+                    "shockWin": 50,
+                },
+            ],
+            "pm": 0,
+            "fanSpeed": 0,
+        },
+    },
 }
 
 SYSTEM_CONFIGS: Dict[Tuple[str, str], Any] = {  # AKA getSystemConfig
@@ -391,7 +428,37 @@ SYSTEM_CONFIGS: Dict[Tuple[str, str], Any] = {  # AKA getSystemConfig
             "ping": 0,
         },
     },
+    ("ESP20_SHRGB_01BT", "1.23.70"): {
+        "method": "getSystemConfig",
+        "env": "pro",
+        "result": {
+            "mac": "d8a0119c42df",
+            "homeId": 5385975,
+            "roomId": 0,
+            "rgn": "eu",
+            "moduleName": "ESP20_SHRGB_01BT",
+            "fwVersion": "1.23.70",
+            "groupId": 0,
+            "ping": 0,
+        },
+    },
     ("BROKEN_JSON", "1.0.0"): json.JSONDecodeError,
+    ("ESP01_DIMTRIACS_01", "1.16.68"): {
+        "method": "getSystemConfig",
+        "env": "pro",
+        "result": {
+            "mac": "a8bb50f30985",
+            "homeId": 5385975,
+            "roomId": 8201410,
+            "homeLock": False,
+            "pairingLock": False,
+            "typeId": 0,
+            "moduleName": "ESP01_DIMTRIACS_01",
+            "fwVersion": "1.16.68",
+            "groupId": 0,
+            "drvConf": [20, 1],
+        },
+    },
 }
 
 USER_CONFIGS: Dict[Tuple[str, str], Any] = {  # AKA getUserConfig
@@ -531,6 +598,20 @@ USER_CONFIGS: Dict[Tuple[str, str], Any] = {  # AKA getUserConfig
             "whiteRange": [2700, 6500],
             "extRange": [2700, 6500],
             "po": False,
+        },
+    },
+    ("ESP01_DIMTRIACS_01", "1.16.68"): {
+        "method": "getUserConfig",
+        "env": "pro",
+        "result": {
+            "fadeIn": 500,
+            "fadeOut": 500,
+            "fadeNight": False,
+            "dftDim": 100,
+            "pwmRange": [10, 100],
+            "whiteRange": [2700, 2700],
+            "extRange": [2700, 2700],
+            "po": True,
         },
     },
 }

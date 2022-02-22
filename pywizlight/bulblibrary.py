@@ -60,28 +60,24 @@ _BASE_FEATURE_MAP = {
     BulbClass.RGB: {
         "brightness": True,
         "color": True,
-        "effect": True,
         "color_tmp": True,
     },
     # TODO: TW supports effects but only "some"; improve the mapping to supported effects
     BulbClass.TW: {
         "brightness": True,
         "color": False,
-        "effect": True,
         "color_tmp": True,
     },
     # Dimmable white only supports brightness and some basic effects
     BulbClass.DW: {
         "brightness": True,
         "color": False,
-        "effect": True,
         "color_tmp": False,
     },
     # Socket supports only on/off
     BulbClass.SOCKET: {
         "brightness": False,
         "color": False,
-        "effect": False,
         "color_tmp": False,
     },
 }
@@ -125,12 +121,16 @@ class BulbType:
                 )
             if "RGB" in _identifier:  # full RGB bulb
                 bulb_type = BulbClass.RGB
+                effect = True
             elif "TW" in _identifier:  # Non RGB but tunable white bulb
                 bulb_type = BulbClass.TW
+                effect = True
             elif "SOCKET" in _identifier:  # A smart socket
                 bulb_type = BulbClass.SOCKET
+                effect = False
             else:  # Plain brightness-only bulb
                 bulb_type = BulbClass.DW
+                effect = "DH" in _identifier or "SH" in _identifier
             dual_head = "DH" in _identifier
         elif type_id is not None:
             if type_id not in KNOWN_TYPE_IDS:
@@ -141,6 +141,7 @@ class BulbType:
                 )
             bulb_type = KNOWN_TYPE_IDS.get(type_id, BulbClass.DW)
             dual_head = False
+            effect = True
         else:
             raise WizLightNotKnownBulb(
                 f"The bulb type could not be determined from the module name: {module_name} or type_id"
@@ -157,7 +158,9 @@ class BulbType:
         else:
             kelvin_range = None
 
-        features = Features(**_BASE_FEATURE_MAP[bulb_type], dual_head=dual_head)
+        features = Features(
+            **_BASE_FEATURE_MAP[bulb_type], dual_head=dual_head, effect=effect
+        )
 
         return BulbType(
             bulb_type=bulb_type,
