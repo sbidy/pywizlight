@@ -779,3 +779,7 @@ class wizlight:
         """Close the connection when the object is destroyed."""
         if self.transport and not self.transport.is_closing():
             self.loop.call_soon_threadsafe(self._async_close)
+
+    def __repr__(self):
+        """Return the representation of the bulb."""
+        return f'{self.__class__.__name__}(ip="{self.ip}", port={self.port}, mac="{self.mac}")'
