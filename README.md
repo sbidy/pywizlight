@@ -159,8 +159,14 @@ async def main():
     # Do operations on multiple lights in parallel
     #bulb1 = wizlight("<your bulb1 ip>")
     #bulb2 = wizlight("<your bulb2 ip>")
-    #await asyncio.gather(bulb1.turn_on(PilotBuilder(brightness = 255)),
+    # --- DEPRECATED in 3.10 see [#140](https://github.com/sbidy/pywizlight/issues/140)
+    # await asyncio.gather(bulb1.turn_on(PilotBuilder(brightness = 255)),
     #    bulb2.turn_on(PilotBuilder(warm_white = 255)))
+    # --- For >3.10 await asyncio.gather() from another coroutine
+    # async def turn_bulbs_on(bulb1, bulb2):
+    #    await asyncio.gather(bulb1.turn_on(PilotBuilder(warm_white=255)), bulb2.turn_on(PilotBuilder(warm_white=255)))
+    #  def main:
+    #    asyncio.run(async turn_bulbs_on(bulb1, bulb2))
 
 loop = asyncio.get_event_loop()
 loop.run_until_complete(main())
