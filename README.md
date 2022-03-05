@@ -33,8 +33,8 @@ sudo dnf -y install python3-pywizlight
 
 ### NixOS
 
-For NixOS and Nix is the latest release of `pywizlight` usually in the [`unstable`](https://search.nixos.org/packages?channel=unstable&query=pywizlight)
-channel available. Stables releases might ship older versions of `pywizlight`.
+For NixOS and Nix the latest release of `pywizlight` is usually available in the [`unstable`](https://search.nixos.org/packages?channel=unstable&query=pywizlight)
+channel. Stable releases might ship older versions of `pywizlight`.
 
 ```bash
 nix-env -iA nixos.python37Packages.pywizlight
@@ -79,7 +79,10 @@ nix-env -iA nixos.python37Packages.pywizlight
 
 ## Discover bulbs via CLI
 
-To find bulbs via cli you can use `python -m pywizlight.cli discover`.
+To find bulbs via cli you can use the following:
+```bash
+python -m pywizlight.cli discover
+```
 
 ## Example
 
@@ -91,7 +94,7 @@ from pywizlight import wizlight, PilotBuilder, discovery
 async def main():
     """Sample code to work with bulbs."""
     # Discover all bulbs in the network via broadcast datagram (UDP)
-    # function takes the discovery object and returns a list with wizlight objects.
+    # function takes the discovery object and returns a list of wizlight objects.
     bulbs = await discovery.discover_lights(broadcast_space="192.168.1.255")
     # Print the IP address of the bulb on index 0
     print(f"Bulb IP address: {bulbs[0].ip}")
@@ -108,10 +111,10 @@ async def main():
     #light = wizlight("your bulb's IP address", port=12345)
 
     # The following calls need to be done inside an asyncio coroutine
-    # to run them fron normal synchronous code, you can wrap them with
+    # to run them from normal synchronous code, you can wrap them with
     # asyncio.run(..).
 
-    # Turn on the light into "rhythm mode"
+    # Turn the light on into "rhythm mode"
     await light.turn_on(PilotBuilder())
     # Set bulb brightness
     await light.turn_on(PilotBuilder(brightness = 255))
@@ -142,22 +145,22 @@ async def main():
 
     # Get the features of the bulb
     bulb_type = await bulbs[0].get_bulbtype()
-    print(bulb_type.features.brightness) # returns true if brightness is supported
-    print(bulb_type.features.color) # returns true if color is supported
-    print(bulb_type.features.color_tmp) # returns true if color temperatures are supported
-    print(bulb_type.features.effect) # returns true if effects are supported
-    print(bulb_type.kelvin_range.max) # returns max kelvin in in INT
-    print(bulb_type.kelvin_range.min) # returns min kelvin in in INT
+    print(bulb_type.features.brightness) # returns True if brightness is supported
+    print(bulb_type.features.color) # returns True if color is supported
+    print(bulb_type.features.color_tmp) # returns True if color temperatures are supported
+    print(bulb_type.features.effect) # returns True if effects are supported
+    print(bulb_type.kelvin_range.max) # returns max kelvin in INT
+    print(bulb_type.kelvin_range.min) # returns min kelvin in INT
     print(bulb_type.name) # returns the module name of the bulb
 
-    # Turns the light off
+    # Turn the light off
     await light.turn_off()
 
-    # Do operations on multiple lights parallely
+    # Do operations on multiple lights in parallel
     #bulb1 = wizlight("<your bulb1 ip>")
     #bulb2 = wizlight("<your bulb2 ip>")
     #await asyncio.gather(bulb1.turn_on(PilotBuilder(brightness = 255)),
-    #    bulb2.turn_on(PilotBuilder(warm_white = 255)), loop = loop)
+    #    bulb2.turn_on(PilotBuilder(warm_white = 255)))
 
 loop = asyncio.get_event_loop()
 loop.run_until_complete(main())
@@ -186,47 +189,47 @@ Commands:
 
 ## Discovery
 
-The discovery works with an UDP Broadcast request and collects all bulbs in the network.
+The discovery works with a UDP Broadcast request and collects all bulbs in the network.
 
 ## Bulb paramters (UDP RAW)
 
-- **sceneId** - calls one of thr predefined scenes (int from 0 to 32) [List of names in code](https://github.com/sbidy/pywizlight/blob/master/pywizlight/scenes.py)
+- **sceneId** - calls one of the predefined scenes (int from 1 to 32) [List of names in code](https://github.com/sbidy/pywizlight/blob/master/pywizlight/scenes.py)
 - **speed** - sets the color changing speed in percent
 - **dimming** - sets the dimmer of the bulb in percent
-- **temp** - sets color temperature in kelvins
+- **temp** - sets the color temperature in kelvins
 - **r** - red color range 0-255
 - **g** - green color range 0-255
 - **b** - blue color range 0-255
 - **c** - cold white range 0-255
 - **w** - warm white range 0-255
 - **id** - the bulb id
-- **state** - when it's on or off
+- **state** - whether it's on or off
 - **schdPsetId** - rhythm id of the room
 
 ## Async I/O
 
-For async I/O this component uses python's built-in asyncio DatagramTransport, which allows completely non-blocking UDP transport
+For async I/O this component uses Python's built-in asyncio DatagramTransport, which allows completely non-blocking UDP transport.
 
 ## Classes
 
-`wizlight(ip)`: Creates a instance of a WiZ Light Bulb. Constructed with the IP addCancel changesress of the bulb.
+`wizlight(ip)`: Creates an instance of a WiZ Light Bulb. Constructed with the IP addCancel changesress of the bulb.
 
 ### Instance variables
 
-You need to first fetch the state by calling `light.updateState()`.
-After that all state can be fetched from `light.state`, which is a `PilotParser` object.
+First you need to fetch the state by calling `light.updateState()`.
+After that all states can be fetched from `light.state`, which is a `PilotParser` object.
 
 `PilotParser.get_brightness()`gets the value of the brightness 0-255
 
-`PilotParser.get_rgb()` get the rgbW color state of the bulb
+`PilotParser.get_rgb()` gets the rgbW color state of the bulb
 
-`PilotParser.get_colortemp()` get the color temperature ot the bulb
+`PilotParser.get_colortemp()` gets the color temperature of the bulb
 
-`PilotParser.get_warm_white/get_cold_white()` get the current warm/cold setting (not supported by original Phillips Wiz bulbs)
+`PilotParser.get_warm_white/get_cold_white()` gets the current warm/cold setting (not supported by original Philips Wiz bulbs)
 
 `PilotParser.get_scene()` gets the current scene name
 
-`PilotParser.get_state()` returns true or false / true = on , false = off
+`PilotParser.get_state()` returns True/False. True = on, False = off
 
 ### Methods
 
@@ -234,25 +237,24 @@ After that all state can be fetched from `light.state`, which is a `PilotParser`
 
 `updateState(self)` gets the current bulb state from the light using `sendUDPMessage` and sets it to `self.state`
 
-`lightSwitch(self)` turns the light bulb on or off like a switch
+`lightSwitch(self)` toggles the light bulb on or off like a switch
 
-`getMAC(self)` returns the MAC address of the bulb. Can be used as unique ID.
+`getMAC(self)` returns the MAC address of the bulb. Can be used as a unique ID
 
-`sendUDPMessage(self, message, timeout = 60, send_interval = 0.5, max_send_datagrams = 100):` sends the udp message to the bulb. Since UDP can loose packets, and your light might be a long distance away from the router, we continuously keep sending the UDP command datagram until there is a response from the light. This has in tests worked way better than just sending once and just waiting for a timeout. You can set the async operation timeout using `timeout`, the time interval to sleep between continuous UDP sends using `send_interval` and the maximum number of continuous pings to send using `max_send_datagrams`. It is already hard coded to a lower value for `setPilot` (set light state) vs `getPilot` (fetch light state) so as to avoid flickering the light.
+`sendUDPMessage(self, message, timeout = 60, send_interval = 0.5, max_send_datagrams = 100):` sends the UDP message to the bulb. Since UDP can lose packets, and your light might be a long distance away from the router, we continuously keep sending the UDP command datagram until there is a response from the bulb. In tests this worked way better than just sending once and waiting for a timeout. You can set the async operation timeout using `timeout`, set the time interval to sleep between continuous UDP sends using `send_interval` and the maximum number of continuous pings to send using `max_send_datagrams`. It is already hardcoded to a lower value for `setPilot` (set light state) vs `getPilot` (fetch light state) to avoid flickering the light.
 
 `turn_off(self)` turns the light off
 
-`turn_on(PilotBuilder)` turns the light on. This take a `PilotBuilder` object, which can be used to set all the parameters programmatically - rgb, color temperature, brightness, etc. To set the light to rhythm mode, create an empty `PilotBuilder`.
+`turn_on(PilotBuilder)` turns the light on. This takes a `PilotBuilder` object, which can be used to set all the parameters programmatically - rgb, color temperature, brightness, etc. To set the light to rhythm mode, create an empty `PilotBuilder`.
 
 ## Bulb methods (UDP native):
 
-- **getSystemConfig** - gets the current system configuration - no parameters need
-- **syncPilot** - sent by the bulb as heart-beats
-- **getPilot** - gets the current bulb state - no parameters need to be included
+- **getSystemConfig** - gets the current system configuration - no parameters required
+- **syncPilot** - sent by the bulb as heartbeats
+- **getPilot** - gets the current bulb state - no parameters required
 - **setPilot** - used to tell the bulb to change color/temp/state
 - **Pulse** - uncertain of purpose
-- **Registration** - used to "register" with the bulb: This notifies the built that
-  it you want it to send you heartbeat sync packets.
+- **Registration** - used to "register" with the bulb: This notifies the bulb if you want it to send you heartbeat sync packets
 
 ### Sync functions:
 
