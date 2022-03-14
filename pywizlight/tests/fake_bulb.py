@@ -397,6 +397,21 @@ SYSTEM_CONFIGS: Dict[Tuple[str, str], Any] = {  # AKA getSystemConfig
             "drvConf": [20, 1],
         },
     },
+    ("ESP05_SHTW_21", "1.10.0"): {
+        "method": "getSystemConfig",
+        "env": "pro",
+        "result": {
+            "mac": "a8bb5007bfc6",
+            "homeId": 5385975,
+            "homeLock": False,
+            "pairingLock": False,
+            "typeId": 0,
+            "moduleName": "ESP05_SHTW_21",
+            "fwVersion": "1.10.0",
+            "groupId": 0,
+            "drvConf": [20, 1],
+        },
+    },
     ("ESP06_SHDW9_01", "1.11.7"): {
         "method": "getSystemConfig",
         "env": "",
@@ -517,6 +532,19 @@ USER_CONFIGS: Dict[Tuple[str, str], Any] = {  # AKA getUserConfig
             "whiteRange": [2700, 6500],
             "extRange": [2700, 6500],
             "po": False,
+        },
+    },
+    ("ESP05_SHTW_21", "1.10.0"): {
+        "method": "getUserConfig",
+        "env": "pro",
+        "result": {
+            "fadeIn": 450,
+            "fadeOut": 500,
+            "fadeNight": False,
+            "dftDim": 100,
+            "pwmRange": [0, 100],
+            "whiteRange": [2700, 6500],
+            "extRange": [2700, 6500],
         },
     },
     ("ESP14_SHTW1C_01", "1.18.0"): {
