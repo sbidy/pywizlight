@@ -474,6 +474,34 @@ SYSTEM_CONFIGS: Dict[Tuple[str, str], Any] = {  # AKA getSystemConfig
             "drvConf": [20, 1],
         },
     },
+    ("ESP25_SOCKET_01", "1.26.2"): {
+        "method": "getSystemConfig",
+        "env": "pro",
+        "result": {
+            "mac": "d8a0119906b7",
+            "homeId": "**REDACTED**",
+            "roomId": "**REDACTED**",
+            "rgn": "eu",
+            "moduleName": "ESP25_SOCKET_01",
+            "fwVersion": "1.26.2",
+            "groupId": 0,
+            "ping": 0,
+        },
+    },
+    ("ESP25_SOCKET_01", "1.26.1"): {
+        "method": "getSystemConfig",
+        "env": "pro",
+        "result": {
+            "mac": "d8a0119906b7",
+            "homeId": "**REDACTED**",
+            "roomId": "**REDACTED**",
+            "rgn": "eu",
+            "moduleName": "ESP25_SOCKET_01",
+            "fwVersion": "1.26.2",
+            "groupId": 0,
+            "ping": 0,
+        },
+    },
 }
 
 USER_CONFIGS: Dict[Tuple[str, str], Any] = {  # AKA getUserConfig
@@ -657,6 +685,12 @@ USER_CONFIG_NOT_FOUND = {
     "error": {"code": -32601, "message": "Method not found"},
 }
 
+GET_POWER_NOT_FOUND = {
+    "method": "getPower",
+    "env": "pro",
+    "error": {"code": -32601, "message": "Method not found"},
+}
+
 
 def get_initial_pilot() -> Dict[str, Any]:
     return {
@@ -694,6 +728,17 @@ def get_initial_user_config(module_name: str, firmware_version: str) -> Dict[str
     return USER_CONFIGS.get((module_name, firmware_version), USER_CONFIG_NOT_FOUND)
 
 
+def get_power(module_name: str, firmware_version: str) -> Dict[str, Any]:
+    if module_name == "ESP25_SOCKET_01" and firmware_version == "1.26.2":
+        return {"method": "getPower", "env": "pro", "result": {"power": 1065385}}
+    if module_name == "ESP25_SOCKET_01" and firmware_version == "1.26.1":
+        return {
+            "method": "getPower",
+            "env": "pro",
+        }
+    return GET_POWER_NOT_FOUND
+
+
 BULB_JSON_ERROR = b'{"env":"pro","error":{"code":-32700,"message":"Parse error"}}'
 
 
@@ -705,6 +750,7 @@ class BulbUDPRequestHandler:
     model_config: Dict[str, Any]  # Will be set by constructor for the actual class
     user_config: Dict[str, Any]
     registration: Dict[str, Any]
+    get_power: Dict[str, Any]
     transport: asyncio.DatagramTransport
 
     def handle(self, resp: bytes, addr: Tuple[str, int]) -> None:
@@ -734,6 +780,8 @@ class BulbUDPRequestHandler:
                 self.transport.sendto(bytes(json.dumps(self.sys_config), "utf-8"), addr)
         elif method == "getModelConfig":
             self.transport.sendto(bytes(json.dumps(self.model_config), "utf-8"), addr)
+        elif method == "getPower":
+            self.transport.sendto(bytes(json.dumps(self.get_power), "utf-8"), addr)
         elif method == "getUserConfig":
             # Simulate late response of model config missing to ensure
             # it does not break getUserConfig
@@ -777,6 +825,7 @@ async def make_udp_fake_bulb_server(
         "env": "pro",
         "result": {"mac": "a8bb5006033d", "success": True},
     }
+    handler.get_power = get_power(module_name, firmware_version)
 
     transport_proto = await asyncio.get_event_loop().create_datagram_endpoint(
         lambda: WizProtocol(on_response=handler.handle),

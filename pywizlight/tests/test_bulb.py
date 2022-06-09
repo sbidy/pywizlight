@@ -24,6 +24,28 @@ async def correct_bulb() -> AsyncGenerator[wizlight, None]:
 
 
 @pytest.fixture()
+async def power_socket_old_firmware() -> AsyncGenerator[wizlight, None]:
+    shutdown, port = await startup_bulb(
+        module_name="ESP25_SOCKET_01", firmware_version="1.26.1"
+    )
+    bulb = wizlight(ip="127.0.0.1", port=port)
+    yield bulb
+    await bulb.async_close()
+    shutdown()
+
+
+@pytest.fixture()
+async def power_socket() -> AsyncGenerator[wizlight, None]:
+    shutdown, port = await startup_bulb(
+        module_name="ESP25_SOCKET_01", firmware_version="1.26.2"
+    )
+    bulb = wizlight(ip="127.0.0.1", port=port)
+    yield bulb
+    await bulb.async_close()
+    shutdown()
+
+
+@pytest.fixture()
 async def bad_bulb() -> AsyncGenerator[wizlight, None]:
     bulb = wizlight(ip="1.1.1.1")
     yield bulb
@@ -266,6 +288,27 @@ async def test_get_mac(correct_bulb: wizlight) -> None:
     assert mac == "a8bb5006033d"
     mac = await correct_bulb.getMac()
     assert mac == "a8bb5006033d"
+
+
+@pytest.mark.asyncio
+async def test_get_power(power_socket: wizlight) -> None:
+    """Test getting power in watts."""
+    watts = await power_socket.get_power()
+    assert watts == 1065.385
+
+
+@pytest.mark.asyncio
+async def test_get_power_old_firmware(power_socket_old_firmware: wizlight) -> None:
+    """Test getting power in watts."""
+    watts = await power_socket_old_firmware.get_power()
+    assert watts is None
+
+
+@pytest.mark.asyncio
+async def test_get_power_unsupported_device(correct_bulb: wizlight) -> None:
+    """Test getting power in watts."""
+    assert await correct_bulb.get_power() is None
+    assert await correct_bulb.get_power() is None
 
 
 # Error states / Timout
