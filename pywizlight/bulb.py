@@ -278,6 +278,11 @@ class PilotParser:
         """Return MAC from the bulb."""
         return _extract_str(self.pilotResult, "mac")
 
+    def get_power(self) -> Optional[float]:
+        """Return power data from the bulb in watts."""
+        milli_watts = _extract_int(self.pilotResult, "pc")
+        return None if milli_watts is None else milli_watts / 1000
+
     def get_warm_white(self) -> Optional[int]:
         """Get the value of the warm white led."""
         return _extract_int(self.pilotResult, "w")
@@ -441,6 +446,7 @@ class wizlight:
         self.push_cancel: Optional[Callable] = None
         self.last_push: float = NEVER_TIME
         self.push_running: bool = False
+        self.power_monitoring: Optional[bool] = None
         # Check connection removed as it did blocking I/O in the event loop
 
     @property
@@ -658,6 +664,19 @@ class wizlight:
         """
         # TODO: self.status could be None, in which case casting it to a bool might not be what we really want
         await self.send(pilot_builder.set_state_message(bool(self.status)))
+
+    async def get_power(self) -> Optional[float]:
+        """Get watts from the device."""
+        if self.last_push + MAX_TIME_BETWEEN_PUSH < time.monotonic():
+            if self.power_monitoring is not False:
+                try:
+                    resp = await self.send({"method": "getPower"})
+                except WizLightMethodNotFound:
+                    self.power_monitoring = False
+                    return None
+                if resp is not None and "result" in resp:
+                    return resp["result"]["power"] / 1000
+        return self.state.get_power() if self.state else None
 
     # ---------- Helper Functions ------------
     async def updateState(self) -> Optional[PilotParser]:

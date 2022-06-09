@@ -104,6 +104,7 @@ async def test_push_updates(socket_push: wizlight) -> None:
         "src": "hb",
         "mqttCd": 255,
         "ts": 1644593327,
+        "pc": 660,
         "state": False,
         "sceneId": 0,
         "temp": 6500,
@@ -125,6 +126,7 @@ async def test_push_updates(socket_push: wizlight) -> None:
     update = await socket_push.updateState()
     assert update is not None
     assert update.pilotResult == params
+    assert await socket_push.get_power() == 0.660
 
     diagnostics = socket_push.diagnostics
     assert diagnostics["bulb_type"]["bulb_type"] == "SOCKET"
