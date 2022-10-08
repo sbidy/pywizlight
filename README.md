@@ -187,10 +187,11 @@ Options:
   --help     Show this message and exit.
 
 Commands:
-  discover  Discover bulb in the local network.
-  off       Turn the bulb off.
-  on        Turn the bulb on.
-  state     Get the current state from the given bulb.
+  discover   Discover bulb in the local network.
+  off        Turn the bulb off.
+  on         Turn the bulb on.
+  set-state  Set the current state of a given bulb.
+  state      Get the current state from the given bulb.
 ```
 
 ### Examples
