@@ -110,6 +110,26 @@ def _validate_ratio_or_raise(ratio: int) -> None:
         raise ValueError("Value must be between 0 and 100")
 
 
+def _validate_fan_state_or_raise(state: int) -> None:
+    if not 0 <= state <= 1:
+        raise ValueError("Value must be between 0 and 1")
+
+
+def _validate_fan_speed_or_raise(speed: int) -> None:
+    if not 1 <= speed <= 6:
+        raise ValueError("Value must be between 1 and 6")
+
+
+def _validate_fan_mode_or_raise(mode: int) -> None:
+    if not 1 <= mode <= 2:
+        raise ValueError("Value must be between 1 and 2")
+
+
+def _validate_fan_reverse_or_raise(reverse: int) -> None:
+    if not 0 <= reverse <= 1:
+        raise ValueError("Value must be between 0 and 1")
+
+
 class PilotBuilder:
     """Get information from the bulb."""
 
@@ -127,6 +147,10 @@ class PilotBuilder:
         colortemp: Optional[int] = None,
         state: bool = True,
         ratio: Optional[int] = None,
+        fan_state: Optional[int] = None,
+        fan_mode: Optional[int] = None,
+        fan_reverse: Optional[int] = None,
+        fan_speed: Optional[int] = None,
     ) -> None:
         """Set the parameter."""
         self.pilot_params: Dict[str, Any] = {"state": state}
@@ -152,6 +176,14 @@ class PilotBuilder:
             self._set_warm_white(warm_white)
         if cold_white is not None:
             self._set_cold_white(cold_white)
+        if fan_state is not None:
+            self._set_fan_state(0)
+        if fan_mode is not None:
+            self._set_fan_mode(1)
+        if fan_reverse is not None:
+            self._set_fan_reverse(0)
+        if fan_speed is not None:
+            self._set_fan_speed(1)
 
     def set_pilot_message(self) -> Dict:
         """Return the pilot message."""
@@ -245,7 +277,28 @@ class PilotBuilder:
         """Set the color temperature for the white led in the bulb."""
         # normalize the kelvin values - should be removed
         self.pilot_params["temp"] = min(10000, max(1000, kelvin))
+        
+    def _set_fan_state(self, fan_state: int) -> None:
+        """Set the fan state to on or off."""
+        _validate_fan_state_or_raise(fan_state)
+        self.pilot_params["fanState"] = fan_state
 
+    def _set_fan_mode(self, fan_mode: int) -> None:
+        """Set the fan mode to normal or breeze."""
+        _validate_fan_mode_or_raise(fan_mode)
+        self.pilot_params["fanMode"] = fan_mode
+
+    def _set_fan_reverse(self, fan_reverse: int) -> None:
+        """Set the fan to rotate normally (summer) or reverse (winter)."""
+        _validate_fan_reverse_or_raise(fan_reverse)
+        self.pilot_params["fanRevrs"] = fan_reverse
+        
+    def _set_fan_speed(self, fan_speed: int) -> None:
+        """Set the fan speed."""
+        #TODO test the actual range from discovery
+        _validate_fan_speed_or_raise(fan_speed)
+        self.pilot_params["fanSpeed"] = fan_speed
+        
 
 def _extract_bool(response: BulbResponse, key: str) -> Optional[bool]:
     return bool(response[key]) if key in response else None
@@ -363,6 +416,27 @@ class PilotParser:
         """Get the color temperature from the bulb."""
         return _extract_int(self.pilotResult, "temp")
 
+    def get_fan_state(self) -> Optional[int]:
+        """Get the the fan state."""
+        return _extract_int(self.pilotResult, "fanState")
+
+    def get_fan_mode(self) -> Optional[int]:
+        """Get the the fan mode."""
+        return _extract_int(self.pilotResult, "fanMode")
+    
+    def get_fan_reverse(self) -> Optional[int]:
+        """Get the the fan rotation."""
+        return _extract_int(self.pilotResult, "fanRevrs")
+    
+    def get_fan_speed(self) -> Optional[int]:
+        """Get the the fan speed."""
+        return _extract_int(self.pilotResult, "fanSpeed")
+
+    def get_fan_speed_range(self) -> Optional[List[int]]:
+        """Get the value of the fanSpeed range property."""
+        if "fanSpeed" in self.pilotResult:
+            return list(range(1, (self.pilotResult["fanSpeed"] + 1)))
+        return None
 
 async def _send_udp_message_with_retry(
     message: str,
@@ -434,6 +508,7 @@ class wizlight:
         self.modelConfig: Optional[Dict] = None
         self.whiteRange: Optional[List[float]] = None
         self.extwhiteRange: Optional[List[float]] = None
+        self.fanSpeedRange: Optional[List[int]] = None
         self.transport: Optional[asyncio.DatagramTransport] = None
         self.protocol: Optional[WizProtocol] = None
         self.history = WizHistory()
@@ -456,6 +531,7 @@ class wizlight:
             "state": self.state.pilotResult if self.state else None,
             "white_range": self.whiteRange,
             "extended_white_range": self.extwhiteRange,
+            "fan_speed_range": self.fanSpeedRange,
             "bulb_type": self.bulbtype.as_dict() if self.bulbtype else None,
             "last_push": self.last_push,
             "push_running": self.push_running,
@@ -567,6 +643,7 @@ class wizlight:
         bulb_config = await self.getBulbConfig()
         result = bulb_config["result"]
         white_range = await self.getExtendedWhiteRange()
+        fan_speed_range = await self.getFanSpeedRange()
         white_to_color_ratio = None
         white_channels = None
         if "drvConf" in result:
@@ -581,6 +658,7 @@ class wizlight:
         self.bulbtype = BulbType.from_data(
             module_name,
             white_range,
+            fan_speed_range,
             fw_version,
             white_channels,
             white_to_color_ratio,
@@ -614,6 +692,22 @@ class wizlight:
             self.extwhiteRange = PilotParser(resp["result"]).get_extended_white_range()
 
         return self.extwhiteRange
+
+    async def getFanSpeedRange(self) -> Optional[List[int]]:
+        """Read fan speed range from the bulb."""
+        if self.fanSpeedRange is not None:
+            return self.fanSpeedRange
+
+        # First for FW > 1.22
+        resp = await self.getModelConfig()
+        if resp is None or "result" not in resp:
+            # For old FW < 1.22
+            resp = await self.getUserConfig()
+
+        if "result" in resp:
+            self.fanSpeedRange = PilotParser(resp["result"]).get_fan_speed_range()
+
+        return self.fanSpeedRange
 
     async def getSupportedScenes(self) -> List[str]:
         """Return the supported scenes based on type.
@@ -655,6 +749,33 @@ class wizlight:
         :type pilot_builder: [type], optional
         """
         await self.send(pilot_builder.set_pilot_message())
+
+    # ---------- Fan Functions ------------
+    async def turn_fan_off(self) -> None:
+        """Turn the fan off."""
+        await self.send({"method": "setPilot", "params": {"fanState": 0}})
+
+    async def turn_fan_on(self) -> None:
+        """Turn the fan off."""
+        await self.send({"method": "setPilot", "params": {"fanState": 1}})
+
+    async def set_fan_speed(self, speed: int) -> None:
+        """Set the fan speed."""
+        # If we have state: True in the setPilot, the speed does not change
+        _validate_fan_speed_or_raise(speed)
+        await self.send({"method": "setPilot", "params": {"fanSpeed": speed}})
+
+    async def set_fan_mode(self, mode: int) -> None:
+        """Set the fan mode to breeze or normal."""
+        # If we have state: True in the setPilot, the speed does not change
+        _validate_fan_mode_or_raise(mode)
+        await self.send({"method": "setPilot", "params": {"fanMode": mode}})
+
+    async def set_fan_reverse(self, reverse: int) -> None:
+        """Set the fan rotation to reverse (winter mode) or normal."""
+        # If we have state: True in the setPilot, the speed does not change
+        _validate_fan_reverse_or_raise(reverse)
+        await self.send({"method": "setPilot", "params": {"fanRevrs": reverse}})
 
     async def set_state(self, pilot_builder: PilotBuilder = PilotBuilder()) -> None:
         """Set the state of the bulb with defined message. Doesn't turn on the light.

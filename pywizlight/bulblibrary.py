@@ -30,6 +30,11 @@ class Features:
     effect: bool
     brightness: bool
     dual_head: bool
+    
+    fan_mode: int
+    fan_state: int
+    fan_revrs: int
+    fan_speed: int
 
 
 @dataclasses.dataclass(frozen=True)
@@ -39,6 +44,12 @@ class KelvinRange:
     max: int
     min: int
 
+@dataclasses.dataclass(frozen=True)
+class FanSpeedRange:
+    """Defines the fan speed range."""
+
+    max: int
+    min: int
 
 class BulbClass(Enum):
     """Bulb Types."""
@@ -51,6 +62,8 @@ class BulbClass(Enum):
     """Have RGB LEDs."""
     SOCKET = "Socket"
     """Smart socket with only on/off."""
+    FANDIM = "Fan Dimmable"
+    """Smart fan with only Dimmable white LEDs."""
 
 
 KNOWN_TYPE_IDS = {0: BulbClass.DW}
@@ -80,6 +93,16 @@ _BASE_FEATURE_MAP = {
         "color": False,
         "color_tmp": False,
     },
+    # Fan with dimmable white only supports brightness and some basic effects
+    BulbClass.FANDIM: {
+        "brightness": True,
+        "color": False,
+        "color_tmp": False,
+        "fan_mode": 1,
+        "fan_state": 0,
+        "fan_revrs": 0,
+        "fan_speed": 1,
+    },
 }
 
 
@@ -90,6 +113,7 @@ class BulbType:
     features: Features
     name: Optional[str]
     kelvin_range: Optional[KelvinRange]
+    fan_speed_range: Optional[FanSpeedRange]
     bulb_type: BulbClass
     fw_version: Optional[str]
     white_channels: Optional[int]
@@ -105,6 +129,7 @@ class BulbType:
     def from_data(
         module_name: str,
         kelvin_list: Optional[List[float]],
+        fan_speed_list: Optional[List[int]],
         fw_version: Optional[str],
         white_channels: Optional[int],
         white_to_color_ratio: Optional[int],
@@ -128,6 +153,9 @@ class BulbType:
             elif "SOCKET" in _identifier:  # A smart socket
                 bulb_type = BulbClass.SOCKET
                 effect = False
+            elif "FANDIM" in _identifier:  # A Fan with dimmable light
+                bulb_type = BulbClass.FANDIM
+                effect = True
             else:  # Plain brightness-only bulb
                 bulb_type = BulbClass.DW
                 effect = "DH" in _identifier or "SH" in _identifier
@@ -158,6 +186,13 @@ class BulbType:
         else:
             kelvin_range = None
 
+        if fan_speed_list:
+            fan_speed_range: Optional[FanSpeedRange] = FanSpeedRange(
+                min=int(min(fan_speed_list)), max=int(max(fan_speed_list))
+            )
+        else:
+            fan_speed_range = None
+
         features = Features(
             **_BASE_FEATURE_MAP[bulb_type], dual_head=dual_head, effect=effect
         )
@@ -167,6 +202,7 @@ class BulbType:
             name=module_name,
             features=features,
             kelvin_range=kelvin_range,
+            fan_speed_range=fan_speed_range,
             fw_version=fw_version,
             white_channels=white_channels,
             white_to_color_ratio=white_to_color_ratio,
