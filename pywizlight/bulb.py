@@ -861,6 +861,19 @@ class wizlight:
             # if the light is off - turn on
             await self.turn_on()
 
+    async def fanSwitch(self) -> None:
+        """Turn the fan on or off like a switch."""
+        # first get the status
+        state = await self.updateState()
+        if not state:  # Did not get state, nothing to do
+            return
+        if state.get_fan_state():
+            # if the light is on - switch off
+            await self.turn_fan_off()
+        else:
+            # if the light is off - turn on
+            await self.turn_fan_on()
+
     async def send(self, msg_dict: Dict) -> BulbResponse:
         """Serialize a dict to json and send it to device over UDP."""
         self.history.message(HISTORY_SEND, msg_dict)

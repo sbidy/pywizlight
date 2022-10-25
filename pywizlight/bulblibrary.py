@@ -31,10 +31,9 @@ class Features:
     brightness: bool
     dual_head: bool
     
-    fan_mode: int
-    fan_state: int
-    fan_revrs: int
-    fan_speed: int
+    fan: bool
+    fan_breeze_mode: bool
+    fan_reverse: bool
 
 
 @dataclasses.dataclass(frozen=True)
@@ -98,10 +97,9 @@ _BASE_FEATURE_MAP = {
         "brightness": True,
         "color": False,
         "color_tmp": False,
-        "fan_mode": 1,
-        "fan_state": 0,
-        "fan_revrs": 0,
-        "fan_speed": 1,
+        "fan": True,
+        "fan_breeze_mode": True,
+        "fan_reverse": True,
     },
 }
 
@@ -155,7 +153,7 @@ class BulbType:
                 effect = False
             elif "FANDIM" in _identifier:  # A Fan with dimmable light
                 bulb_type = BulbClass.FANDIM
-                effect = True
+                effect = False
             else:  # Plain brightness-only bulb
                 bulb_type = BulbClass.DW
                 effect = "DH" in _identifier or "SH" in _identifier
