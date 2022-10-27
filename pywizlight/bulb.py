@@ -277,7 +277,7 @@ class PilotBuilder:
         """Set the color temperature for the white led in the bulb."""
         # normalize the kelvin values - should be removed
         self.pilot_params["temp"] = min(10000, max(1000, kelvin))
-        
+
     def _set_fan_state(self, fan_state: int) -> None:
         """Set the fan state to on or off."""
         _validate_fan_state_or_raise(fan_state)
@@ -292,13 +292,13 @@ class PilotBuilder:
         """Set the fan to rotate normally (summer) or reverse (winter)."""
         _validate_fan_reverse_or_raise(fan_reverse)
         self.pilot_params["fanRevrs"] = fan_reverse
-        
+
     def _set_fan_speed(self, fan_speed: int) -> None:
         """Set the fan speed."""
-        #TODO test the actual range from discovery
+        # TODO test the actual range from discovery
         _validate_fan_speed_or_raise(fan_speed)
         self.pilot_params["fanSpeed"] = fan_speed
-        
+
 
 def _extract_bool(response: BulbResponse, key: str) -> Optional[bool]:
     return bool(response[key]) if key in response else None
@@ -423,11 +423,11 @@ class PilotParser:
     def get_fan_mode(self) -> Optional[int]:
         """Get the the fan mode."""
         return _extract_int(self.pilotResult, "fanMode")
-    
+
     def get_fan_reverse(self) -> Optional[int]:
         """Get the the fan rotation."""
         return _extract_int(self.pilotResult, "fanRevrs")
-    
+
     def get_fan_speed(self) -> Optional[int]:
         """Get the the fan speed."""
         return _extract_int(self.pilotResult, "fanSpeed")
@@ -437,6 +437,7 @@ class PilotParser:
         if "fanSpeed" in self.pilotResult:
             return list(range(1, (self.pilotResult["fanSpeed"] + 1)))
         return None
+
 
 async def _send_udp_message_with_retry(
     message: str,

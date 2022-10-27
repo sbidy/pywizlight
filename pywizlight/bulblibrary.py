@@ -30,7 +30,7 @@ class Features:
     effect: bool
     brightness: bool
     dual_head: bool
-    
+
     fan: bool
     fan_breeze_mode: bool
     fan_reverse: bool
@@ -43,12 +43,14 @@ class KelvinRange:
     max: int
     min: int
 
+
 @dataclasses.dataclass(frozen=True)
 class FanSpeedRange:
     """Defines the fan speed range."""
 
     max: int
     min: int
+
 
 class BulbClass(Enum):
     """Bulb Types."""

@@ -30,9 +30,9 @@ async def test_model_description_fan(fan: wizlight) -> None:
             effect=False,
             brightness=True,
             dual_head=False,
-            fan=True, 
-            fan_breeze_mode=True, 
-            fan_reverse=True
+            fan=True,
+            fan_breeze_mode=True,
+            fan_reverse=True,
         ),
         name="ESP03_FANDIMS_31",
         kelvin_range=KelvinRange(max=2700, min=2700),
