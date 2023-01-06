@@ -13,6 +13,10 @@
 
 A Python connector for [WiZ](https://www.wizconnected.com/en/consumer/) devices.
 
+# Wiz Ligt API Documentation
+
+https://docs.pro.wizconnected.com/#introduction
+
 ## Install
 
 ```bash
