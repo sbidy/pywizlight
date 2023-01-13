@@ -257,6 +257,8 @@ After that all states can be fetched from `light.state`, which is a `PilotParser
 
 `turn_on(PilotBuilder)` turns the light on. This takes a `PilotBuilder` object, which can be used to set all the parameters programmatically - rgb, color temperature, brightness, etc. To set the light to rhythm mode, create an empty `PilotBuilder`.
 
+`get_power(self)` returns the current power consumption of a Smart Plug with Metering.
+
 ## Bulb methods (UDP native):
 
 - **getSystemConfig** - gets the current system configuration - no parameters required
