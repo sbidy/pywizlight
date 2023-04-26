@@ -43,7 +43,7 @@ jobs:
 
       - name: Test with pytest
         run: |
-            pytest --durations=0 --cov=pywizlight --cov-report term-missing --cov-report xml
+            pytest --asyncio-mode=auto --durations=0 --cov=pywizlight --cov-report term-missing --cov-report xml
 
       - name: Upload codecov
         uses: codecov/codecov-action@v2
