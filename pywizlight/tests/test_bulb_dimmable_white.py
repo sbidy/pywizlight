@@ -42,10 +42,10 @@ async def test_supported_scenes(dimmable_bulb: wizlight) -> None:
     assert await dimmable_bulb.getSupportedScenes() == [
         "Wake-up",
         "Bedtime",
-        "Warm white",
         "Night light",
         "Candlelight",
         "Pulse",
         "Steampunk",
+        "White",
         "Alarm",
     ]
