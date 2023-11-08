@@ -376,7 +376,7 @@ async def _send_udp_message_with_retry(
     send_wait = FIRST_SEND_INTERVAL
     total_waited = 0.0
     for send in range(MAX_SEND_DATAGRAMS):
-        if transport.is_closing() or response_future.done():
+        if transport is None or transport.is_closing() or response_future.done():
             return
         attempt = send + 1
         _LOGGER.debug(
