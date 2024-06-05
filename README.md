@@ -191,11 +191,31 @@ Options:
   --help     Show this message and exit.
 
 Commands:
-  discover  Discover bulb in the local network.
-  off       Turn the bulb off.
-  on        Turn the bulb on.
-  state     Get the current state from the given bulb.
+  discover   Discover bulb in the local network.
+  off        Turn the bulb off.
+  on         Turn the bulb on.
+  set-state  Set the current state of a given bulb.
+  state      Get the current state from the given bulb.
 ```
+
+### Examples
+
+```
+$ wizlight discover --b 192.168.0.101
+Search for bulbs in 192.168.0.101 ...
+{'ip_address': '192.168.0.101', 'mac_address': 'a8bs4090193d'}
+
+$ wizlight on --ip 192.168.0.101 --k 3000 --brightness 128
+Turning on 192.168.0.101
+
+$ wizlight off --ip 192.168.0.101
+Turning off 192.168.0.101
+
+$ wizlight state --ip 192.168.0.101
+{'mac': 'a8bs4090193d', 'rssi': -57, 'src': '', 'state': False, 'sceneId': 0, 'temp': 3000, 'dimming': 50}
+```
+
+Run `wizlight COMMAND --help` to see usage and options.
 
 ## Discovery
 
