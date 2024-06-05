@@ -15,7 +15,6 @@ LISTEN_PORT = 38900
 
 
 class PushManager:
-
     _manager = None
 
     @classmethod
