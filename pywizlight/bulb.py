@@ -189,7 +189,7 @@ class PilotBuilder:
         """Set the scene by id."""
         if scene_id not in SCENES:
             # id not in SCENES !
-            raise ValueError("Scene is not available. Only 1 to 32 are supported")
+            raise ValueError("Scene is not available. Only 1 to 35 are supported")
         self.pilot_params["sceneId"] = scene_id
 
     def _set_rgbw(self, rgbw: Tuple[int, int, int, int]) -> None:
