@@ -484,6 +484,12 @@ class wizlight:
         self.transport = cast(asyncio.DatagramTransport, transport_proto[0])
         self.protocol = cast(WizProtocol, transport_proto[1])
 
+        # The transport expects us to send to the same address we connected to here
+        ip, port = self.transport.get_extra_info("peername")
+        if (self.ip, self.port) != (ip, port):
+            _LOGGER.debug("Resolved %s:%s to %s:%s", self.ip, self.port, ip, port)
+            self.ip, self.port = ip, port
+
     def register(self) -> None:
         """Call register to keep alive push updates."""
         if self.push_running:
