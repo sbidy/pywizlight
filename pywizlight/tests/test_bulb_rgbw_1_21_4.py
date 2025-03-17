@@ -74,5 +74,6 @@ async def test_supported_scenes(rgbw_bulb: wizlight) -> None:
         "Steampunk",
         "Diwali",
         "Alarm",
+        "White",
         "Rhythm",
     ]

@@ -65,6 +65,7 @@ async def test_supported_scenes(light_strip: wizlight) -> None:
         "Steampunk",
         "Diwali",
         "Alarm",
+        "White",
         "Rhythm",
     ]
 
