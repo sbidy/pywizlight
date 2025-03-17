@@ -319,7 +319,7 @@ async def test_timeout(bad_bulb: wizlight) -> None:
     with pytest.raises(WizLightTimeOutError), patch(
         "pywizlight.bulb.FIRST_SEND_INTERVAL", 0.01
     ), patch("pywizlight.bulb.TIMEOUT", 0.01):
-        await bad_bulb.getBulbConfig() is WizLightConnectionError
+        assert await bad_bulb.getBulbConfig() is WizLightConnectionError
 
 
 @pytest.mark.asyncio
@@ -329,7 +329,7 @@ async def test_timeout_PilotBuilder(bad_bulb: wizlight) -> None:
     with pytest.raises(WizLightTimeOutError), patch(
         "pywizlight.bulb.FIRST_SEND_INTERVAL", 0.01
     ), patch("pywizlight.bulb.TIMEOUT", 0.01):
-        await bad_bulb.turn_on(PilotBuilder(brightness=255)) is WizLightConnectionError
+        assert await bad_bulb.turn_on(PilotBuilder(brightness=255)) is WizLightConnectionError
 
 
 @pytest.mark.asyncio
