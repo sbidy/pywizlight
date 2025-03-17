@@ -1,4 +1,5 @@
 """Tests for the Bulb API with a light strip."""
+
 from typing import AsyncGenerator
 
 import pytest
@@ -64,9 +65,8 @@ async def test_supported_scenes(light_strip: wizlight) -> None:
         "White",
         "Wake-up",
         "Warm white",
-        "Rhythm"
+        "Rhythm",
     ]
-
 
 
 @pytest.mark.asyncio
