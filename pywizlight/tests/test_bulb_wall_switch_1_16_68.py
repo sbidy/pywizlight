@@ -1,4 +1,5 @@
 """Tests for the Bulb API with a wall switch dimmer."""
+
 from typing import AsyncGenerator
 
 import pytest

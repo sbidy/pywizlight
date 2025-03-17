@@ -1,4 +1,5 @@
 """Tests for the Bulb API with a socket."""
+
 import asyncio
 import logging
 from typing import AsyncGenerator, Optional, cast

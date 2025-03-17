@@ -1,4 +1,5 @@
 """Tests for the Bulb API."""
+
 from typing import AsyncGenerator
 from unittest.mock import patch
 

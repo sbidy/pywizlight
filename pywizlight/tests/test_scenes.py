@@ -1,6 +1,5 @@
 """Tests for the Scenes."""
 
-
 import pytest
 
 from pywizlight import scenes

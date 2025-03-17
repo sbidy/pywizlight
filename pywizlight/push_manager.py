@@ -1,4 +1,5 @@
 """pywizlight integration push updates."""
+
 import asyncio
 import json
 import logging

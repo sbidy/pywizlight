@@ -11,6 +11,7 @@ RGB -- Fullstack bulb
 1C -- Specific to the hardware - defines PWM frequency + way of controlling CCT temperature
 31 -- Related to the hardware revision
 """
+
 import dataclasses
 import logging
 from enum import Enum

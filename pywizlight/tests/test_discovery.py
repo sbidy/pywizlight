@@ -1,4 +1,5 @@
 """Tests for discovery."""
+
 import asyncio
 import contextlib
 import logging
@@ -21,9 +22,9 @@ logging.getLogger("pywizlight").setLevel(logging.DEBUG)
 async def mock_discovery_aio_protocol() -> AsyncGenerator:
     """Fixture to mock an asyncio connection."""
     loop = asyncio.get_running_loop()
-    future: asyncio.Future[
-        Tuple[asyncio.DatagramProtocol, BroadcastProtocol]
-    ] = asyncio.Future()
+    future: asyncio.Future[Tuple[asyncio.DatagramProtocol, BroadcastProtocol]] = (
+        asyncio.Future()
+    )
 
     async def _wait_for_connection():
         transport, protocol = await future

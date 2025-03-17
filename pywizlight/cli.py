@@ -1,4 +1,5 @@
 """Command-line interface to interact with wizlight devices."""
+
 import asyncio
 from functools import wraps
 from typing import Any, Callable, Coroutine, TypeVar

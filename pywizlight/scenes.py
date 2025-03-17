@@ -39,7 +39,7 @@ SCENES = {
     34: "White",
     9: "Wake-up",
     11: "Warm white",
-    1000: "Rhythm"
+    1000: "Rhythm",
 }
 SCENE_NAME_TO_ID = {scene_name: scene_id for (scene_id, scene_name) in SCENES.items()}
 TW_SCENES = [6, 9, 10, 11, 12, 13, 14, 15, 16, 18, 29, 30, 31, 32, 33, 35]
