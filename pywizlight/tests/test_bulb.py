@@ -9,7 +9,7 @@ from pywizlight import SCENES, PilotBuilder, wizlight
 from pywizlight.bulb import states_match
 from pywizlight.bulblibrary import BulbClass, BulbType, Features, KelvinRange
 from pywizlight.discovery import discover_lights
-from pywizlight.exceptions import WizLightTimeOutError
+from pywizlight.exceptions import WizLightTimeOutError, WizLightConnectionError
 from pywizlight.tests.fake_bulb import startup_bulb
 
 
@@ -315,21 +315,21 @@ async def test_get_power_unsupported_device(correct_bulb: wizlight) -> None:
 # Error states / Timout
 @pytest.mark.asyncio
 async def test_timeout(bad_bulb: wizlight) -> None:
-    """Test the timout exception after."""
+    """Test the timeout exception after."""
     with pytest.raises(WizLightTimeOutError), patch(
         "pywizlight.bulb.FIRST_SEND_INTERVAL", 0.01
     ), patch("pywizlight.bulb.TIMEOUT", 0.01):
-        await bad_bulb.getBulbConfig()
+        await bad_bulb.getBulbConfig() is WizLightConnectionError
 
 
 @pytest.mark.asyncio
 async def test_timeout_PilotBuilder(bad_bulb: wizlight) -> None:
-    """Test Timout for Result."""
+    """Test Timeout for Result."""
     # check if the bulb state it given as bool - mock ?
     with pytest.raises(WizLightTimeOutError), patch(
         "pywizlight.bulb.FIRST_SEND_INTERVAL", 0.01
     ), patch("pywizlight.bulb.TIMEOUT", 0.01):
-        await bad_bulb.turn_on(PilotBuilder(brightness=255))
+        await bad_bulb.turn_on(PilotBuilder(brightness=255)) is WizLightConnectionError
 
 
 @pytest.mark.asyncio
