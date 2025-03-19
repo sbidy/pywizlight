@@ -1,4 +1,5 @@
 """Models."""
+
 import dataclasses
 from typing import Dict, List
 

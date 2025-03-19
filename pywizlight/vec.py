@@ -1,7 +1,8 @@
 """Helper class with some math.
 
-    A bunch of utility functions, just so we don't have to bring in any external dependencies.
+A bunch of utility functions, just so we don't have to bring in any external dependencies.
 """
+
 from math import cos, sin, sqrt
 from operator import add, mul, sub
 from typing import Tuple

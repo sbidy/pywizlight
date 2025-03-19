@@ -1,4 +1,5 @@
 """pywizlight integration protocol."""
+
 import asyncio
 import logging
 from typing import Callable, Optional, Tuple

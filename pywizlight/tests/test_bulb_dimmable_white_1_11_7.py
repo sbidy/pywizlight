@@ -1,4 +1,5 @@
 """Tests for the Bulb API with a light strip."""
+
 from typing import AsyncGenerator
 
 import pytest

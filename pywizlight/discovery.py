@@ -1,4 +1,5 @@
 """Discover bulbs in a network."""
+
 import asyncio
 import json
 import logging
