@@ -1,0 +1,78 @@
+#!/usr/bin/env python3
+import argparse
+import asyncio
+from pywizlight import wizlight, PilotBuilder, discovery
+
+async def discover_lights_cli():
+    bulbs = await discovery.discover_lights()
+    for bulb in bulbs:
+        print(f"Found bulb: {bulb.ip}")
+
+async def turn_on_light(ip):
+    bulb = wizlight(ip)
+    await bulb.turn_on()
+
+async def turn_off_light(ip):
+    bulb = wizlight(ip)
+    await bulb.turn_off()
+
+async def get_state(ip):
+    bulb = wizlight(ip)
+    state = await bulb.updateState()
+    print("Current state of the bulb:")
+    print(f" - Power: {'On' if state.get_state() else 'Off'}")
+    print(f" - Brightness: {state.get_brightness()}")
+    print(f" - RGB: {state.get_rgb()}")
+    print(f" - Color Temp: {state.get_colortemp()}")
+    print(f" - Scene: {state.get_scene()}")
+
+async def set_state(ip, brightness=None, r=None, g=None, b=None):
+    bulb = wizlight(ip)
+    pilot = PilotBuilder()
+    if brightness is not None:
+        pilot = PilotBuilder(brightness=brightness)
+    if r is not None and g is not None and b is not None:
+        pilot = PilotBuilder(rgb=(r, g, b))
+    await bulb.turn_on(pilot)
+
+def main():
+    parser = argparse.ArgumentParser(description="Control WizLight bulbs via command line.")
+    subparsers = parser.add_subparsers(dest="command", required=True)
+
+    parser_discover = subparsers.add_parser("discover", help="Discover bulbs in the local network")
+
+    parser_on = subparsers.add_parser("on", help="Turn a given bulb on")
+    parser_on.add_argument("ip", help="IP address of the WizLight bulb")
+
+    parser_off = subparsers.add_parser("off", help="Turn a given bulb off")
+    parser_off.add_argument("ip", help="IP address of the WizLight bulb")
+
+    parser_state = subparsers.add_parser("state", help="Get the current state of a given bulb")
+    parser_state.add_argument("ip", help="IP address of the WizLight bulb")
+
+    parser_set_state = subparsers.add_parser("set-state", help="Set the current state of a given bulb")
+    parser_set_state.add_argument("ip", help="IP address of the WizLight bulb")
+    parser_set_state.add_argument("--brightness", type=int, help="Brightness value (0-255)")
+    parser_set_state.add_argument("--color", type=str, help="Color value in the format r,g,b")
+
+    args = parser.parse_args()
+
+    loop = asyncio.get_event_loop()
+
+    if args.command == "discover":
+        loop.run_until_complete(discover_lights_cli())
+    elif args.command == "on":
+        loop.run_until_complete(turn_on_light(args.ip))
+    elif args.command == "off":
+        loop.run_until_complete(turn_off_light(args.ip))
+    elif args.command == "state":
+        loop.run_until_complete(get_state(args.ip))
+    elif args.command == "set-state":
+        brightness = args.brightness
+        color = None
+        if args.color:
+            color = tuple(map(int, args.color.split(',')))
+        loop.run_until_complete(set_state(args.ip, brightness, *color))
+
+if __name__ == "__main__":
+    main()
