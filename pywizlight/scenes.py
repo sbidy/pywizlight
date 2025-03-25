@@ -30,6 +30,7 @@ SCENES = {
     8: "Pastel colors",
     2: "Romance",
     16: "Relax",
+    36: "Snowy sky",
     3: "Sunset",
     20: "Spring",
     21: "Summer",
