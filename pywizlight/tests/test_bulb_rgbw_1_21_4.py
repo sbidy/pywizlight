@@ -65,6 +65,7 @@ async def test_supported_scenes(rgbw_bulb: wizlight) -> None:
         "Pastel colors",
         "Romance",
         "Relax",
+        "Snowy sky",
         "Sunset",
         "Spring",
         "Summer",
