@@ -56,6 +56,7 @@ async def test_supported_scenes(light_strip: wizlight) -> None:
         "Pastel colors",
         "Romance",
         "Relax",
+        "Snowy sky",
         "Sunset",
         "Spring",
         "Summer",
