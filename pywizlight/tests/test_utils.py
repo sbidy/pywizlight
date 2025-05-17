@@ -1,6 +1,5 @@
 """Tests for the Utils."""
 
-
 import pytest
 
 from pywizlight import utils

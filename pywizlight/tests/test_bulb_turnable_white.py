@@ -1,4 +1,5 @@
 """Tests for the Bulb API with a light strip."""
+
 from typing import AsyncGenerator
 
 import pytest
@@ -41,9 +42,9 @@ async def test_supported_scenes(turnable_bulb: wizlight) -> None:
     """Test supported scenes."""
     assert await turnable_bulb.getSupportedScenes() == [
         "Cozy",
-        "Wake up",
+        "Wake-up",
         "Bedtime",
-        "Warm White",
+        "Warm white",
         "Daylight",
         "Cool white",
         "Night light",
@@ -54,4 +55,6 @@ async def test_supported_scenes(turnable_bulb: wizlight) -> None:
         "Golden white",
         "Pulse",
         "Steampunk",
+        "Diwali",
+        "Alarm",
     ]

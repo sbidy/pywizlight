@@ -1,4 +1,5 @@
 """Tests for the Bulb API with a Hero."""
+
 from typing import AsyncGenerator
 
 import pytest

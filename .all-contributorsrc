@@ -167,6 +167,15 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "shreve",
+      "name": "Violet Shreve",
+      "avatar_url": "https://avatars.githubusercontent.com/u/253634?v=4",
+      "profile": "https://shreve.io",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,
@@ -174,5 +183,7 @@
   "projectOwner": "sbidy",
   "repoType": "github",
   "repoHost": "https://github.com",
-  "skipCi": true
+  "skipCi": true,
+  "commitType": "docs",
+  "commitConvention": "angular"
 }

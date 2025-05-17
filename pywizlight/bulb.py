@@ -1,4 +1,5 @@
 """pywizlight integration."""
+
 import asyncio
 import contextlib
 import json
@@ -221,7 +222,7 @@ class PilotBuilder:
         """Set the scene by id."""
         if scene_id not in SCENES:
             # id not in SCENES !
-            raise ValueError("Scene is not available. Only 1 to 32 are supported")
+            raise ValueError("Scene is not available. Only 1 to 35 are supported")
         self.pilot_params["sceneId"] = scene_id
 
     def _set_rgbw(self, rgbw: Tuple[int, int, int, int]) -> None:
@@ -451,7 +452,7 @@ async def _send_udp_message_with_retry(
     send_wait = FIRST_SEND_INTERVAL
     total_waited = 0.0
     for send in range(MAX_SEND_DATAGRAMS):
-        if transport.is_closing() or response_future.done():
+        if transport is None or transport.is_closing() or response_future.done():
             return
         attempt = send + 1
         _LOGGER.debug(
@@ -493,7 +494,6 @@ class wizlight:
     """Create an instance of a WiZ Light Bulb."""
 
     # default port for WiZ lights - 38899
-
     def __init__(
         self,
         ip: str,
@@ -560,6 +560,11 @@ class wizlight:
         )
         self.transport = cast(asyncio.DatagramTransport, transport_proto[0])
         self.protocol = cast(WizProtocol, transport_proto[1])
+
+        ip, port = self.transport.get_extra_info("peername")
+        if (self.ip, self.port) != (ip, port):
+            _LOGGER.debug("Resolved %s:%s to %s:%s", self.ip, self.port, ip, port)
+            self.ip, self.port = ip, port
 
     def register(self) -> None:
         """Call register to keep alive push updates."""

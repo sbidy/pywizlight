@@ -1,4 +1,5 @@
 """pywizlight integration push updates."""
+
 import asyncio
 import json
 import logging
@@ -15,7 +16,6 @@ LISTEN_PORT = 38900
 
 
 class PushManager:
-
     _manager = None
 
     @classmethod

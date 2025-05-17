@@ -1,4 +1,5 @@
 """Tests for the Bulb API with a light strip."""
+
 from typing import AsyncGenerator
 
 import pytest
@@ -40,12 +41,12 @@ async def test_model_description_dimmable_bulb(dimmable_bulb: wizlight) -> None:
 async def test_supported_scenes(dimmable_bulb: wizlight) -> None:
     """Test supported scenes."""
     assert await dimmable_bulb.getSupportedScenes() == [
-        "Wake up",
+        "Wake-up",
         "Bedtime",
-        "Cool white",
         "Night light",
         "Candlelight",
-        "Golden white",
         "Pulse",
         "Steampunk",
+        "White",
+        "Alarm",
     ]

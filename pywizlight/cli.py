@@ -1,4 +1,5 @@
 """Command-line interface to interact with wizlight devices."""
+
 import asyncio
 from functools import wraps
 from typing import Any, Callable, Coroutine, TypeVar
@@ -35,7 +36,7 @@ def main() -> None:
     help="Define the broadcast address like 192.168.1.255.",
 )
 async def discover(b: str) -> None:
-    """Discovery bulb in the local network."""
+    """Discover bulb in the local network."""
     click.echo(f"Search for bulbs in {b} ... ")
 
     bulbs = await discovery.find_wizlights(broadcast_address=b)

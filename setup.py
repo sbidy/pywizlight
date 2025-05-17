@@ -1,4 +1,5 @@
 """Setup for pywizlight."""
+
 import os
 import re
 

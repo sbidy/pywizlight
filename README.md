@@ -1,7 +1,7 @@
 ![Upload Python Package](https://github.com/sbidy/pywizlight/workflows/Upload%20Python%20Package/badge.svg)
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-18-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-19-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 ![Update Docs](https://github.com/sbidy/pywizlight/workflows/Update%20Docs/badge.svg)
@@ -12,6 +12,10 @@
 # pywizlight
 
 A Python connector for [WiZ](https://www.wizconnected.com/en/consumer/) devices.
+
+# Wiz Ligt API Documentation
+
+https://docs.pro.wizconnected.com/#introduction
 
 ## Install
 
@@ -46,30 +50,33 @@ nix-env -iA nixos.python37Packages.pywizlight
 <!-- prettier-ignore-start -->
 <!-- markdownlint-disable -->
 <table>
-  <tr>
-    <td align="center"><a href="http://mtnspring.org"><img src="https://avatars.githubusercontent.com/u/223277?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Seth Nickell</b></sub></a><br /><a href="https://github.com/sbidy/pywizlight/commits?author=snickell" title="Code">💻</a></td>
-    <td align="center"><a href="https://github.com/daanzu"><img src="https://avatars.githubusercontent.com/u/4319503?v=4?s=100" width="100px;" alt=""/><br /><sub><b>David Zurow</b></sub></a><br /><a href="https://github.com/sbidy/pywizlight/commits?author=daanzu" title="Documentation">📖</a></td>
-    <td align="center"><a href="https://github.com/eibanez"><img src="https://avatars.githubusercontent.com/u/438494?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Eduardo Ibanez</b></sub></a><br /><a href="https://github.com/sbidy/pywizlight/commits?author=eibanez" title="Documentation">📖</a></td>
-    <td align="center"><a href="https://github.com/angadsingh"><img src="https://avatars.githubusercontent.com/u/1623026?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Angad Singh</b></sub></a><br /><a href="https://github.com/sbidy/pywizlight/commits?author=angadsingh" title="Code">💻</a></td>
-    <td align="center"><a href="http://fabian-affolter.ch/blog/"><img src="https://avatars.githubusercontent.com/u/116184?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Fabian Affolter</b></sub></a><br /><a href="https://github.com/sbidy/pywizlight/commits?author=fabaff" title="Documentation">📖</a> <a href="https://github.com/sbidy/pywizlight/commits?author=fabaff" title="Code">💻</a></td>
-    <td align="center"><a href="https://redaxmedia.com"><img src="https://avatars.githubusercontent.com/u/1835397?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Henry Ruhs</b></sub></a><br /><a href="https://github.com/sbidy/pywizlight/commits?author=redaxmedia" title="Code">💻</a></td>
-    <td align="center"><a href="https://www.panu.it/"><img src="https://avatars.githubusercontent.com/u/2248402?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Alberto Panu</b></sub></a><br /><a href="https://github.com/sbidy/pywizlight/commits?author=bigjohnson" title="Code">💻</a></td>
-  </tr>
-  <tr>
-    <td align="center"><a href="https://github.com/skitterrusty"><img src="https://avatars.githubusercontent.com/u/71942600?v=4?s=100" width="100px;" alt=""/><br /><sub><b>skitterrusty</b></sub></a><br /><a href="https://github.com/sbidy/pywizlight/commits?author=skitterrusty" title="Code">💻</a></td>
-    <td align="center"><a href="https://github.com/mots"><img src="https://avatars.githubusercontent.com/u/26517?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Mathias Roth</b></sub></a><br /><a href="https://github.com/sbidy/pywizlight/commits?author=mots" title="Code">💻</a></td>
-    <td align="center"><a href="https://github.com/durnezj"><img src="https://avatars.githubusercontent.com/u/11504333?v=4?s=100" width="100px;" alt=""/><br /><sub><b>durnezj</b></sub></a><br /><a href="https://github.com/sbidy/pywizlight/commits?author=durnezj" title="Code">💻</a></td>
-    <td align="center"><a href="https://github.com/Dirty-No"><img src="https://avatars.githubusercontent.com/u/54525684?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Noëlle</b></sub></a><br /><a href="https://github.com/sbidy/pywizlight/commits?author=Dirty-No" title="Documentation">📖</a></td>
-    <td align="center"><a href="https://linkedin.com/in/scriptsrc"><img src="https://avatars.githubusercontent.com/u/8009126?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Patrick Kelley</b></sub></a><br /><a href="https://github.com/sbidy/pywizlight/commits?author=scriptsrc" title="Documentation">📖</a></td>
-    <td align="center"><a href="http://ellismichael.com"><img src="https://avatars.githubusercontent.com/u/1312141?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Ellis Michael</b></sub></a><br /><a href="https://github.com/sbidy/pywizlight/commits?author=emichael" title="Code">💻</a></td>
-    <td align="center"><a href="https://github.com/SvbZ3r0"><img src="https://avatars.githubusercontent.com/u/57280279?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Gughan Ravikumar</b></sub></a><br /><a href="https://github.com/sbidy/pywizlight/commits?author=SvbZ3r0" title="Code">💻</a></td>
-  </tr>
-  <tr>
-    <td align="center"><a href="https://github.com/CharlotteCross1998"><img src="https://avatars.githubusercontent.com/u/29734551?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Charlotte</b></sub></a><br /><a href="https://github.com/sbidy/pywizlight/commits?author=CharlotteCross1998" title="Code">💻</a></td>
-    <td align="center"><a href="https://akx.github.io/"><img src="https://avatars.githubusercontent.com/u/58669?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Aarni Koskela</b></sub></a><br /><a href="https://github.com/sbidy/pywizlight/commits?author=akx" title="Code">💻</a></td>
-    <td align="center"><a href="https://github.com/UH-60"><img src="https://avatars.githubusercontent.com/u/4968133?v=4?s=100" width="100px;" alt=""/><br /><sub><b>UH-60</b></sub></a><br /><a href="https://github.com/sbidy/pywizlight/commits?author=UH-60" title="Code">💻</a></td>
-    <td align="center"><a href="https://github.com/bdraco"><img src="https://avatars.githubusercontent.com/u/663432?v=4?s=100" width="100px;" alt=""/><br /><sub><b>J. Nick Koston</b></sub></a><br /><a href="https://github.com/sbidy/pywizlight/commits?author=bdraco" title="Code">💻</a></td>
-  </tr>
+  <tbody>
+    <tr>
+      <td align="center" valign="top" width="14.28%"><a href="http://mtnspring.org"><img src="https://avatars.githubusercontent.com/u/223277?v=4?s=100" width="100px;" alt="Seth Nickell"/><br /><sub><b>Seth Nickell</b></sub></a><br /><a href="https://github.com/sbidy/pywizlight/commits?author=snickell" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/daanzu"><img src="https://avatars.githubusercontent.com/u/4319503?v=4?s=100" width="100px;" alt="David Zurow"/><br /><sub><b>David Zurow</b></sub></a><br /><a href="https://github.com/sbidy/pywizlight/commits?author=daanzu" title="Documentation">📖</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/eibanez"><img src="https://avatars.githubusercontent.com/u/438494?v=4?s=100" width="100px;" alt="Eduardo Ibanez"/><br /><sub><b>Eduardo Ibanez</b></sub></a><br /><a href="https://github.com/sbidy/pywizlight/commits?author=eibanez" title="Documentation">📖</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/angadsingh"><img src="https://avatars.githubusercontent.com/u/1623026?v=4?s=100" width="100px;" alt="Angad Singh"/><br /><sub><b>Angad Singh</b></sub></a><br /><a href="https://github.com/sbidy/pywizlight/commits?author=angadsingh" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="http://fabian-affolter.ch/blog/"><img src="https://avatars.githubusercontent.com/u/116184?v=4?s=100" width="100px;" alt="Fabian Affolter"/><br /><sub><b>Fabian Affolter</b></sub></a><br /><a href="https://github.com/sbidy/pywizlight/commits?author=fabaff" title="Documentation">📖</a> <a href="https://github.com/sbidy/pywizlight/commits?author=fabaff" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://redaxmedia.com"><img src="https://avatars.githubusercontent.com/u/1835397?v=4?s=100" width="100px;" alt="Henry Ruhs"/><br /><sub><b>Henry Ruhs</b></sub></a><br /><a href="https://github.com/sbidy/pywizlight/commits?author=redaxmedia" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://www.panu.it/"><img src="https://avatars.githubusercontent.com/u/2248402?v=4?s=100" width="100px;" alt="Alberto Panu"/><br /><sub><b>Alberto Panu</b></sub></a><br /><a href="https://github.com/sbidy/pywizlight/commits?author=bigjohnson" title="Code">💻</a></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/skitterrusty"><img src="https://avatars.githubusercontent.com/u/71942600?v=4?s=100" width="100px;" alt="skitterrusty"/><br /><sub><b>skitterrusty</b></sub></a><br /><a href="https://github.com/sbidy/pywizlight/commits?author=skitterrusty" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/mots"><img src="https://avatars.githubusercontent.com/u/26517?v=4?s=100" width="100px;" alt="Mathias Roth"/><br /><sub><b>Mathias Roth</b></sub></a><br /><a href="https://github.com/sbidy/pywizlight/commits?author=mots" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/durnezj"><img src="https://avatars.githubusercontent.com/u/11504333?v=4?s=100" width="100px;" alt="durnezj"/><br /><sub><b>durnezj</b></sub></a><br /><a href="https://github.com/sbidy/pywizlight/commits?author=durnezj" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/Dirty-No"><img src="https://avatars.githubusercontent.com/u/54525684?v=4?s=100" width="100px;" alt="Noëlle"/><br /><sub><b>Noëlle</b></sub></a><br /><a href="https://github.com/sbidy/pywizlight/commits?author=Dirty-No" title="Documentation">📖</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://linkedin.com/in/scriptsrc"><img src="https://avatars.githubusercontent.com/u/8009126?v=4?s=100" width="100px;" alt="Patrick Kelley"/><br /><sub><b>Patrick Kelley</b></sub></a><br /><a href="https://github.com/sbidy/pywizlight/commits?author=scriptsrc" title="Documentation">📖</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="http://ellismichael.com"><img src="https://avatars.githubusercontent.com/u/1312141?v=4?s=100" width="100px;" alt="Ellis Michael"/><br /><sub><b>Ellis Michael</b></sub></a><br /><a href="https://github.com/sbidy/pywizlight/commits?author=emichael" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/SvbZ3r0"><img src="https://avatars.githubusercontent.com/u/57280279?v=4?s=100" width="100px;" alt="Gughan Ravikumar"/><br /><sub><b>Gughan Ravikumar</b></sub></a><br /><a href="https://github.com/sbidy/pywizlight/commits?author=SvbZ3r0" title="Code">💻</a></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/CharlotteCross1998"><img src="https://avatars.githubusercontent.com/u/29734551?v=4?s=100" width="100px;" alt="Charlotte"/><br /><sub><b>Charlotte</b></sub></a><br /><a href="https://github.com/sbidy/pywizlight/commits?author=CharlotteCross1998" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://akx.github.io/"><img src="https://avatars.githubusercontent.com/u/58669?v=4?s=100" width="100px;" alt="Aarni Koskela"/><br /><sub><b>Aarni Koskela</b></sub></a><br /><a href="https://github.com/sbidy/pywizlight/commits?author=akx" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/UH-60"><img src="https://avatars.githubusercontent.com/u/4968133?v=4?s=100" width="100px;" alt="UH-60"/><br /><sub><b>UH-60</b></sub></a><br /><a href="https://github.com/sbidy/pywizlight/commits?author=UH-60" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/bdraco"><img src="https://avatars.githubusercontent.com/u/663432?v=4?s=100" width="100px;" alt="J. Nick Koston"/><br /><sub><b>J. Nick Koston</b></sub></a><br /><a href="https://github.com/sbidy/pywizlight/commits?author=bdraco" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://shreve.io"><img src="https://avatars.githubusercontent.com/u/253634?v=4?s=100" width="100px;" alt="Violet Shreve"/><br /><sub><b>Violet Shreve</b></sub></a><br /><a href="https://github.com/sbidy/pywizlight/commits?author=shreve" title="Code">💻</a></td>
+    </tr>
+  </tbody>
 </table>
 
 <!-- markdownlint-restore -->
@@ -187,11 +194,31 @@ Options:
   --help     Show this message and exit.
 
 Commands:
-  discover  Discover bulb in the local network.
-  off       Turn the bulb off.
-  on        Turn the bulb on.
-  state     Get the current state from the given bulb.
+  discover   Discover bulb in the local network.
+  off        Turn the bulb off.
+  on         Turn the bulb on.
+  set-state  Set the current state of a given bulb.
+  state      Get the current state from the given bulb.
 ```
+
+### Examples
+
+```
+$ wizlight discover --b 192.168.0.101
+Search for bulbs in 192.168.0.101 ...
+{'ip_address': '192.168.0.101', 'mac_address': 'a8bs4090193d'}
+
+$ wizlight on --ip 192.168.0.101 --k 3000 --brightness 128
+Turning on 192.168.0.101
+
+$ wizlight off --ip 192.168.0.101
+Turning off 192.168.0.101
+
+$ wizlight state --ip 192.168.0.101
+{'mac': 'a8bs4090193d', 'rssi': -57, 'src': '', 'state': False, 'sceneId': 0, 'temp': 3000, 'dimming': 50}
+```
+
+Run `wizlight COMMAND --help` to see usage and options.
 
 ## Discovery
 
@@ -199,7 +226,7 @@ The discovery works with a UDP Broadcast request and collects all bulbs in the n
 
 ## Bulb paramters (UDP RAW)
 
-- **sceneId** - calls one of the predefined scenes (int from 1 to 32) [List of names in code](https://github.com/sbidy/pywizlight/blob/master/pywizlight/scenes.py)
+- **sceneId** - calls one of the predefined scenes (int from 1 to 35) [List of names in code](https://github.com/sbidy/pywizlight/blob/master/pywizlight/scenes.py)
 - **speed** - sets the color changing speed in percent
 - **dimming** - sets the dimmer of the bulb in percent
 - **temp** - sets the color temperature in kelvins
@@ -252,6 +279,8 @@ After that all states can be fetched from `light.state`, which is a `PilotParser
 `turn_off(self)` turns the light off
 
 `turn_on(PilotBuilder)` turns the light on. This takes a `PilotBuilder` object, which can be used to set all the parameters programmatically - rgb, color temperature, brightness, etc. To set the light to rhythm mode, create an empty `PilotBuilder`.
+
+`get_power(self)` returns the current power consumption of a Smart Plug with Metering.
 
 ## Bulb methods (UDP native):
 

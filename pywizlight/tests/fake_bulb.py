@@ -1,4 +1,5 @@
 """Start up a fake bulb to test features without a real bulb."""
+
 import asyncio
 import json
 from typing import Any, Callable, Dict, Tuple, cast
@@ -835,9 +836,9 @@ async def make_udp_fake_bulb_server(
     return transport_proto
 
 
-async def make_udp_fake_bulb_push_server() -> Tuple[
-    asyncio.BaseTransport, asyncio.BaseProtocol
-]:
+async def make_udp_fake_bulb_push_server() -> (
+    Tuple[asyncio.BaseTransport, asyncio.BaseProtocol]
+):
     """Configure a fake push instance."""
     handler = BulbUDPRequestHandler()
     transport_proto = await asyncio.get_event_loop().create_datagram_endpoint(

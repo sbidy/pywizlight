@@ -2,11 +2,11 @@ name: Lint
 
 on:
   push:
-    branches: [ master ]
+    branches: [master]
   pull_request:
-    branches: [ master ]
+    branches: [master]
   pull_request_target:
-    branches: [ master ]
+    branches: [master]
 
 permissions:
   checks: write
@@ -24,7 +24,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v1
         with:
-          python-version: 3.8
+          python-version: 3.12
 
       - name: Install Python dependencies
         run: pip install black flake8 mypy pytest pytest-cov pytest-asyncio -e .
@@ -43,7 +43,7 @@ jobs:
 
       - name: Test with pytest
         run: |
-            pytest --durations=0 --cov=pywizlight --cov-report term-missing --cov-report xml
+          pytest --asyncio-mode=auto --durations=0 --cov=pywizlight --cov-report term-missing --cov-report xml
 
       - name: Upload codecov
         uses: codecov/codecov-action@v2

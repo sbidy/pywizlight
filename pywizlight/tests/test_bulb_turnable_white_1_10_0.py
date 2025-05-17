@@ -1,4 +1,5 @@
 """Tests for the Bulb API with a turnable white device with 1.10.0 firmware."""
+
 from typing import AsyncGenerator
 
 import pytest
