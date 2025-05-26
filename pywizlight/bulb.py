@@ -178,13 +178,13 @@ class PilotBuilder:
         if cold_white is not None:
             self._set_cold_white(cold_white)
         if fan_state is not None:
-            self._set_fan_state(0)
+            self._set_fan_state(fan_state)
         if fan_mode is not None:
-            self._set_fan_mode(1)
+            self._set_fan_mode(fan_mode)
         if fan_reverse is not None:
-            self._set_fan_reverse(0)
+            self._set_fan_reverse(fan_reverse)
         if fan_speed is not None:
-            self._set_fan_speed(1)
+            self._set_fan_speed(fan_speed)
 
     def set_pilot_message(self) -> Dict:
         """Return the pilot message."""
