@@ -433,11 +433,9 @@ class PilotParser:
         """Get the the fan speed."""
         return _extract_int(self.pilotResult, "fanSpeed")
 
-    def get_fan_speed_range(self) -> Optional[List[int]]:
+    def get_fan_speed_range(self) -> Optional[int]:
         """Get the value of the fanSpeed range property."""
-        if "fanSpeed" in self.pilotResult:
-            return list(range(1, (self.pilotResult["fanSpeed"] + 1)))
-        return None
+        return _extract_int(self.pilotResult, "fanSpeed")
 
 
 async def _send_udp_message_with_retry(
@@ -509,7 +507,7 @@ class wizlight:
         self.modelConfig: Optional[Dict] = None
         self.whiteRange: Optional[List[float]] = None
         self.extwhiteRange: Optional[List[float]] = None
-        self.fanSpeedRange: Optional[List[int]] = None
+        self.fanSpeedRange: Optional[int] = None
         self.transport: Optional[asyncio.DatagramTransport] = None
         self.protocol: Optional[WizProtocol] = None
         self.history = WizHistory()
@@ -699,7 +697,7 @@ class wizlight:
 
         return self.extwhiteRange
 
-    async def getFanSpeedRange(self) -> Optional[List[int]]:
+    async def getFanSpeedRange(self) -> Optional[int]:
         """Read fan speed range from the bulb."""
         if self.fanSpeedRange is not None:
             return self.fanSpeedRange

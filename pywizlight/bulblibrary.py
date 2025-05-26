@@ -45,14 +45,6 @@ class KelvinRange:
     min: int
 
 
-@dataclasses.dataclass(frozen=True)
-class FanSpeedRange:
-    """Defines the fan speed range."""
-
-    max: int
-    min: int
-
-
 class BulbClass(Enum):
     """Bulb Types."""
 
@@ -114,7 +106,7 @@ class BulbType:
     features: Features
     name: Optional[str]
     kelvin_range: Optional[KelvinRange]
-    fan_speed_range: Optional[FanSpeedRange]
+    fan_speed_range: Optional[int]
     bulb_type: BulbClass
     fw_version: Optional[str]
     white_channels: Optional[int]
@@ -130,7 +122,7 @@ class BulbType:
     def from_data(
         module_name: str,
         kelvin_list: Optional[List[float]],
-        fan_speed_list: Optional[List[int]],
+        fan_speed_range: Optional[int],
         fw_version: Optional[str],
         white_channels: Optional[int],
         white_to_color_ratio: Optional[int],
@@ -186,13 +178,6 @@ class BulbType:
             )
         else:
             kelvin_range = None
-
-        if fan_speed_list:
-            fan_speed_range: Optional[FanSpeedRange] = FanSpeedRange(
-                min=int(min(fan_speed_list)), max=int(max(fan_speed_list))
-            )
-        else:
-            fan_speed_range = None
 
         features = Features(
             **_BASE_FEATURE_MAP[bulb_type], dual_head=dual_head, effect=effect
