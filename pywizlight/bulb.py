@@ -767,19 +767,16 @@ class wizlight:
 
     async def set_fan_speed(self, speed: int) -> None:
         """Set the fan speed."""
-        # If we have state: True in the setPilot, the speed does not change
         _validate_fan_speed_or_raise(speed)
         await self.send({"method": "setPilot", "params": {"fanSpeed": speed}})
 
     async def set_fan_mode(self, mode: int) -> None:
         """Set the fan mode to breeze or normal."""
-        # If we have state: True in the setPilot, the speed does not change
         _validate_fan_mode_or_raise(mode)
         await self.send({"method": "setPilot", "params": {"fanMode": mode}})
 
     async def set_fan_reverse(self, reverse: int) -> None:
         """Set the fan rotation to reverse (winter mode) or normal."""
-        # If we have state: True in the setPilot, the speed does not change
         _validate_fan_reverse_or_raise(reverse)
         await self.send({"method": "setPilot", "params": {"fanRevrs": reverse}})
 
@@ -918,7 +915,7 @@ class wizlight:
         if "error" in resp:
             if resp["error"]["code"] == -32601:
                 raise WizLightMethodNotFound("Method not found; maybe older bulb FW?")
-            raise WizLightConnectionError(f'Error recieved: {resp["error"]}')
+            raise WizLightConnectionError(f"Error recieved: {resp['error']}")
         return resp
 
     async def async_close(self):
