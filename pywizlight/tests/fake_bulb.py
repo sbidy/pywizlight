@@ -152,6 +152,22 @@ MODULE_CONFIGS = {  # AKA getModelConfig
             "fanSpeed": 0,
         },
     },
+    ("ESP03_FANDIMS_31", "1.31.32"): {
+        "method": "getModelConfig",
+        "env": "pro",
+        "result": {
+            "ps": 1,
+            "pwmFreq": 200,
+            "pwmRange": [0, 100],
+            "wcr": 20,
+            "nowc": 1,
+            "cctRange": [2700, 2700, 2700, 2700],
+            "renderFactor": [255, 0, 255, 255, 0, 0, 0, 0, 0, 0],
+            "fanSpeed": 6,
+            "wizc1": {"mode": [0, 0, 0, 0, 0, 0, 0]},
+            "wizc2": {"mode": [0, 0, 0, 0, 0, 0, 0]},
+        },
+    },
 }
 
 SYSTEM_CONFIGS: Dict[Tuple[str, str], Any] = {  # AKA getSystemConfig
@@ -503,6 +519,20 @@ SYSTEM_CONFIGS: Dict[Tuple[str, str], Any] = {  # AKA getSystemConfig
             "ping": 0,
         },
     },
+    ("ESP03_FANDIMS_31", "1.31.32"): {
+        "method": "getSystemConfig",
+        "env": "pro",
+        "result": {
+            "mac": "d8a0119906b7",
+            "homeId": "**REDACTED**",
+            "roomId": "**REDACTED**",
+            "rgn": "eu",
+            "moduleName": "ESP03_FANDIMS_31",
+            "fwVersion": "1.31.32",
+            "groupId": 0,
+            "ping": 0,
+        },
+    },
 }
 
 USER_CONFIGS: Dict[Tuple[str, str], Any] = {  # AKA getUserConfig
@@ -836,9 +866,9 @@ async def make_udp_fake_bulb_server(
     return transport_proto
 
 
-async def make_udp_fake_bulb_push_server() -> (
-    Tuple[asyncio.BaseTransport, asyncio.BaseProtocol]
-):
+async def make_udp_fake_bulb_push_server() -> Tuple[
+    asyncio.BaseTransport, asyncio.BaseProtocol
+]:
     """Configure a fake push instance."""
     handler = BulbUDPRequestHandler()
     transport_proto = await asyncio.get_event_loop().create_datagram_endpoint(

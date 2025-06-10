@@ -1,4 +1,5 @@
 """Tests for the Bulb API with a fan."""
+
 from typing import AsyncGenerator
 
 import pytest
@@ -11,7 +12,7 @@ from pywizlight.tests.fake_bulb import startup_bulb
 @pytest.fixture()
 async def fan() -> AsyncGenerator[wizlight, None]:
     shutdown, port = await startup_bulb(
-        module_name="ESP03_FANDIMS_31", firmware_version="1.28.0"
+        module_name="ESP03_FANDIMS_31", firmware_version="1.31.32"
     )
     bulb = wizlight(ip="127.0.0.1", port=port)
     yield bulb
@@ -37,9 +38,10 @@ async def test_model_description_fan(fan: wizlight) -> None:
         name="ESP03_FANDIMS_31",
         kelvin_range=KelvinRange(max=2700, min=2700),
         bulb_type=BulbClass.FANDIM,
-        fw_version="1.28.0",
+        fw_version="1.31.32",
         white_channels=1,
         white_to_color_ratio=20,
+        fan_speed_range=6,
     )
 
 
