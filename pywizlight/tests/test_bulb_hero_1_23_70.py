@@ -34,4 +34,5 @@ async def test_model_description_squire(hero: wizlight) -> None:
         fw_version="1.23.70",
         white_channels=2,
         white_to_color_ratio=20,
+        fan_speed_range=0,
     )

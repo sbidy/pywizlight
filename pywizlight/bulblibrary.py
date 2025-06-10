@@ -32,6 +32,10 @@ class Features:
     brightness: bool
     dual_head: bool
 
+    fan: bool = False
+    fan_breeze_mode: bool = False
+    fan_reverse: bool = False
+
 
 @dataclasses.dataclass(frozen=True)
 class KelvinRange:
@@ -52,6 +56,8 @@ class BulbClass(Enum):
     """Have RGB LEDs."""
     SOCKET = "Socket"
     """Smart socket with only on/off."""
+    FANDIM = "Fan Dimmable"
+    """Smart fan with only Dimmable white LEDs."""
 
 
 KNOWN_TYPE_IDS = {0: BulbClass.DW}
@@ -81,6 +87,15 @@ _BASE_FEATURE_MAP = {
         "color": False,
         "color_tmp": False,
     },
+    # Fan with dimmable white only supports brightness
+    BulbClass.FANDIM: {
+        "brightness": True,
+        "color": False,
+        "color_tmp": False,
+        "fan": True,
+        "fan_breeze_mode": True,
+        "fan_reverse": True,
+    },
 }
 
 
@@ -95,6 +110,7 @@ class BulbType:
     fw_version: Optional[str]
     white_channels: Optional[int]
     white_to_color_ratio: Optional[int]
+    fan_speed_range: Optional[int] = None
 
     def as_dict(self):
         """Convert to a dict."""
@@ -109,6 +125,7 @@ class BulbType:
         fw_version: Optional[str],
         white_channels: Optional[int],
         white_to_color_ratio: Optional[int],
+        fan_speed_range: Optional[int],
         type_id: Optional[int],
     ) -> "BulbType":
         if module_name:
@@ -128,6 +145,9 @@ class BulbType:
                 effect = True
             elif "SOCKET" in _identifier:  # A smart socket
                 bulb_type = BulbClass.SOCKET
+                effect = False
+            elif "FANDIM" in _identifier:  # A Fan with dimmable light
+                bulb_type = BulbClass.FANDIM
                 effect = False
             else:  # Plain brightness-only bulb
                 bulb_type = BulbClass.DW
@@ -171,4 +191,5 @@ class BulbType:
             fw_version=fw_version,
             white_channels=white_channels,
             white_to_color_ratio=white_to_color_ratio,
+            fan_speed_range=fan_speed_range,
         )

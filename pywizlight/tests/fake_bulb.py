@@ -152,6 +152,22 @@ MODULE_CONFIGS = {  # AKA getModelConfig
             "fanSpeed": 0,
         },
     },
+    ("ESP03_FANDIMS_31", "1.31.32"): {
+        "method": "getModelConfig",
+        "env": "pro",
+        "result": {
+            "ps": 1,
+            "pwmFreq": 200,
+            "pwmRange": [0, 100],
+            "wcr": 20,
+            "nowc": 1,
+            "cctRange": [2700, 2700, 2700, 2700],
+            "renderFactor": [255, 0, 255, 255, 0, 0, 0, 0, 0, 0],
+            "fanSpeed": 6,
+            "wizc1": {"mode": [0, 0, 0, 0, 0, 0, 0]},
+            "wizc2": {"mode": [0, 0, 0, 0, 0, 0, 0]},
+        },
+    },
 }
 
 SYSTEM_CONFIGS: Dict[Tuple[str, str], Any] = {  # AKA getSystemConfig
@@ -499,6 +515,20 @@ SYSTEM_CONFIGS: Dict[Tuple[str, str], Any] = {  # AKA getSystemConfig
             "rgn": "eu",
             "moduleName": "ESP25_SOCKET_01",
             "fwVersion": "1.26.2",
+            "groupId": 0,
+            "ping": 0,
+        },
+    },
+    ("ESP03_FANDIMS_31", "1.31.32"): {
+        "method": "getSystemConfig",
+        "env": "pro",
+        "result": {
+            "mac": "d8a0119906b7",
+            "homeId": "**REDACTED**",
+            "roomId": "**REDACTED**",
+            "rgn": "eu",
+            "moduleName": "ESP03_FANDIMS_31",
+            "fwVersion": "1.31.32",
             "groupId": 0,
             "ping": 0,
         },
