@@ -146,7 +146,7 @@ class PilotBuilder:
         hucolor: Optional[Tuple[float, float]] = None,
         brightness: Optional[int] = None,
         colortemp: Optional[int] = None,
-        state: bool = True,
+        state: Optional[bool] = None,
         ratio: Optional[int] = None,
         fan_state: Optional[int] = None,
         fan_mode: Optional[int] = None,
@@ -154,7 +154,9 @@ class PilotBuilder:
         fan_speed: Optional[int] = None,
     ) -> None:
         """Set the parameter."""
-        self.pilot_params: Dict[str, Any] = {"state": state}
+        self.pilot_params: Dict[str, Any] = {}
+        if state is not None:
+            self.pilot_params["state"] = state
         if speed is not None:
             self._set_speed(speed)
         if ratio is not None:
@@ -186,13 +188,16 @@ class PilotBuilder:
         if fan_speed is not None:
             self._set_fan_speed(fan_speed)
 
-    def set_pilot_message(self) -> Dict:
+    def set_pilot_message(self, state: Optional[bool] = None) -> Dict:
         """Return the pilot message."""
+        if state is not None:
+            self.pilot_params["state"] = state
         return {"method": "setPilot", "params": self.pilot_params}
 
-    def set_state_message(self, state: bool) -> Dict:
-        """Return the setState message. It doesn't change the current status of the light."""
-        self.pilot_params["state"] = state
+    def set_state_message(self, state: Optional[bool] = None) -> Dict:
+        """Return the setState message"""
+        if state is not None:
+            self.pilot_params["state"] = state
         return {"method": "setState", "params": self.pilot_params}
 
     def _set_warm_white(self, value: int) -> None:
@@ -752,31 +757,7 @@ class wizlight:
         :param pilot_builder: PilotBuilder object to set the turn on state, defaults to PilotBuilder()
         :type pilot_builder: [type], optional
         """
-        await self.send(pilot_builder.set_pilot_message())
-
-    # ---------- Fan Functions ------------
-    async def turn_fan_off(self) -> None:
-        """Turn the fan off."""
-        await self.send({"method": "setPilot", "params": {"fanState": 0}})
-
-    async def turn_fan_on(self) -> None:
-        """Turn the fan off."""
-        await self.send({"method": "setPilot", "params": {"fanState": 1}})
-
-    async def set_fan_speed(self, speed: int) -> None:
-        """Set the fan speed."""
-        _validate_fan_speed_or_raise(speed)
-        await self.send({"method": "setPilot", "params": {"fanSpeed": speed}})
-
-    async def set_fan_mode(self, mode: int) -> None:
-        """Set the fan mode to breeze or normal."""
-        _validate_fan_mode_or_raise(mode)
-        await self.send({"method": "setPilot", "params": {"fanMode": mode}})
-
-    async def set_fan_reverse(self, reverse: int) -> None:
-        """Set the fan rotation to reverse (winter mode) or normal."""
-        _validate_fan_reverse_or_raise(reverse)
-        await self.send({"method": "setPilot", "params": {"fanRevrs": reverse}})
+        await self.send(pilot_builder.set_pilot_message(state=True))
 
     async def set_state(self, pilot_builder: PilotBuilder = PilotBuilder()) -> None:
         """Set the state of the bulb with defined message. Doesn't turn on the light.
@@ -799,6 +780,37 @@ class wizlight:
                 if resp is not None and "result" in resp:
                     return resp["result"]["power"] / 1000
         return self.state.get_power() if self.state else None
+
+    # ---------- Fan Functions ------------
+    async def set_fan_state(
+        self,
+        state: Optional[int] = None,
+        speed: Optional[int] = None,
+        mode: Optional[int] = None,
+        reverse: Optional[int] = None,
+    ) -> None:
+        """Set the fan state.
+
+        :param state: turn the fan on or off
+        :param speed: set the fan speed
+        :param mode: set the fan mode to breeze or normal
+        :param reverse: set the fan rotation to reverse (winter mode) or normal
+        """
+        pilot_builder = PilotBuilder(
+            fan_state=state,
+            fan_speed=speed,
+            fan_mode=mode,
+            fan_reverse=reverse,
+        )
+        await self.send(pilot_builder.set_pilot_message())
+
+    async def turn_fan_on(self) -> None:
+        """Turn the fan on."""
+        await self.set_fan_state(state=1)
+
+    async def turn_fan_off(self) -> None:
+        """Turn the fan off."""
+        await self.set_fan_state(state=0)
 
     # ---------- Helper Functions ------------
     async def updateState(self) -> Optional[PilotParser]:
