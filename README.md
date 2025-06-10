@@ -1,7 +1,7 @@
 ![Upload Python Package](https://github.com/sbidy/pywizlight/workflows/Upload%20Python%20Package/badge.svg)
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-19-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-20-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 ![Update Docs](https://github.com/sbidy/pywizlight/workflows/Update%20Docs/badge.svg)
@@ -75,6 +75,7 @@ nix-env -iA nixos.python37Packages.pywizlight
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/UH-60"><img src="https://avatars.githubusercontent.com/u/4968133?v=4?s=100" width="100px;" alt="UH-60"/><br /><sub><b>UH-60</b></sub></a><br /><a href="https://github.com/sbidy/pywizlight/commits?author=UH-60" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/bdraco"><img src="https://avatars.githubusercontent.com/u/663432?v=4?s=100" width="100px;" alt="J. Nick Koston"/><br /><sub><b>J. Nick Koston</b></sub></a><br /><a href="https://github.com/sbidy/pywizlight/commits?author=bdraco" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://shreve.io"><img src="https://avatars.githubusercontent.com/u/253634?v=4?s=100" width="100px;" alt="Violet Shreve"/><br /><sub><b>Violet Shreve</b></sub></a><br /><a href="https://github.com/sbidy/pywizlight/commits?author=shreve" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/arturpragacz"><img src="https://avatars.githubusercontent.com/u/49985303?v=4?s=100" width="100px;" alt="Artur Pragacz"/><br /><sub><b>Artur Pragacz</b></sub></a><br /><a href="https://github.com/sbidy/pywizlight/commits?author=arturpragacz" title="Code">💻</a></td>
     </tr>
   </tbody>
 </table>
