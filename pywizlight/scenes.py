@@ -28,6 +28,7 @@ SCENES = {
     4: "Party",
     31: "Pulse",
     8: "Pastel colors",
+    19: "Plantgrowth",
     2: "Romance",
     16: "Relax",
     # 36: "Snowy sky",
