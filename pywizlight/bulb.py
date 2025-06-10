@@ -804,9 +804,13 @@ class wizlight:
         )
         await self.send(pilot_builder.set_pilot_message())
 
-    async def fan_turn_on(self) -> None:
+    async def fan_turn_on(
+        self,
+        mode: Optional[int] = None,
+        speed: Optional[int] = None,
+    ) -> None:
         """Turn the fan on."""
-        await self.fan_set_state(state=1)
+        await self.fan_set_state(state=1, mode=mode, speed=speed)
 
     async def fan_turn_off(self) -> None:
         """Turn the fan off."""
