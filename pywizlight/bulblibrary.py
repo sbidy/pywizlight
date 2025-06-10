@@ -32,9 +32,9 @@ class Features:
     brightness: bool
     dual_head: bool
 
-    fan: bool
-    fan_breeze_mode: bool
-    fan_reverse: bool
+    fan: bool = False
+    fan_breeze_mode: bool = False
+    fan_reverse: bool = False
 
 
 @dataclasses.dataclass(frozen=True)
@@ -87,7 +87,7 @@ _BASE_FEATURE_MAP = {
         "color": False,
         "color_tmp": False,
     },
-    # Fan with dimmable white only supports brightness and some basic effects
+    # Fan with dimmable white only supports brightness
     BulbClass.FANDIM: {
         "brightness": True,
         "color": False,
@@ -106,11 +106,11 @@ class BulbType:
     features: Features
     name: Optional[str]
     kelvin_range: Optional[KelvinRange]
-    fan_speed_range: Optional[int]
     bulb_type: BulbClass
     fw_version: Optional[str]
     white_channels: Optional[int]
     white_to_color_ratio: Optional[int]
+    fan_speed_range: Optional[int] = None
 
     def as_dict(self):
         """Convert to a dict."""
@@ -122,10 +122,10 @@ class BulbType:
     def from_data(
         module_name: str,
         kelvin_list: Optional[List[float]],
-        fan_speed_range: Optional[int],
         fw_version: Optional[str],
         white_channels: Optional[int],
         white_to_color_ratio: Optional[int],
+        fan_speed_range: Optional[int],
         type_id: Optional[int],
     ) -> "BulbType":
         if module_name:
@@ -188,8 +188,8 @@ class BulbType:
             name=module_name,
             features=features,
             kelvin_range=kelvin_range,
-            fan_speed_range=fan_speed_range,
             fw_version=fw_version,
             white_channels=white_channels,
             white_to_color_ratio=white_to_color_ratio,
+            fan_speed_range=fan_speed_range,
         )

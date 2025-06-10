@@ -667,10 +667,10 @@ class wizlight:
         self.bulbtype = BulbType.from_data(
             module_name,
             white_range,
-            fan_speed_range,
             fw_version,
             white_channels,
             white_to_color_ratio,
+            fan_speed_range,
             type_id,
         )
         return self.bulbtype
