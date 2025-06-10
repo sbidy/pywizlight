@@ -121,9 +121,10 @@ def _validate_fan_mode_or_raise(mode: int) -> None:
         raise ValueError("Value must be between 1 and 2")
 
 
-def _validate_fan_speed_or_raise(speed: int) -> None:
-    if not 1 <= speed <= 6:
-        raise ValueError("Value must be between 1 and 6")
+def _validate_fan_speed_or_raise(speed: int, speed_range: Optional[int]) -> None:
+    speed_range = speed_range if speed_range is not None else 6
+    if not 1 <= speed <= speed_range:
+        raise ValueError(f"Value must be between 1 and {speed_range}")
 
 
 def _validate_fan_reverse_or_raise(reverse: int) -> None:
@@ -132,7 +133,7 @@ def _validate_fan_reverse_or_raise(reverse: int) -> None:
 
 
 class PilotBuilder:
-    """Get information from the bulb."""
+    """Set information for the bulb."""
 
     def __init__(
         self,
@@ -148,10 +149,6 @@ class PilotBuilder:
         colortemp: Optional[int] = None,
         state: Optional[bool] = None,
         ratio: Optional[int] = None,
-        fan_state: Optional[int] = None,
-        fan_mode: Optional[int] = None,
-        fan_speed: Optional[int] = None,
-        fan_reverse: Optional[int] = None,
     ) -> None:
         """Set the parameter."""
         self.pilot_params: Dict[str, Any] = {}
@@ -179,14 +176,6 @@ class PilotBuilder:
             self._set_warm_white(warm_white)
         if cold_white is not None:
             self._set_cold_white(cold_white)
-        if fan_state is not None:
-            self._set_fan_state(fan_state)
-        if fan_mode is not None:
-            self._set_fan_mode(fan_mode)
-        if fan_reverse is not None:
-            self._set_fan_reverse(fan_reverse)
-        if fan_speed is not None:
-            self._set_fan_speed(fan_speed)
 
     def set_pilot_message(self, state: Optional[bool] = None) -> Dict:
         """Return the pilot message."""
@@ -284,6 +273,57 @@ class PilotBuilder:
         # normalize the kelvin values - should be removed
         self.pilot_params["temp"] = min(10000, max(1000, kelvin))
 
+
+class PilotBuilderEx(PilotBuilder):
+    """Set information for the bulb (extended)."""
+
+    def __init__(
+        self,
+        light: "wizlight",
+        /,
+        *,
+        warm_white: Optional[int] = None,
+        cold_white: Optional[int] = None,
+        speed: Optional[int] = None,
+        scene: Optional[int] = None,
+        rgb: Optional[Tuple[float, float, float]] = None,
+        rgbw: Optional[Tuple[int, int, int, int]] = None,
+        rgbww: Optional[Tuple[int, int, int, int, int]] = None,
+        hucolor: Optional[Tuple[float, float]] = None,
+        brightness: Optional[int] = None,
+        colortemp: Optional[int] = None,
+        state: Optional[bool] = None,
+        ratio: Optional[int] = None,
+        fan_state: Optional[int] = None,
+        fan_mode: Optional[int] = None,
+        fan_speed: Optional[int] = None,
+        fan_reverse: Optional[int] = None,
+    ) -> None:
+        """Set the parameter."""
+        super().__init__(
+            warm_white=warm_white,
+            cold_white=cold_white,
+            speed=speed,
+            scene=scene,
+            rgb=rgb,
+            rgbw=rgbw,
+            rgbww=rgbww,
+            hucolor=hucolor,
+            brightness=brightness,
+            colortemp=colortemp,
+            state=state,
+            ratio=ratio,
+        )
+        self._light = light
+        if fan_state is not None:
+            self._set_fan_state(fan_state)
+        if fan_mode is not None:
+            self._set_fan_mode(fan_mode)
+        if fan_reverse is not None:
+            self._set_fan_reverse(fan_reverse)
+        if fan_speed is not None:
+            self._set_fan_speed(fan_speed)
+
     def _set_fan_state(self, fan_state: int) -> None:
         """Set the fan state to on or off."""
         _validate_fan_state_or_raise(fan_state)
@@ -296,8 +336,7 @@ class PilotBuilder:
 
     def _set_fan_speed(self, fan_speed: int) -> None:
         """Set the fan speed."""
-        # TODO test the actual range from discovery
-        _validate_fan_speed_or_raise(fan_speed)
+        _validate_fan_speed_or_raise(fan_speed, self._light.fanSpeedRange)
         self.pilot_params["fanSpeed"] = fan_speed
 
     def _set_fan_reverse(self, fan_reverse: int) -> None:
@@ -796,7 +835,8 @@ class wizlight:
         :param speed: set the fan speed
         :param reverse: set the fan rotation to reverse (winter mode) or normal
         """
-        pilot_builder = PilotBuilder(
+        pilot_builder = PilotBuilderEx(
+            self,
             fan_state=state,
             fan_speed=speed,
             fan_mode=mode,
