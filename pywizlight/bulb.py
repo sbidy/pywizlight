@@ -806,6 +806,36 @@ class wizlight:
         """
         # TODO: self.status could be None, in which case casting it to a bool might not be what we really want
         await self.send(pilot_builder.set_state_message(bool(self.status)))
+        
+    # TODO finish set_preview
+    # Add more parameters to set_preview
+    async def set_preview(self) -> None:
+        """Set the preview of the bulb."""
+        color_steps = [
+            [0, 255, 0, 0, 0, 0, 50, 0, 500, 500, 0, 0, 0],
+            [0, 0, 255, 0, 0, 0, 50, 0, 500, 500, 0, 0, 1],
+            [0, 0, 0, 255, 0, 0, 50, 0, 500, 500, 0, 0, 2],
+            [0, 0, 0, 0, 255, 0, 50, 0, 500, 500, 0, 0, 3],
+        ]
+        set_eff_preview_message = {
+            "method": "setEffect",
+            "params": {
+            "preview": {
+                "elm": {
+                    "type": 1,
+                    "modifier": 102,
+                    "gradient": True,
+                    "initStep": 1,
+                    "rand": 0,
+                    "steps": color_steps
+                    },
+                "state": True,
+                "duration": 10
+                }
+            }
+        }
+
+        await self.send(set_eff_preview_message)
 
     async def get_power(self) -> Optional[float]:
         """Get watts from the device."""
