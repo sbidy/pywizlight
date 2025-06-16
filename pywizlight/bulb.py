@@ -818,7 +818,7 @@ class wizlight:
             details (dict[str, int]): Configuration for the effect.
                 Keys: "type", "modifier", "gradient", "initStep", "rand".
             steps (dict[str, int]): Color steps for the effect.
-                Keys per step: "rendering_type" (0/1), "red", "green", "blue", "ww", "cw", "cct (kelvin temp)",
+                Keys per step: "rendering_type" (0/1), "r", "g", "b", "ww", "cw", "cct (kelvin temp)",
                 "dimming" (0-100), "duration", "transition", "rand", "advanced", "software_head".
 
         Returns:
