@@ -920,7 +920,7 @@ class wizlight:
             steps (dict[str, int] | list[dict[str, int]]): Step data as a dictionary or list of dictionaries.
 
         Returns:
-            list[list[int]]: List of steps as arrays in order: [rendering_type, red, green, blue, ww, cw,
+            list[list[int]]: List of steps as arrays in order: [rendering_type, r, g, b, ww, cw,
             cct, dimming, duration, transition, rand, advanced, software_head].
         """
         if isinstance(steps, dict):
@@ -930,9 +930,9 @@ class wizlight:
         for step in steps:
             color_step = [
                 step.get("rendering_type", 0),
-                step.get("red", 0),
-                step.get("green", 0),
-                step.get("blue", 0),
+                step.get("r", 0),
+                step.get("g", 0),
+                step.get("b", 0),
                 step.get("ww", 0),
                 step.get("cw", 0),
                 step.get("cct", 2700),
