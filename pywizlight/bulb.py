@@ -809,28 +809,37 @@ class wizlight:
         
     # TODO finish set_preview
     # Add more parameters to set_preview
-    async def set_preview(self) -> None:
-        """Set the preview of the bulb."""
-        color_steps = [
-            [0, 255, 0, 0, 0, 0, 50, 0, 500, 500, 0, 0, 0],
-            [0, 0, 255, 0, 0, 0, 50, 0, 500, 500, 0, 0, 1],
-            [0, 0, 0, 255, 0, 0, 50, 0, 500, 500, 0, 0, 2],
-            [0, 0, 0, 0, 255, 0, 50, 0, 500, 500, 0, 0, 3],
-        ]
+    async def set_preview(self, details: dict[str, int], steps: dict[str, int]) -> None:
+        """Set the preview effect for the bulb.
+
+        Configures a preview effect with specified details and color steps.
+
+        Args:
+            details (dict[str, int]): Configuration for the effect.
+                Keys: "type", "modifier", "gradient", "initStep", "rand".
+            steps (dict[str, int]): Color steps for the effect.
+                Keys per step: "rendering_type" (0/1), "red", "green", "blue", "ww", "cw", "cct (kelvin temp)",
+                "dimming" (0-100), "duration", "transition", "rand", "advanced", "software_head".
+
+        Returns:
+            None
+        """
+        color_steps = self._transform_steps(steps)
+
         set_eff_preview_message = {
             "method": "setEffect",
             "params": {
-            "preview": {
-                "elm": {
-                    "type": 1,
-                    "modifier": 102,
-                    "gradient": True,
-                    "initStep": 1,
-                    "rand": 0,
-                    "steps": color_steps
+                "preview": {
+                    "elm": {
+                        "type": details.get("type", 1),
+                        "modifier": details.get("modifier", 102),
+                        "gradient": details.get("gradient", True),
+                        "initStep": details.get("initStep", 1),
+                        "rand": details.get("rand", 0),
+                        "steps": color_steps
                     },
-                "state": True,
-                "duration": 10
+                    "state": True,
+                    "duration": 10
                 }
             }
         }
@@ -902,6 +911,42 @@ class wizlight:
             else:
                 self.state = None
         return self.state
+    
+    def _transform_steps(self, steps: dict[str, int] | list[dict[str, int]]) -> list[list[int]]:
+        # TODO use a proper data type for steps or update PilotBuilder to handle this
+        """Transform steps input into array format for the bulb. Rendering type 0 is for RGB, 1 for Kelvin temperature (cct).
+           Software head is used for LED strips.
+        Args:
+            steps (dict[str, int] | list[dict[str, int]]): Step data as a dictionary or list of dictionaries.
+
+        Returns:
+            list[list[int]]: List of steps as arrays in order: [rendering_type, red, green, blue, ww, cw,
+            cct, dimming, duration, transition, rand, advanced, software_head].
+        """
+        if isinstance(steps, dict):
+            steps = [steps]
+
+        color_steps = []
+        for step in steps:
+            color_step = [
+                step.get("rendering_type", 0),
+                step.get("red", 0),
+                step.get("green", 0),
+                step.get("blue", 0),
+                step.get("ww", 0),
+                step.get("cw", 0),
+                step.get("cct", 2700),
+                step.get("dimming", 0),
+                step.get("duration", 0),
+                step.get("transition", 0),
+                step.get("rand", 0),
+                step.get("advanced", 0),
+                step.get("software_head", 0)
+            ]
+            color_steps.append(color_step)
+
+        return color_steps
+
 
     def _cache_mac_from_bulb_config(self, resp: BulbResponse) -> None:
         """Cache the mac when we fetch bulb config to avoid fetching it again."""
