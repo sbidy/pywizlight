@@ -14,7 +14,8 @@ class RenderingType(IntEnum):
 class ModifierType(IntEnum):
     """Modifier types for effects."""
 
-    # Each color will play the same color in all software heads (Used for lightbulbs mostly, if used on multiple software heads, all will play the same color)
+    # Each color will play the same color in all software heads (Used for lightbulbs mostly,
+    # if used on multiple software heads, all will play the same color)
     ELM_MDF_STATIC = 0
     ELM_MDF_CYCLE = 1
     ELM_MDF_PROGRESSIVE = 2
@@ -52,7 +53,8 @@ class EffectStep:
     # NOT IN USE YET
     advanced: int = 0  # takes 0 or 1
     software_head: int = (
-        0  # manages the order of lights on each software head. 0 is the first LED of LED strip, 1 is the second LED, etc.
+        0  # manages the order of lights on each software head.
+        # 0 is the first LED of LED strip, 1 is the second LED, etc.
     )
 
     def __post_init__(self):
