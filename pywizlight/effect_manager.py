@@ -1,23 +1,23 @@
 from dataclasses import dataclass
-from typing import List, Optional, Union
+from typing import List
 from enum import IntEnum
 
 class RenderingType(IntEnum):
     """Rendering type for effect steps."""
-    RGB = 0
+    RGB = 0 
     KELVIN = 1
     
-# SUBJECT TO CHANGE
+# More modifiers will be added
 class ModifierType(IntEnum):
     """Modifier types for effects."""
     
-    # Each color will play the same color in all software heads
+    # Each color will play the same color in all software heads (Used for lightbulbs mostly, if used on multiple software heads, all will play the same color)
     ELM_MDF_STATIC = 0 
     ELM_MDF_CYCLE = 1
     ELM_MDF_PROGRESSIVE = 2
     ELM_MDF_RANDOM = 3
     
-    # Different colors in each software head
+    # Different colors in each software head (Used for LED Strips and other devices with multiple LEDs)
     ELM_MDF_MH_STATIC = 100 
     ELM_MDF_MH_FLOW = 101 
     ELM_MDF_MH_SPARKLE = 102 # Sparkle effect
@@ -27,7 +27,7 @@ class ModifierType(IntEnum):
 
 MAX_EFFECT_STEPS = 12 # Max number of steps that bulbs accept 
 
-# SUBJECT TO CHANGE params: rand and advanced
+# SUBJECT TO CHANGE params: rand and advanced (not in use yet)
 @dataclass
 class EffectStep:
     """Represents a single step in a preview effect."""
@@ -45,7 +45,7 @@ class EffectStep:
     rand: int = 0 # 0 - 100 different seeds for randomness
     # NOT IN USE YET
     advanced: int = 0 # takes 0 or 1 
-    software_head: int = 0 # manages the queue of effects
+    software_head: int = 0 # manages the order of lights on each software head. 0 is the first LED of LED strip, 1 is the second LED, etc.
     
     def __post_init__(self):
         """Validate step parameters."""
@@ -88,7 +88,7 @@ class EffectStep:
             raise ValueError(f"Advanced must be 0 or 1, got {self.advanced}")
     
     @classmethod
-    def from_rgb(cls, r: int, g: int, b: int, software_head: int, duration: int = 1000, dimming: int = 100, transition: int = 100) -> 'EffectStep':
+    def from_rgb(cls, r: int, g: int, b: int, duration: int = 1000, dimming: int = 100, transition: int = 100, software_head: int = 0) -> 'EffectStep':
         """Create an RGB step."""
         return cls(
             rendering_type=RenderingType.RGB,
@@ -100,7 +100,7 @@ class EffectStep:
         )
     
     @classmethod
-    def from_kelvin(cls, cct: int, software_head: int, duration: int = 1000, dimming: int = 100, transition: int = 100) -> 'EffectStep':
+    def from_kelvin(cls, cct: int, duration: int = 1000, dimming: int = 100, transition: int = 100, software_head: int = 0) -> 'EffectStep':
         """Create a Kelvin temperature step."""
         return cls(
             rendering_type=RenderingType.KELVIN,
@@ -124,9 +124,9 @@ class EffectStep:
 @dataclass
 class EffectDetails:
     """Configuration details for a preview effect."""
-    modifier: ModifierType = ModifierType.ELM_MDF_MH_SPARKLE
+    modifier: ModifierType = ModifierType.ELM_MDF_STATIC
     gradient: bool = True
-    init_step: int = 0
+    init_step: int = 0 # Which step will play on the first LED (software head). For lightbulbs, set to 0 by default.
     rand: int = 0
     duration: int = 10  # seconds
     
