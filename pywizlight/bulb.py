@@ -808,7 +808,7 @@ class wizlight:
         # TODO: self.status could be None, in which case casting it to a bool might not be what we really want
         await self.send(pilot_builder.set_state_message(bool(self.status)))
         
-    async def set_preview(self, effect: PreviewEffect, wait_for_completion: bool = False) -> None:
+    async def set_preview(self, effect: PreviewEffect, wait_for_completion: bool = True) -> None:
         """Set the preview effect for the bulb.
         
         Args:
