@@ -834,7 +834,7 @@ class wizlight:
                         "type": details.get("type", 0),
                         "modifier": details.get("modifier", 102),
                         "gradient": details.get("gradient", True),
-                        "initStep": details.get("initStep", 1),
+                        "initStep": details.get("initStep", 0),
                         "rand": details.get("rand", 0),
                         "steps": color_steps
                     },
@@ -935,7 +935,7 @@ class wizlight:
                 step.get("b", 0),
                 step.get("ww", 0),
                 step.get("cw", 0),
-                step.get("cct", 2700),
+                step.get("cct", 0),
                 step.get("dimming", 0),
                 step.get("duration", 0),
                 step.get("transition", 0),
