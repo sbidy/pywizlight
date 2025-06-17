@@ -7,22 +7,27 @@ class RenderingType(IntEnum):
     RGB = 0
     KELVIN = 1
     
+# SUBJECT TO CHANGE
 class ModifierType(IntEnum):
     """Modifier types for effects."""
-    ELM_MDF_STATIC = 0
+    
+    # Each color will play the same color in all software heads
+    ELM_MDF_STATIC = 0 
     ELM_MDF_CYCLE = 1
     ELM_MDF_PROGRESSIVE = 2
     ELM_MDF_RANDOM = 3
-    ELM_MDF_MH_STATIC = 100
-    ELM_MDF_MH_FLOW = 101
-    ELM_MDF_MH_SPARKLE = 102
-    ELM_MDF_MH_RANDOM = 103
-    ELM_MDF_MH_FLYIN = 104
-    ELM_MDF_MH_TWINKLE = 105
+    
+    # Different colors in each software head
+    ELM_MDF_MH_STATIC = 100 
+    ELM_MDF_MH_FLOW = 101 
+    ELM_MDF_MH_SPARKLE = 102 # Sparkle effect
+    ELM_MDF_MH_RANDOM = 103 # Each software head will change color randomly based on the light mode definition
+    ELM_MDF_MH_FLYIN = 104 # Flyin effect
+    ELM_MDF_MH_TWINKLE = 105 # Twinkle effect
 
-# Add constant for maximum steps
-MAX_EFFECT_STEPS = 12
+MAX_EFFECT_STEPS = 12 # Max number of steps that bulbs accept 
 
+# SUBJECT TO CHANGE params: rand and advanced
 @dataclass
 class EffectStep:
     """Represents a single step in a preview effect."""
@@ -36,8 +41,10 @@ class EffectStep:
     dimming: int = 100  # 0-100 brightness power
     duration: int = 1000  # milliseconds
     transition: int = 0
+    # NOT IN USE YET
     rand: int = 0 # 0 - 100 different seeds for randomness
-    advanced: int = 0 # takes 0 or 1
+    # NOT IN USE YET
+    advanced: int = 0 # takes 0 or 1 
     software_head: int = 0 # manages the queue of effects
     
     def __post_init__(self):
@@ -81,25 +88,27 @@ class EffectStep:
             raise ValueError(f"Advanced must be 0 or 1, got {self.advanced}")
     
     @classmethod
-    def from_rgb(cls, r: int, g: int, b: int, duration: int = 1000, dimming: int = 100, **kwargs) -> 'EffectStep':
+    def from_rgb(cls, r: int, g: int, b: int, software_head: int, duration: int = 1000, dimming: int = 100, transition: int = 100) -> 'EffectStep':
         """Create an RGB step."""
         return cls(
             rendering_type=RenderingType.RGB,
             r=r, g=g, b=b,
             duration=duration,
             dimming=dimming,
-            **kwargs
+            transition=transition,
+            software_head=software_head
         )
     
     @classmethod
-    def from_kelvin(cls, cct: int, duration: int = 1000, dimming: int = 100, **kwargs) -> 'EffectStep':
+    def from_kelvin(cls, cct: int, software_head: int, duration: int = 1000, dimming: int = 100, transition: int = 100) -> 'EffectStep':
         """Create a Kelvin temperature step."""
         return cls(
             rendering_type=RenderingType.KELVIN,
             cct=cct,
             duration=duration,
             dimming=dimming,
-            **kwargs
+            transition=transition,
+            software_head=software_head
         )
     
     def to_array(self) -> List[int]:
@@ -173,58 +182,28 @@ class PreviewEffect:
             }
         }
     
+    # Class methods to test effect or gain insight
     @classmethod
     def rainbow_fade(cls, duration: int = 10, step_duration: int = 1000) -> 'PreviewEffect':
-        """Create a rainbow fade effect."""
+        """Create a rainbow fade effect with smooth transitions."""
         steps = [
-            EffectStep.from_rgb(255, 0, 0, step_duration),    # Red
-            EffectStep.from_rgb(255, 127, 0, step_duration),  # Orange
-            EffectStep.from_rgb(255, 255, 0, step_duration),  # Yellow
-            EffectStep.from_rgb(0, 255, 0, step_duration),    # Green
-            EffectStep.from_rgb(0, 0, 255, step_duration),    # Blue
-            EffectStep.from_rgb(75, 0, 130, step_duration),   # Indigo
-            EffectStep.from_rgb(148, 0, 211, step_duration),  # Violet
+            EffectStep.from_rgb(255, 0, 0, step_duration, transition=400),    # Red
+            EffectStep.from_rgb(255, 127, 0, step_duration, transition=400),  # Orange
+            EffectStep.from_rgb(255, 255, 0, step_duration, transition=400),  # Yellow
+            EffectStep.from_rgb(0, 255, 0, step_duration, transition=400),    # Green
+            EffectStep.from_rgb(0, 0, 255, step_duration, transition=400),    # Blue
+            EffectStep.from_rgb(75, 0, 130, step_duration, transition=400),   # Indigo
+            EffectStep.from_rgb(148, 0, 211, step_duration, transition=400),  # Violet
         ]
         details = EffectDetails(duration=duration)
         return cls(details, steps)
-    
+
     @classmethod
     def breathing_white(cls, duration: int = 10) -> 'PreviewEffect':
-        """Create a breathing white effect."""
+        """Create a breathing white effect with smooth transitions."""
         steps = [
-            EffectStep.from_kelvin(3000, 1000, 10),   # Dim warm white
-            EffectStep.from_kelvin(3000, 1000, 100),  # Bright warm white
+            EffectStep.from_kelvin(3000, 1000, 10, transition=500),   # Dim warm white - slow fade in
+            EffectStep.from_kelvin(3000, 1000, 100, transition=500),  # Bright warm white - slow fade out
         ]
         details = EffectDetails(duration=duration)
-        return cls(details, steps)
-    
-    @classmethod
-    def police_lights(cls, duration: int = 10, step_duration: int = 500) -> 'PreviewEffect':
-        """Create a police lights effect (red/blue alternating)."""
-        steps = [
-            EffectStep.from_rgb(255, 0, 0, step_duration, 100),  # Bright red
-            EffectStep.from_rgb(0, 0, 255, step_duration, 100),  # Bright blue
-        ]
-        details = EffectDetails(
-            modifier=ModifierType.ELM_MDF_CYCLE,
-            duration=duration
-        )
-        return cls(details, steps)
-    
-    @classmethod
-    def fire_effect(cls, duration: int = 10) -> 'PreviewEffect':
-        """Create a fire effect with warm colors."""
-        steps = [
-            EffectStep.from_rgb(255, 0, 0, 800, 100),     # Red
-            EffectStep.from_rgb(255, 69, 0, 600, 90),     # Red-orange
-            EffectStep.from_rgb(255, 140, 0, 700, 80),    # Dark orange
-            EffectStep.from_rgb(255, 165, 0, 500, 70),    # Orange
-            EffectStep.from_rgb(255, 215, 0, 400, 60),    # Gold
-            EffectStep.from_rgb(255, 255, 0, 300, 50),    # Yellow
-        ]
-        details = EffectDetails(
-            modifier=ModifierType.ELM_MDF_MH_RANDOM,
-            duration=duration,
-            rand=50  # Add some randomness for fire effect
-        )
         return cls(details, steps)
