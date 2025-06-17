@@ -20,6 +20,9 @@ class ModifierType(IntEnum):
     ELM_MDF_MH_FLYIN = 104
     ELM_MDF_MH_TWINKLE = 105
 
+# Add constant for maximum steps
+MAX_EFFECT_STEPS = 12
+
 @dataclass
 class EffectStep:
     """Represents a single step in a preview effect."""
@@ -42,6 +45,9 @@ class EffectStep:
         self._validate_rgb_values()
         self._validate_dimming()
         self._validate_duration()
+        self._validate_cct()
+        self._validate_rand()
+        self._validate_advanced()
     
     def _validate_rgb_values(self):
         """Validate RGB values are in valid range."""
@@ -58,6 +64,21 @@ class EffectStep:
         """Validate duration value."""
         if self.duration < 0:
             raise ValueError(f"Duration must be positive, got {self.duration}")
+    
+    def _validate_cct(self):
+        """Validate CCT (color temperature) value."""
+        if not 0 <= self.cct <= 12000:
+            raise ValueError(f"CCT must be between 0-12000, got {self.cct}")
+    
+    def _validate_rand(self):
+        """Validate rand value."""
+        if not 0 <= self.rand <= 100:
+            raise ValueError(f"Rand must be between 0-100, got {self.rand}")
+    
+    def _validate_advanced(self):
+        """Validate advanced value."""
+        if self.advanced not in (0, 1):
+            raise ValueError(f"Advanced must be 0 or 1, got {self.advanced}")
     
     @classmethod
     def from_rgb(cls, r: int, g: int, b: int, duration: int = 1000, dimming: int = 100, **kwargs) -> 'EffectStep':
@@ -106,6 +127,8 @@ class EffectDetails:
             raise ValueError(f"Duration must be positive, got {self.duration}")
         if not 0 <= self.init_step:
             raise ValueError(f"init_step must be non-negative, got {self.init_step}")
+        if not 0 <= self.rand <= 100:
+            raise ValueError(f"rand must be between 0-100, got {self.rand}")
 
 class PreviewEffect:
     """Manages a complete preview effect with details and steps."""
@@ -119,6 +142,9 @@ class PreviewEffect:
         """Validate that steps are compatible with effect details."""
         if not self.steps:
             raise ValueError("Effect must have at least one step")
+        
+        if len(self.steps) > MAX_EFFECT_STEPS:
+            raise ValueError(f"Effect cannot have more than {MAX_EFFECT_STEPS} steps, got {len(self.steps)}")
         
         if self.details.init_step >= len(self.steps):
             raise ValueError(f"init_step ({self.details.init_step}) must be less than number of steps ({len(self.steps)})")
@@ -135,7 +161,7 @@ class PreviewEffect:
             "params": {
                 "preview": {
                     "elm": {
-                        "modifier": self.details.modifier,
+                        "modifier": self.details.modifier.value,
                         "gradient": self.details.gradient,
                         "initStep": self.details.init_step,
                         "rand": self.details.rand,
@@ -170,4 +196,35 @@ class PreviewEffect:
             EffectStep.from_kelvin(3000, 1000, 100),  # Bright warm white
         ]
         details = EffectDetails(duration=duration)
+        return cls(details, steps)
+    
+    @classmethod
+    def police_lights(cls, duration: int = 10, step_duration: int = 500) -> 'PreviewEffect':
+        """Create a police lights effect (red/blue alternating)."""
+        steps = [
+            EffectStep.from_rgb(255, 0, 0, step_duration, 100),  # Bright red
+            EffectStep.from_rgb(0, 0, 255, step_duration, 100),  # Bright blue
+        ]
+        details = EffectDetails(
+            modifier=ModifierType.ELM_MDF_CYCLE,
+            duration=duration
+        )
+        return cls(details, steps)
+    
+    @classmethod
+    def fire_effect(cls, duration: int = 10) -> 'PreviewEffect':
+        """Create a fire effect with warm colors."""
+        steps = [
+            EffectStep.from_rgb(255, 0, 0, 800, 100),     # Red
+            EffectStep.from_rgb(255, 69, 0, 600, 90),     # Red-orange
+            EffectStep.from_rgb(255, 140, 0, 700, 80),    # Dark orange
+            EffectStep.from_rgb(255, 165, 0, 500, 70),    # Orange
+            EffectStep.from_rgb(255, 215, 0, 400, 60),    # Gold
+            EffectStep.from_rgb(255, 255, 0, 300, 50),    # Yellow
+        ]
+        details = EffectDetails(
+            modifier=ModifierType.ELM_MDF_MH_RANDOM,
+            duration=duration,
+            rand=50  # Add some randomness for fire effect
+        )
         return cls(details, steps)
