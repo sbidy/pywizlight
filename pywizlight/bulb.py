@@ -831,7 +831,7 @@ class wizlight:
             "params": {
                 "preview": {
                     "elm": {
-                        "type": details.get("type", 1),
+                        "type": details.get("type", 0),
                         "modifier": details.get("modifier", 102),
                         "gradient": details.get("gradient", True),
                         "initStep": details.get("initStep", 1),
@@ -839,7 +839,7 @@ class wizlight:
                         "steps": color_steps
                     },
                     "state": True,
-                    "duration": 10
+                    "duration": details.get("duration", 10),
                 }
             }
         }
