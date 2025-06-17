@@ -88,11 +88,12 @@ class EffectStep:
             raise ValueError(f"Advanced must be 0 or 1, got {self.advanced}")
     
     @classmethod
-    def from_rgb(cls, r: int, g: int, b: int, duration: int = 1000, dimming: int = 100, transition: int = 100, software_head: int = 0) -> 'EffectStep':
+    def from_rgb(cls, r: int, g: int, b: int, ww: int = 0, cw: int = 0, duration: int = 1000, dimming: int = 100, transition: int = 100, software_head: int = 0) -> 'EffectStep':
         """Create an RGB step."""
         return cls(
             rendering_type=RenderingType.RGB,
             r=r, g=g, b=b,
+            ww=ww, cw=cw,
             duration=duration,
             dimming=dimming,
             transition=transition,
