@@ -809,7 +809,7 @@ class wizlight:
         
     # TODO finish set_preview
     # Add more parameters to set_preview
-    async def set_preview(self, details: dict[str, int], steps: dict[str, int]) -> None:
+    async def set_preview(self, details: dict[str, int], steps: dict[str, int], wait_for_completion: bool = False) -> None:
         """Set the preview effect for the bulb.
 
         Configures a preview effect with specified details and color steps.
@@ -820,6 +820,7 @@ class wizlight:
             steps (dict[str, int]): Color steps for the effect.
                 Keys per step: "rendering_type" (0/1), "r", "g", "b", "ww", "cw", "cct (kelvin temp)",
                 "dimming" (0-100), "duration", "transition", "rand", "advanced", "software_head".
+            wait_for_completion (bool): If True, waits for the effect to complete before returning.
 
         Returns:
             None
@@ -845,6 +846,11 @@ class wizlight:
         }
 
         await self.send(set_eff_preview_message)
+        
+            # Wait for the effect to complete if requested
+        if wait_for_completion:
+            duration = details.get("duration", 10)
+            await asyncio.sleep(duration)
 
     async def get_power(self) -> Optional[float]:
         """Get watts from the device."""
