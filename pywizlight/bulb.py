@@ -779,14 +779,11 @@ class wizlight:
     async def turn_off(self, device: Optional[int] = None) -> None:
         """Turn the light off."""
         if device is None:
-            await self.send(
-                {"method": "setPilot", "params": {"state": False}}
-            )
+            await self.send({"method": "setPilot", "params": {"state": False}})
         else:
             await self.send(
                 {"method": "setPilot", "params": {"devices": device, "state": False}}
             )
-
 
     async def reboot(self) -> None:
         """Reboot the bulb."""
