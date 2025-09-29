@@ -6,7 +6,7 @@ from typing import Any, Callable, Coroutine, TypeVar
 
 import click
 
-from pywizlight import PilotBuilder, discovery, wizlight
+from  . import PilotBuilder, discovery, wizlight
 
 T = TypeVar("T")
 
@@ -31,97 +31,154 @@ def main() -> None:
 @main.command("discover")
 @coro
 @click.option(
-    "--b",
-    prompt="Set the broadcast address",
-    help="Define the broadcast address like 192.168.1.255.",
+    "--broadcast", "-b",
+    default="192.168.1.255",
+    help="Broadcast address (default: 192.168.1.255)",
 )
-async def discover(b: str) -> None:
-    """Discover bulb in the local network."""
-    click.echo(f"Search for bulbs in {b} ... ")
-
-    bulbs = await discovery.find_wizlights(broadcast_address=b)
-    for bulb in bulbs:
-        click.echo(bulb.__dict__)
+async def discover(broadcast: str) -> None:
+    """Discover bulbs in the local network."""
+    click.echo(f"Searching for bulbs on {broadcast}...")
+    
+    bulbs = await discovery.find_wizlights(broadcast_address=broadcast)
+    if bulbs:
+        click.echo(f"Found {len(bulbs)} bulb(s):")
+        for bulb in bulbs:
+            click.echo(f"  IP: {bulb.ip}, MAC: {bulb.mac}")
+    else:
+        click.echo("No bulbs found")
 
 
 @main.command("on")
 @coro
-@click.option("--ip", prompt="IP address of the bulb", help="IP address of the bulb.")
-@click.option(
-    "--k",
-    prompt="Kelvin for temperature.",
-    help="Kelvin value (1000-8000) for turn on. Default 3000",
-    default=3000,
-    type=int,
-)
-@click.option(
-    "--brightness",
-    prompt="Set the brightness value 0-255",
-    help="Brightness for turn on. Default 128",
-    default=128,
-    type=int,
-)
-async def turn_on(ip: str, k: int, brightness: int) -> None:
-    """Turn a given bulb on."""
-    click.echo(f"Turning on {ip}")
+@click.argument("ip")
+@click.option("--brightness", "-b", default=255, help="Brightness (0-255, default: 255)")
+@click.option("--kelvin", "-k", help="Color temperature in Kelvin (1000-6800)")
+@click.option("--rgb", help="RGB color as 'r,g,b' (e.g., '255,0,0' for red)")
+@click.option("--scene", "-s", type=int, help="Scene ID (1-35)")
+@click.option("--device", "-d", type=int, help="Device 1 or 2")
+async def turn_on(ip: str, brightness: int, kelvin: int, rgb: str, scene: int, device: int) -> None:
+    """Turn bulb on with optional color/brightness settings."""
     bulb = wizlight(ip)
-    if bulb and 1000 <= k <= 6800 and 0 <= brightness <= 255:
-        await bulb.turn_on(PilotBuilder(colortemp=k, brightness=brightness))
-    else:
-        click.echo("Error - values are not correct. Type --help for help.")
-    await bulb.async_close()
+    
+    try:
+        pilot = PilotBuilder(brightness=brightness, device=device)
+        
+        if rgb:
+            r, g, b = map(int, rgb.split(','))
+            pilot = PilotBuilder(rgb=(r, g, b), brightness=brightness, device=device)
+        elif kelvin:
+            pilot = PilotBuilder(colortemp=kelvin, brightness=brightness, device=device)
+        elif scene:
+            pilot = PilotBuilder(scene=scene, device=device)
+            
+        await bulb.turn_on(pilot)
+        click.echo(f"✓ Turned on {ip}")
+    except Exception as e:
+        click.echo(f"✗ Error: {e}")
+    finally:
+        await bulb.async_close()
 
 
-@main.command("set-state")
+@main.command("color")
 @coro
-@click.option("--ip", prompt="IP address of the bulb", help="IP address of the bulb.")
-@click.option(
-    "--k",
-    prompt="Kelvin for temperature.",
-    help="Kelvin value (1000-8000) for turn on. Default 3000",
-    default=3000,
-)
-@click.option(
-    "--brightness",
-    prompt="Set the brightness value 0-255",
-    help="Brightness for turn on. Default 128",
-    default=128,
-)
-async def set_state(ip: str, k: int, brightness: int) -> None:
-    """Set the current state of a given bulb."""
-    click.echo(f"Turning on {ip}")
+@click.argument("ip")
+@click.argument("rgb")
+@click.option("--brightness", "-b", default=255, help="Brightness (0-255, default: 255)")
+@click.option("--device", "-d", type=int, help="Device 1 or 2")
+async def set_color(ip: str, rgb: str, brightness: int, device: int) -> None:
+    """Set bulb to RGB color (format: 'r,g,b' e.g., '255,0,0')."""
     bulb = wizlight(ip)
-    if bulb and 1000 <= k <= 6800 and 0 <= brightness <= 255:
-        await bulb.set_state(PilotBuilder(colortemp=k, brightness=brightness))
-    else:
-        click.echo("Error - values are not correct. Type --help for help.")
-    await bulb.async_close()
+    
+    try:
+        r, g, b = map(int, rgb.split(','))
+        await bulb.turn_on(PilotBuilder(rgb=(r, g, b), brightness=brightness, device=device))
+        click.echo(f"✓ Set {ip} to RGB({r},{g},{b})")
+    except Exception as e:
+        click.echo(f"✗ Error: {e}")
+    finally:
+        await bulb.async_close()
 
 
 @main.command("off")
 @coro
-@click.option("--ip", prompt="IP address of the bulb", help="IP address of the bulb.")
-async def turn_off(ip: str) -> None:
-    """Turn a given bulb off."""
-    click.echo(f"Turning off {ip}")
+@click.argument("ip")
+@click.option("--device", "-d", type=int, help="Device 1 or 2")
+async def turn_off(ip: str, device: int) -> None:
+    """Turn bulb off."""
     bulb = wizlight(ip)
-    await bulb.turn_off()
-    await bulb.async_close()
+    
+    try:
+        await bulb.turn_off(device=device)
+        click.echo(f"✓ Turned off {ip}")
+    except Exception as e:
+        click.echo(f"✗ Error: {e}")
+    finally:
+        await bulb.async_close()
 
 
-@main.command("state")
+@main.command("status")
 @coro
-@click.option("--ip", prompt="IP address of the bulb", help="IP address of the bulb.")
-async def state(ip: str) -> None:
-    """Get the current state of a given bulb."""
-    click.echo(f"Get the state from {ip}")
+@click.argument("ip")
+async def status(ip: str) -> None:
+    """Get bulb status and current settings."""
     bulb = wizlight(ip)
-    bulb_state = await bulb.updateState()
-    if bulb_state:
-        click.echo(bulb_state.pilotResult)
-    else:
-        click.echo("Did not get state from bulb")
-    await bulb.async_close()
+    
+    try:
+        state = await bulb.updateState()
+        if state:
+            click.echo(f"Bulb {ip} status:")
+            click.echo(f"  Power: {'ON' if state.get_state() else 'OFF'}")
+            click.echo(f"  Brightness: {state.get_brightness()}")
+            if state.get_rgb():
+                r, g, b = state.get_rgb()
+                click.echo(f"  RGB: ({r}, {g}, {b})")
+            if state.get_colortemp():
+                click.echo(f"  Color Temp: {state.get_colortemp()}K")
+            if state.get_scene():
+                click.echo(f"  Scene: {state.get_scene()}")
+        else:
+            click.echo(f"✗ Could not get status from {ip}")
+    except Exception as e:
+        click.echo(f"✗ Error: {e}")
+    finally:
+        await bulb.async_close()
+
+
+@main.command("scene")
+@coro
+@click.argument("ip")
+@click.argument("scene_id", type=int)
+@click.option("--speed", "-s", type=int, default=128)
+@click.option("--device", "-d", type=int, help="Device 1 or 2")
+async def set_scene(ip: str, scene_id: int, speed: int, device: int) -> None:
+    """Set bulb to a predefined scene (1-35)."""
+    bulb = wizlight(ip)
+    
+    try:
+        await bulb.turn_on(PilotBuilder(scene=scene_id, speed=speed, device=device))
+        click.echo(f"✓ Set {ip} to scene {scene_id} with speed {speed} on device {device}")
+    except Exception as e:
+        click.echo(f"✗ Error: {e}")
+    finally:
+        await bulb.async_close()
+
+
+@main.command("brightness")
+@coro
+@click.argument("ip")
+@click.argument("level", type=int)
+@click.option("--device", "-d", type=int, help="Device 1 or 2")
+async def set_brightness(ip: str, level: int, device: int) -> None:
+    """Set bulb brightness (0-255)."""
+    bulb = wizlight(ip)
+    
+    try:
+        await bulb.turn_on(PilotBuilder(brightness=level, device=device))
+        click.echo(f"✓ Set {ip} brightness to {level}")
+    except Exception as e:
+        click.echo(f"✗ Error: {e}")
+    finally:
+        await bulb.async_close()
 
 
 if __name__ == "__main__":

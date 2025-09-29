@@ -149,6 +149,7 @@ class PilotBuilder:
         colortemp: Optional[int] = None,
         state: Optional[bool] = None,
         ratio: Optional[int] = None,
+        device: Optional[int] = None,
     ) -> None:
         """Set the parameter."""
         self.pilot_params: Dict[str, Any] = {}
@@ -176,6 +177,8 @@ class PilotBuilder:
             self._set_warm_white(warm_white)
         if cold_white is not None:
             self._set_cold_white(cold_white)
+        if device is not None:
+            self._set_device(device)
 
     def set_pilot_message(self, state: Optional[bool] = None) -> Dict:
         """Return the pilot message."""
@@ -188,6 +191,12 @@ class PilotBuilder:
         if state is not None:
             self.pilot_params["state"] = state
         return {"method": "setState", "params": self.pilot_params}
+
+    def _set_device(self, value: int) -> None:
+        """Set the device id of the command."""
+        if not 1 <= value < 4:
+            raise ValueError("Device id must be 1 or 10")
+        self.pilot_params["devices"] = value
 
     def _set_warm_white(self, value: int) -> None:
         """Set the value of the warm white led."""
@@ -767,9 +776,17 @@ class wizlight:
         assert self.bulbtype  # Should have gotten set by get_bulbtype
         return SCENES_BY_CLASS.get(self.bulbtype.bulb_type, [])
 
-    async def turn_off(self) -> None:
+    async def turn_off(self, device: Optional[int] = None) -> None:
         """Turn the light off."""
-        await self.send({"method": "setPilot", "params": {"state": False}})
+        if device is None:
+            await self.send(
+                {"method": "setPilot", "params": {"state": False}}
+            )
+        else:
+            await self.send(
+                {"method": "setPilot", "params": {"devices": device, "state": False}}
+            )
+
 
     async def reboot(self) -> None:
         """Reboot the bulb."""
