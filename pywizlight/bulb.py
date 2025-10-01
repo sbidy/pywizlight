@@ -871,7 +871,7 @@ class wizlight:
         await self.fan_set_state(state=0)
 
     # ---------- Helper Functions ------------
-    async def updateState(self, device: Optional[int]) -> Optional[PilotParser]:
+    async def updateState(self, device: Optional[int] = 0) -> Optional[PilotParser]:
         """Update the bulb state.
 
         Note: Call this method before getting any other property.
