@@ -871,7 +871,7 @@ class wizlight:
         await self.fan_set_state(state=0)
 
     # ---------- Helper Functions ------------
-    async def updateState(self) -> Optional[PilotParser]:
+    async def updateState(self, device: Optional[int]) -> Optional[PilotParser]:
         """Update the bulb state.
 
         Note: Call this method before getting any other property.
@@ -880,7 +880,13 @@ class wizlight:
         {"method": "getPilot", "id": 24}
         """
         if self.last_push + MAX_TIME_BETWEEN_PUSH < time.monotonic():
-            resp = await self.send({"method": "getPilot", "params": {}})
+            if device > 0 and device < 4:
+                # Workaround becuase for getPilot is is 0,1,2,3 for setPilot 1,2,3,4
+                device = device - 1
+                method = {"method": "getPilot", "params": {"devices": device}}
+            else:
+                method = {"method": "getPilot", "params": {}}
+            resp = await self.send(method)
             if resp is not None and "result" in resp:
                 self.state = PilotParser(resp["result"])
             else:

@@ -128,12 +128,13 @@ async def turn_off(ip: str, device: int) -> None:
 @main.command("status")
 @coro
 @click.argument("ip")
-async def status(ip: str) -> None:
+@click.option("--device", "-d", type=int, help="Device 1 or 2")
+async def status(ip: str, device: int) -> None:
     """Get bulb status and current settings."""
     bulb = wizlight(ip)
 
     try:
-        state = await bulb.updateState()
+        state = await bulb.updateState(device)
         if state:
             click.echo(f"Bulb {ip} status:")
             click.echo(f"  Power: {'ON' if state.get_state() else 'OFF'}")
