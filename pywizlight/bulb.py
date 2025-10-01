@@ -554,7 +554,7 @@ class wizlight:
         """Create instance with the IP address of the bulb."""
         self.ip = ip
         self.port = port
-        self.state: Optional[PilotParser] = None
+        self.state: Optional[List[PilotParser]] = []
         self.mac = mac
         self.bulbtype: Optional[BulbType] = None
         self.modelConfig: Optional[Dict] = None
@@ -593,11 +593,11 @@ class wizlight:
         }
 
     @property
-    def status(self) -> Optional[bool]:
+    def status(self, device: int = 0) -> Optional[bool]:
         """Return the status of the bulb: true = on, false = off."""
         if self.state is None:
             return None
-        return self.state.get_state()
+        return self.state[device].get_state()
 
     # ------------------ Non properties -------------- #
 
@@ -776,7 +776,7 @@ class wizlight:
         assert self.bulbtype  # Should have gotten set by get_bulbtype
         return SCENES_BY_CLASS.get(self.bulbtype.bulb_type, [])
 
-    async def turn_off(self, device: Optional[int] = None) -> None:
+    async def turn_off(self, device: int = None) -> None:
         """Turn the light off."""
         if device is None:
             await self.send({"method": "setPilot", "params": {"state": False}})
@@ -879,18 +879,27 @@ class wizlight:
         getPilot - gets the current bulb state - no parameters need to be included
         {"method": "getPilot", "id": 24}
         """
+
         if self.last_push + MAX_TIME_BETWEEN_PUSH < time.monotonic():
-            if device > 0 and device < 4:
-                # Workaround becuase for getPilot is is 0,1,2,3 for setPilot 1,2,3,4
-                device = device - 1
-                method = {"method": "getPilot", "params": {"devices": device}}
-            else:
-                method = {"method": "getPilot", "params": {}}
-            resp = await self.send(method)
+            if self.bulbtype is None:
+                await self.get_bulbtype()
+            if self.bulbtype.features.dual_head:
+                for heads in range(2):
+                    method = {"method": "getPilot", "params": {"devices": heads}}
+                    resp = await self.send(method)
+                    if resp is not None and "result" in resp:
+                        head_state = PilotParser(resp["result"])
+                    else:
+                        head_state = None
+                    self.state.append(head_state)
+        # Without heads
+        else:
+            resp = await self.send({"method": "getPilot", "params": {}})
             if resp is not None and "result" in resp:
-                self.state = PilotParser(resp["result"])
+                sinlge_state = PilotParser(resp["result"])
             else:
-                self.state = None
+                single_state = None
+            self.state.append(single_state)
         return self.state
 
     def _cache_mac_from_bulb_config(self, resp: BulbResponse) -> None:

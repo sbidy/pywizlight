@@ -134,18 +134,21 @@ async def status(ip: str, device: int) -> None:
     bulb = wizlight(ip)
 
     try:
-        state = await bulb.updateState(device)
-        if state:
-            click.echo(f"Bulb {ip} status:")
-            click.echo(f"  Power: {'ON' if state.get_state() else 'OFF'}")
-            click.echo(f"  Brightness: {state.get_brightness()}")
-            if state.get_rgb():
-                r, g, b = state.get_rgb()
-                click.echo(f"  RGB: ({r}, {g}, {b})")
-            if state.get_colortemp():
-                click.echo(f"  Color Temp: {state.get_colortemp()}K")
-            if state.get_scene():
-                click.echo(f"  Scene: {state.get_scene()}")
+        states = await bulb.updateState(device)
+        if states:
+            id = 1
+            for state in states:
+                click.echo(f"Bulb {ip} - Device {id} status:")
+                click.echo(f"  Power: {'ON' if state.get_state() else 'OFF'}")
+                click.echo(f"  Brightness: {state.get_brightness()}")
+                if state.get_rgb():
+                    r, g, b = state.get_rgb()
+                    click.echo(f"  RGB: ({r}, {g}, {b})")
+                if state.get_colortemp():
+                    click.echo(f"  Color Temp: {state.get_colortemp()}K")
+                if state.get_scene():
+                    click.echo(f"  Scene: {state.get_scene()}")
+                id = id + 1
         else:
             click.echo(f"✗ Could not get status from {ip}")
     except Exception as e:
