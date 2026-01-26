@@ -89,7 +89,10 @@ async def turn_on(
                 rgbww=(r, g, b, c, w), brightness=brightness, device=device
             )
         elif kelvin:
-            pilot = PilotBuilder(colortemp=int(kelvin), brightness=brightness, device=device)
+            kelvin_int = int(str(kelvin).lower().replace("k", ""))
+            pilot = PilotBuilder(
+                colortemp=kelvin_int, brightness=brightness, device=device
+            )
         elif scene:
             pilot = PilotBuilder(scene=scene, device=device)
 
