@@ -523,14 +523,14 @@ async def _send_udp_message_with_retry(
 class WizHistory:
     """Create a history instance for diagnostics."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Init the diagnostics instance."""
         self._history: Dict[str, Dict] = {
             msg_type: {} for msg_type in HISTORY_MSG_TYPES
         }
         self._last_error: Optional[str] = None
 
-    def get(self) -> Dict:
+    def get(self) -> Dict[str, Any]:
         return {**self._history, "last_error": self._last_error}
 
     def error(self, msg: str) -> None:
