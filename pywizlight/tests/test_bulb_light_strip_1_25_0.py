@@ -40,6 +40,7 @@ async def test_supported_scenes(light_strip: wizlight) -> None:
         "Cool white",
         "Club",
         "Daylight",
+        "Dim-to-warm",
         "Diwali",
         "Deep dive",
         "Fall",
