@@ -2,7 +2,7 @@
 
 import asyncio
 from functools import wraps
-from typing import Any, Callable, Coroutine, TypeVar
+from typing import Any, Callable, Coroutine, List, Tuple, TypeVar, cast
 
 import click
 
@@ -57,10 +57,19 @@ async def discover(broadcast: str) -> None:
 )
 @click.option("--kelvin", "-k", help="Color temperature in Kelvin (1000-6800)")
 @click.option("--rgb", help="RGB color as 'r,g,b' (e.g., '255,0,0' for red)")
+@click.option("--rgbw", help="RGBW color as 'r,g,b,w' (e.g., '255,0,0,255')")
+@click.option("--rgbww", help="RGBWW color as 'r,g,b,c,w' (e.g., '255,0,0,255,255')")
 @click.option("--scene", "-s", type=int, help="Scene ID (1-35)")
 @click.option("--device", "-d", type=int, help="Device 1 or 2")
 async def turn_on(
-    ip: str, brightness: int, kelvin: int, rgb: str, scene: int, device: int
+    ip: str,
+    brightness: int,
+    kelvin: str,
+    rgb: str,
+    rgbw: str,
+    rgbww: str,
+    scene: int,
+    device: int,
 ) -> None:
     """Turn bulb on with optional color/brightness settings."""
     bulb = wizlight(ip)
@@ -71,8 +80,19 @@ async def turn_on(
         if rgb:
             r, g, b = map(int, rgb.split(","))
             pilot = PilotBuilder(rgb=(r, g, b), brightness=brightness, device=device)
+        elif rgbw:
+            r, g, b, w = map(int, rgbw.split(","))
+            pilot = PilotBuilder(rgbw=(r, g, b, w), brightness=brightness, device=device)
+        elif rgbww:
+            r, g, b, c, w = map(int, rgbww.split(","))
+            pilot = PilotBuilder(
+                rgbww=(r, g, b, c, w), brightness=brightness, device=device
+            )
         elif kelvin:
-            pilot = PilotBuilder(colortemp=kelvin, brightness=brightness, device=device)
+            kelvin_int = int(str(kelvin).lower().replace("k", ""))
+            pilot = PilotBuilder(
+                colortemp=kelvin_int, brightness=brightness, device=device
+            )
         elif scene:
             pilot = PilotBuilder(scene=scene, device=device)
 
@@ -138,12 +158,42 @@ async def status(ip: str, device: int) -> None:
         if states:
             id = 1
             for state in states:
+                if state is None:
+                    click.echo(f"Bulb {ip} - Device {id} status: Error (No state)")
+                    id = id + 1
+                    continue
                 click.echo(f"Bulb {ip} - Device {id} status:")
                 click.echo(f"  Power: {'ON' if state.get_state() else 'OFF'}")
                 click.echo(f"  Brightness: {state.get_brightness()}")
-                if state.get_rgb():
-                    r, g, b = state.get_rgb()
-                    click.echo(f"  RGB: ({r}, {g}, {b})")
+                # Check for RGBWW first
+                rgbww = state.get_rgbww()
+                if rgbww:
+                    r_v, g_v, b_v, c_v, w_v = rgbww
+                    click.echo(f"  RGBWW: ({r_v}, {g_v}, {b_v}, {c_v}, {w_v})")
+                else:
+                    # Check for RGBW
+                    rgbw = state.get_rgbw()
+                    if rgbw:
+                        r_v, g_v, b_v, w_v = rgbw
+                        click.echo(f"  RGBW: ({r_v}, {g_v}, {b_v}, {w_v})")
+                    else:
+                        # Check for RGB
+                        rgb = state.get_rgb()
+                        if rgb[0] is not None:
+                            # It's a Vector/Tuple[int, int, int]
+                            r_v, g_v, b_v = cast(Tuple[int, int, int], rgb)
+                            click.echo(f"  RGB: ({r_v}, {g_v}, {b_v})")
+
+                        # If not full RGBWW/RGBW, check individual white channels
+                        # that might exist independently or with just RGB
+                        if not rgbww and not rgbw:
+                            warm_w = state.get_warm_white()
+                            if warm_w is not None:
+                                click.echo(f"  Warm White: {warm_w}")
+                            cold_w = state.get_cold_white()
+                            if cold_w is not None:
+                                click.echo(f"  Cold White: {cold_w}")
+
                 if state.get_colortemp():
                     click.echo(f"  Color Temp: {state.get_colortemp()}K")
                 if state.get_scene():

@@ -65,95 +65,97 @@ async def test_Bulb_Discovery(correct_bulb: wizlight) -> None:
         with patch("pywizlight.bulb.FIRST_SEND_INTERVAL", 0.01), patch(
             "pywizlight.bulb.TIMEOUT", 0.01
         ):
-            state = await bulb.updateState()
-        assert state and state.get_state() is False
+            states = await bulb.updateState()
+        assert states and states[0] and states[0].get_state() is False
 
 
 @pytest.mark.asyncio
 async def test_PilotBuilder_state(correct_bulb: wizlight) -> None:
     """Test State."""
-    state = await correct_bulb.updateState()
-    assert state and state.get_state() is False
+    states = await correct_bulb.updateState()
+    assert states and states[0] and states[0].get_state() is False
 
 
 @pytest.mark.asyncio
 async def test_PilotBuilder_colortemp(correct_bulb: wizlight) -> None:
     """Test Color Temp."""
     await correct_bulb.turn_on(PilotBuilder(colortemp=2800))
-    state = await correct_bulb.updateState()
+    states = await correct_bulb.updateState()
 
-    assert state and state.get_colortemp() == 2800
+    assert states and states[0] and states[0].get_colortemp() == 2800
 
 
 @pytest.mark.asyncio
 async def test_PilotBuilder_brightness(correct_bulb: wizlight) -> None:
     """Test Brightness."""
     await correct_bulb.turn_on(PilotBuilder(brightness=10))
-    state = await correct_bulb.updateState()
+    states = await correct_bulb.updateState()
     # 10% == 26 in Hex
-    assert state and state.get_brightness() == 26
+    assert states and states[0] and states[0].get_brightness() == 26
 
 
 @pytest.mark.asyncio
 async def test_PilotBuilder_warm_wite(correct_bulb: wizlight) -> None:
     """Test Warm White."""
     await correct_bulb.turn_on(PilotBuilder(warm_white=255))
-    state = await correct_bulb.updateState()
+    states = await correct_bulb.updateState()
 
-    assert state and state.get_warm_white() == 255
+    assert states and states[0] and states[0].get_warm_white() == 255
 
 
 @pytest.mark.asyncio
 async def test_PilotBuilder_cold_white(correct_bulb: wizlight) -> None:
     """Test Cold White."""
     await correct_bulb.turn_on(PilotBuilder(cold_white=255))
-    state = await correct_bulb.updateState()
+    states = await correct_bulb.updateState()
 
-    assert state and state.get_cold_white() == 255
+    assert states and states[0] and states[0].get_cold_white() == 255
 
 
 @pytest.mark.asyncio
 async def test_PilotBuilder_rgb(correct_bulb: wizlight) -> None:
     """Test RGB Value."""
     await correct_bulb.turn_on(PilotBuilder(rgb=(0, 128, 255)))
-    state = await correct_bulb.updateState()
+    states = await correct_bulb.updateState()
 
-    assert state and state.get_rgb() == (0, 127, 255)
+    assert states and states[0] and states[0].get_rgb() == (0, 127, 255)
 
 
 @pytest.mark.asyncio
 async def test_PilotBuilder_hucolor(correct_bulb: wizlight) -> None:
     """Test RGB Value via hucolor."""
     await correct_bulb.turn_on(PilotBuilder(hucolor=(100, 50)))
-    state = await correct_bulb.updateState()
+    states = await correct_bulb.updateState()
 
-    assert state and state.get_rgb() == (88.0, 255.0, 0.0)
+    assert states and states[0] and states[0].get_rgb() == (88.0, 255.0, 0.0)
 
 
 @pytest.mark.asyncio
 async def test_setting_rgbw(correct_bulb: wizlight) -> None:
     """Test setting rgbw."""
     await correct_bulb.turn_on(PilotBuilder(rgbw=(1, 2, 3, 4)))
-    state = await correct_bulb.updateState()
-    assert state and state.get_rgbw() == (1, 2, 3, 4)
+    states = await correct_bulb.updateState()
+    assert states and states[0] and states[0].get_rgbw() == (1, 2, 3, 4)
 
 
 @pytest.mark.asyncio
 async def test_PilotBuilder_scene(correct_bulb: wizlight) -> None:
     """Test scene."""
     await correct_bulb.turn_on(PilotBuilder(scene=1))
-    state = await correct_bulb.updateState()
+    states = await correct_bulb.updateState()
 
-    assert state and state.get_scene() == SCENES[1]
-    state.pilotResult["schdPsetId"] = True
-    assert state.get_scene() == SCENES[1000]
+    assert states and states[0] and states[0].get_scene() == SCENES[1]
+    if states and states[0]:
+        states[0].pilotResult["schdPsetId"] = True
+        assert states[0].get_scene() == SCENES[1000]
 
 
 @pytest.mark.asyncio
 async def test_PilotBuilder_scene_empty(correct_bulb: wizlight) -> None:
     """Test scene with no scene set."""
-    state = await correct_bulb.updateState()
-    assert state is not None
+    states = await correct_bulb.updateState()
+    assert states is not None and states[0] is not None
+    state = states[0]
     if "sceneId" in state.pilotResult:
         del state.pilotResult["sceneId"]
     assert state and state.get_scene() is None
@@ -163,25 +165,25 @@ async def test_PilotBuilder_scene_empty(correct_bulb: wizlight) -> None:
 async def test_PilotBuilder_speed(correct_bulb: wizlight) -> None:
     """Test speed."""
     await correct_bulb.turn_on(PilotBuilder(scene=1, speed=50))
-    state = await correct_bulb.updateState()
+    states = await correct_bulb.updateState()
 
-    assert state and state.get_scene() == SCENES[1]
-    assert state and state.get_speed() == 50
+    assert states and states[0] and states[0].get_scene() == SCENES[1]
+    assert states and states[0] and states[0].get_speed() == 50
 
 
 @pytest.mark.asyncio
 async def test_set_speed(correct_bulb: wizlight) -> None:
     """Set speed."""
     await correct_bulb.set_speed(125)
-    state = await correct_bulb.updateState()
-    assert state and state.get_speed() == 125
+    states = await correct_bulb.updateState()
+    assert states and states[0] and states[0].get_speed() == 125
 
 
 @pytest.mark.asyncio
 async def test_get_source(correct_bulb: wizlight) -> None:
     """Test getting the source."""
-    state = await correct_bulb.updateState()
-    assert state and state.get_source() == "udp"
+    states = await correct_bulb.updateState()
+    assert states and states[0] and states[0].get_source() == "udp"
 
 
 # ------ Error states -------------------------------------

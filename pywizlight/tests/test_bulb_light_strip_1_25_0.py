@@ -24,8 +24,8 @@ async def light_strip() -> AsyncGenerator[wizlight, None]:
 async def test_setting_rgbww(light_strip: wizlight) -> None:
     """Test setting rgbww."""
     await light_strip.turn_on(PilotBuilder(rgbww=(1, 2, 3, 4, 5)))
-    state = await light_strip.updateState()
-    assert state and state.get_rgbww() == (1, 2, 3, 4, 5)
+    states = await light_strip.updateState()
+    assert states and states[0] and states[0].get_rgbww() == (1, 2, 3, 4, 5)
 
 
 @pytest.mark.asyncio

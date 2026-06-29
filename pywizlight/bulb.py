@@ -523,14 +523,14 @@ async def _send_udp_message_with_retry(
 class WizHistory:
     """Create a history instance for diagnostics."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Init the diagnostics instance."""
         self._history: Dict[str, Dict] = {
             msg_type: {} for msg_type in HISTORY_MSG_TYPES
         }
         self._last_error: Optional[str] = None
 
-    def get(self) -> Dict:
+    def get(self) -> Dict[str, Any]:
         return {**self._history, "last_error": self._last_error}
 
     def error(self, msg: str) -> None:
@@ -554,7 +554,7 @@ class wizlight:
         """Create instance with the IP address of the bulb."""
         self.ip = ip
         self.port = port
-        self.state: Optional[List[PilotParser]] = []
+        self.state: Optional[List[Optional[PilotParser]]] = []
         self.mac = mac
         self.bulbtype: Optional[BulbType] = None
         self.modelConfig: Optional[Dict] = None
@@ -567,7 +567,9 @@ class wizlight:
 
         self.lock = asyncio.Lock()
         self.loop = asyncio.get_event_loop()
-        self.push_callback: Optional[Callable[[PilotParser], None]] = None
+        self.push_callback: Optional[Callable[[List[Optional[PilotParser]]], None]] = (
+            None
+        )
         self.response_method: Optional[str] = None
         self.response_future: Optional[asyncio.Future] = None
         self.push_cancel: Optional[Callable] = None
@@ -580,7 +582,9 @@ class wizlight:
     def diagnostics(self) -> dict:
         """Get diagnostics for the device."""
         return {
-            "state": self.state.pilotResult if self.state else None,
+            "state": [s.pilotResult if s else None for s in self.state]
+            if self.state
+            else None,
             "white_range": self.whiteRange,
             "extended_white_range": self.extwhiteRange,
             "fan_speed_range": self.fanSpeedRange,
@@ -595,9 +599,13 @@ class wizlight:
     @property
     def status(self, device: int = 0) -> Optional[bool]:
         """Return the status of the bulb: true = on, false = off."""
-        if self.state is None:
+        if (
+            self.state is None
+            or len(self.state) <= device
+            or (state := self.state[device]) is None
+        ):
             return None
-        return self.state[device].get_state()
+        return cast(PilotParser, state).get_state()
 
     # ------------------ Non properties -------------- #
 
@@ -632,7 +640,7 @@ class wizlight:
             _LOGGER.debug("%s: Registration for push updates failed: %s", self.ip, ex)
 
     async def start_push(
-        self, callback: Optional[Callable[[PilotParser], None]]
+        self, callback: Optional[Callable[[List[Optional[PilotParser]]], None]]
     ) -> bool:
         """Start periodic register calls to get push updates via syncPilot."""
         _LOGGER.debug("Enabling push updates for %s", self.mac)
@@ -655,11 +663,19 @@ class wizlight:
         """Handle a syncPilot from the device."""
         self.history.message(HISTORY_PUSH, resp)
         self.last_push = time.monotonic()
-        old_state = self.state.pilotResult if self.state else None
+        old_state = self.state[0].pilotResult if self.state and self.state[0] else None
         new_state = resp["params"]
         if old_state and states_match(old_state, new_state):
             return
-        self.state = PilotParser(new_state)
+        if self.bulbtype and self.bulbtype.features.dual_head:
+            # For dual head, push updates might be partial or ambiguous.
+            # We avoid corrupting the list-based state and force a refresh.
+            self.last_push = 0
+            if self.push_callback:
+                self.push_callback(self.state)
+            return
+
+        self.state = [PilotParser(new_state)]
         if self.push_callback:
             self.push_callback(self.state)
 
@@ -776,7 +792,7 @@ class wizlight:
         assert self.bulbtype  # Should have gotten set by get_bulbtype
         return SCENES_BY_CLASS.get(self.bulbtype.bulb_type, [])
 
-    async def turn_off(self, device: int = None) -> None:
+    async def turn_off(self, device: Optional[int] = None) -> None:
         """Turn the light off."""
         if device is None:
             await self.send({"method": "setPilot", "params": {"state": False}})
@@ -804,13 +820,20 @@ class wizlight:
         _validate_ratio_or_raise(ratio)
         await self.send({"method": "setPilot", "params": {"ratio": ratio}})
 
-    async def turn_on(self, pilot_builder: PilotBuilder = PilotBuilder()) -> None:
+    async def turn_on(
+        self, pilot_builder: PilotBuilder = PilotBuilder(), device: Optional[int] = None
+    ) -> None:
         """Turn the light on with defined message.
 
         :param pilot_builder: PilotBuilder object to set the turn on state, defaults to PilotBuilder()
         :type pilot_builder: [type], optional
+        :param device: The device index to control (for dual head), defaults to None
+        :type device: int, optional
         """
-        await self.send(pilot_builder.set_pilot_message(state=True))
+        msg = pilot_builder.set_pilot_message(state=True)
+        if device is not None:
+            msg["params"]["devices"] = device
+        await self.send(msg)
 
     async def set_state(self, pilot_builder: PilotBuilder = PilotBuilder()) -> None:
         """Set the state of the bulb with defined message. Doesn't turn on the light.
@@ -832,7 +855,7 @@ class wizlight:
                     return None
                 if resp is not None and "result" in resp:
                     return resp["result"]["power"] / 1000
-        return self.state.get_power() if self.state else None
+        return self.state[0].get_power() if self.state and self.state[0] else None
 
     # ---------- Fan Functions ------------
     async def fan_set_state(
@@ -871,7 +894,9 @@ class wizlight:
         await self.fan_set_state(state=0)
 
     # ---------- Helper Functions ------------
-    async def updateState(self, device: int = 0) -> Optional[PilotParser]:
+    async def updateState(
+        self, device: int = 0
+    ) -> Optional[List[Optional[PilotParser]]]:
         """Update the bulb state.
 
         Note: Call this method before getting any other property.
@@ -883,7 +908,9 @@ class wizlight:
         if self.last_push + MAX_TIME_BETWEEN_PUSH < time.monotonic():
             if self.bulbtype is None:
                 await self.get_bulbtype()
-            if self.bulbtype.features.dual_head:
+
+            new_state: List[Optional[PilotParser]] = []
+            if self.bulbtype and self.bulbtype.features.dual_head:
                 for heads in range(2):
                     method = {"method": "getPilot", "params": {"devices": heads}}
                     resp = await self.send(method)
@@ -891,15 +918,16 @@ class wizlight:
                         head_state = PilotParser(resp["result"])
                     else:
                         head_state = None
-                    self.state.append(head_state)
-        # Without heads
-        else:
-            resp = await self.send({"method": "getPilot", "params": {}})
-            if resp is not None and "result" in resp:
-                sinlge_state = PilotParser(resp["result"])
+                    new_state.append(head_state)
+            # Without heads
             else:
-                single_state = None
-            self.state.append(single_state)
+                resp = await self.send({"method": "getPilot", "params": {}})
+                if resp is not None and "result" in resp:
+                    single_state = PilotParser(resp["result"])
+                else:
+                    single_state = None
+                new_state.append(single_state)
+            self.state = new_state
         return self.state
 
     def _cache_mac_from_bulb_config(self, resp: BulbResponse) -> None:
@@ -937,10 +965,10 @@ class wizlight:
     async def lightSwitch(self) -> None:
         """Turn the light bulb on or off like a switch."""
         # first get the status
-        state = await self.updateState()
-        if not state:  # Did not get state, nothing to do
+        states = await self.updateState()
+        if not states or not states[0]:  # Did not get state, nothing to do
             return
-        if state.get_state():
+        if states[0].get_state():
             # if the light is on - switch off
             await self.turn_off()
         else:
@@ -950,10 +978,10 @@ class wizlight:
     async def fanSwitch(self) -> None:
         """Turn the fan on or off like a switch."""
         # first get the status
-        state = await self.updateState()
-        if not state:  # Did not get state, nothing to do
+        states = await self.updateState()
+        if not states or not states[0]:  # Did not get state, nothing to do
             return
-        if state.get_fan_state():
+        if states[0].get_fan_state():
             # if the light is on - switch off
             await self.fan_turn_off()
         else:
