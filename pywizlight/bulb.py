@@ -987,8 +987,16 @@ class wizlight:
 
     def __del__(self):
         """Close the connection when the object is destroyed."""
-        if self.transport and not self.transport.is_closing():
-            self.loop.call_soon_threadsafe(self._async_close)
+        try:
+            if (
+                self.transport
+                and not self.transport.is_closing()
+                and self.loop
+                and not self.loop.is_closed()
+            ):
+                self.loop.call_soon_threadsafe(self._async_close)
+        except RuntimeError:
+            pass
 
     def __repr__(self):
         """Return the representation of the bulb."""
