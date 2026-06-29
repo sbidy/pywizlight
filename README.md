@@ -289,7 +289,7 @@ After that all states can be fetched from `light.state`, which is a `PilotParser
 - **syncPilot** - sent by the bulb as heartbeats
 - **getPilot** - gets the current bulb state - no parameters required
 - **setPilot** - used to tell the bulb to change color/temp/state
-- **Pulse** - uncertain of purpose
+- **Pulse** - Gradually fades the current light state in or out based on the delta value (+/- 1–100) and a specified duration (in ms). If the duration is set longer than 2 minutes, the pulsing effect will loop continuously
 - **Registration** - used to "register" with the bulb: This notifies the bulb if you want it to send you heartbeat sync packets
 
 ### Sync functions:
