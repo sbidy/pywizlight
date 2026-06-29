@@ -69,6 +69,16 @@ async def test_supported_scenes(light_strip: wizlight) -> None:
         "Wake-up",
         "Warm white",
         "Rhythm",
+        "Custom Mode 1",
+        "Custom Mode 2",
+        "Custom Mode 3",
+        "Custom Mode 4",
+        "Custom Mode 5",
+        "Custom Mode 6",
+        "Custom Mode 7",
+        "Custom Mode 8",
+        "Custom Mode 9",
+        "Custom Mode 10",
     ]
 
 
