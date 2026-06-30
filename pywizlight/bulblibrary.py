@@ -58,6 +58,8 @@ class BulbClass(Enum):
     """Smart socket with only on/off."""
     FANDIM = "Fan Dimmable"
     """Smart fan with only Dimmable white LEDs."""
+    FANTW = "Fan Tunable White"
+    """Smart fan with Tunable White LEDs."""
 
 
 KNOWN_TYPE_IDS = {0: BulbClass.DW}
@@ -92,6 +94,15 @@ _BASE_FEATURE_MAP = {
         "brightness": True,
         "color": False,
         "color_tmp": False,
+        "fan": True,
+        "fan_breeze_mode": True,
+        "fan_reverse": True,
+    },
+    # Fan with tunable white supports brightness and color temperature
+    BulbClass.FANTW: {
+        "brightness": True,
+        "color": False,
+        "color_tmp": True,
         "fan": True,
         "fan_breeze_mode": True,
         "fan_reverse": True,
@@ -140,6 +151,9 @@ class BulbType:
             if "RGB" in _identifier:  # full RGB bulb
                 bulb_type = BulbClass.RGB
                 effect = True
+            elif "DDTW" in _identifier:  # Fan with tunable white light (e.g. Trio Sandfjord)
+                bulb_type = BulbClass.FANTW
+                effect = True
             elif "TW" in _identifier:  # Non RGB but tunable white bulb
                 bulb_type = BulbClass.TW
                 effect = True
@@ -172,7 +186,7 @@ class BulbType:
             kelvin_range: Optional[KelvinRange] = KelvinRange(
                 min=int(min(kelvin_list)), max=int(max(kelvin_list))
             )
-        elif bulb_type in (BulbClass.RGB, BulbClass.TW):
+        elif bulb_type in (BulbClass.RGB, BulbClass.TW, BulbClass.FANTW):
             raise WizLightNotKnownBulb(
                 f"Unable to determine required kelvin range for a {bulb_type.value} device"
             )
