@@ -14,6 +14,7 @@ SCENES = {
     13: "Cool white",
     26: "Club",
     12: "Daylight",
+    40: "Dim-to-warm",
     33: "Diwali",
     23: "Deep dive",
     22: "Fall",
@@ -47,7 +48,7 @@ SCENES = {
 for i in range(1, 11):
     SCENES[255 + i] = f"Custom Mode {i}"
 SCENE_NAME_TO_ID = {scene_name: scene_id for (scene_id, scene_name) in SCENES.items()}
-TW_SCENES = [6, 9, 10, 11, 12, 13, 14, 15, 16, 18, 29, 30, 31, 32, 33, 35]
+TW_SCENES = [6, 9, 10, 11, 12, 13, 14, 15, 16, 18, 29, 30, 31, 32, 33, 35, 40]
 DW_SCENES = [9, 10, 14, 29, 31, 32, 34, 35]
 
 SCENES_BY_CLASS: Dict[BulbClass, List[str]] = {
