@@ -57,4 +57,5 @@ async def test_supported_scenes(turnable_bulb: wizlight) -> None:
         "Steampunk",
         "Diwali",
         "Alarm",
+        "Dim-to-warm",
     ]
