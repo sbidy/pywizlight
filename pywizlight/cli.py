@@ -2,7 +2,7 @@
 
 import asyncio
 from functools import wraps
-from typing import Any, Callable, Coroutine, List, Tuple, TypeVar, cast
+from typing import Any, Callable, Coroutine, Tuple, TypeVar, cast
 
 import click
 
@@ -82,7 +82,9 @@ async def turn_on(
             pilot = PilotBuilder(rgb=(r, g, b), brightness=brightness, device=device)
         elif rgbw:
             r, g, b, w = map(int, rgbw.split(","))
-            pilot = PilotBuilder(rgbw=(r, g, b, w), brightness=brightness, device=device)
+            pilot = PilotBuilder(
+                rgbw=(r, g, b, w), brightness=brightness, device=device
+            )
         elif rgbww:
             r, g, b, c, w = map(int, rgbww.split(","))
             pilot = PilotBuilder(

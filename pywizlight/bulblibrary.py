@@ -151,7 +151,9 @@ class BulbType:
             if "RGB" in _identifier:  # full RGB bulb
                 bulb_type = BulbClass.RGB
                 effect = True
-            elif "DDTW" in _identifier:  # Fan with tunable white light (e.g. Trio Sandfjord)
+            elif (
+                "DDTW" in _identifier
+            ):  # Fan with tunable white light (e.g. Trio Sandfjord)
                 bulb_type = BulbClass.FANTW
                 effect = True
             elif "TW" in _identifier:  # Non RGB but tunable white bulb

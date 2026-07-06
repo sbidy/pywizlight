@@ -582,9 +582,11 @@ class wizlight:
     def diagnostics(self) -> dict:
         """Get diagnostics for the device."""
         return {
-            "state": [s.pilotResult if s else None for s in self.state]
-            if self.state
-            else None,
+            "state": (
+                [s.pilotResult if s else None for s in self.state]
+                if self.state
+                else None
+            ),
             "white_range": self.whiteRange,
             "extended_white_range": self.extwhiteRange,
             "fan_speed_range": self.fanSpeedRange,
