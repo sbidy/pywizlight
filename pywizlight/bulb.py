@@ -554,7 +554,7 @@ class wizlight:
         """Create instance with the IP address of the bulb."""
         self.ip = ip
         self.port = port
-        self.state: Optional[List[Optional[PilotParser]]] = []
+        self.state: List[Optional[PilotParser]] = []
         self.mac = mac
         self.bulbtype: Optional[BulbType] = None
         self.modelConfig: Optional[Dict] = None
@@ -582,11 +582,7 @@ class wizlight:
     def diagnostics(self) -> dict:
         """Get diagnostics for the device."""
         return {
-            "state": (
-                [s.pilotResult if s else None for s in self.state]
-                if self.state
-                else None
-            ),
+            "state": [s.pilotResult if s else None for s in self.state],
             "white_range": self.whiteRange,
             "extended_white_range": self.extwhiteRange,
             "fan_speed_range": self.fanSpeedRange,
@@ -601,11 +597,7 @@ class wizlight:
     @property
     def status(self, device: int = 0) -> Optional[bool]:
         """Return the status of the bulb: true = on, false = off."""
-        if (
-            self.state is None
-            or len(self.state) <= device
-            or (state := self.state[device]) is None
-        ):
+        if len(self.state) <= device or (state := self.state[device]) is None:
             return None
         return cast(PilotParser, state).get_state()
 
