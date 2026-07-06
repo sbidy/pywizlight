@@ -85,11 +85,52 @@ nix-env -iA nixos.python37Packages.pywizlight
 
 <!-- ALL-CONTRIBUTORS-LIST:END -->
 
-## Discover bulbs via CLI
+## CLI Usage
 
-To find bulbs via cli you can use the following:
+`pywizlight` includes a command-line interface for easy bulb control:
+
 ```bash
+# Discover bulbs (uses 192.168.1.255 by default)
 python -m pywizlight.cli discover
+
+# Discover with custom broadcast address
+python -m pywizlight.cli discover --broadcast 192.168.0.255
+
+# Turn bulb on (full brightness)
+python -m pywizlight.cli on 192.168.1.10
+
+# Turn on with specific brightness and color temperature
+python -m pywizlight.cli on 192.168.1.10 --brightness 128 --kelvin 3000
+
+# Set RGB color
+python -m pywizlight.cli color 192.168.1.10 255,0,0  # Red
+
+# Set predefined scene
+python -m pywizlight.cli scene 192.168.1.10 4  # Party scene
+
+# Adjust brightness only
+python -m pywizlight.cli brightness 192.168.1.10 128
+
+# Turn bulb off
+python -m pywizlight.cli off 192.168.1.10
+
+# Get bulb status
+python -m pywizlight.cli status 192.168.1.10
+```
+
+### Available Commands
+
+- `discover` - Find bulbs on the network
+- `on` - Turn bulb on with optional settings (brightness, color temp, RGB, scene)
+- `off` - Turn bulb off
+- `color` - Set RGB color
+- `scene` - Set predefined scene (1-35)
+- `brightness` - Set brightness level (0-255)
+- `status` - Get current bulb state
+
+Use `--help` with any command for detailed options:
+```bash
+python -m pywizlight.cli on --help
 ```
 
 ## Example
@@ -180,46 +221,57 @@ loop = asyncio.get_event_loop()
 loop.run_until_complete(main())
 ```
 
-## CLI
+## CLI Reference
 
-`wizlight` is a command-line tool to perform basic interactions with bulbs.
+The CLI provides intuitive commands for bulb control:
 
 ```console
-$ wizlight
-Usage: wizlight [OPTIONS] COMMAND [ARGS]...
+$ python -m pywizlight.cli --help
+Usage: cli.py [OPTIONS] COMMAND [ARGS]...
 
-  Simple command-line tool to interact with Wizlight bulbs.
+  Command-line tool to interact with Wizlight bulbs.
 
 Options:
   --version  Show the version and exit.
   --help     Show this message and exit.
 
 Commands:
-  discover   Discover bulb in the local network.
-  off        Turn the bulb off.
-  on         Turn the bulb on.
-  set-state  Set the current state of a given bulb.
-  state      Get the current state from the given bulb.
+  brightness  Set bulb brightness (0-255).
+  color       Set bulb to RGB color (format: 'r,g,b' e.g., '255,0,0').
+  discover    Discover bulbs in the local network.
+  off         Turn bulb off.
+  on          Turn bulb on with optional color/brightness settings.
+  scene       Set bulb to a predefined scene (1-35).
+  status      Get bulb status and current settings.
 ```
 
-### Examples
+### Updated Examples
 
+```bash
+# Discover bulbs with default broadcast
+$ python -m pywizlight.cli discover
+Searching for bulbs on 192.168.1.255...
+Found 2 bulb(s):
+  IP: 192.168.1.10, MAC: a8bb50a4f94d
+  IP: 192.168.1.11, MAC: a8bb50a4f95e
+
+# Turn on bulb with warm white
+$ python -m pywizlight.cli on 192.168.1.10 --kelvin 3000 --brightness 200
+✓ Turned on 192.168.1.10
+
+# Set RGB color
+$ python -m pywizlight.cli color 192.168.1.10 255,0,0
+✓ Set 192.168.1.10 to RGB(255,0,0)
+
+# Get detailed status
+$ python -m pywizlight.cli status 192.168.1.10
+Bulb 192.168.1.10 status:
+  Power: ON
+  Brightness: 200
+  Color Temp: 3000K
 ```
-$ wizlight discover --b 192.168.0.101
-Search for bulbs in 192.168.0.101 ...
-{'ip_address': '192.168.0.101', 'mac_address': 'a8bs4090193d'}
 
-$ wizlight on --ip 192.168.0.101 --k 3000 --brightness 128
-Turning on 192.168.0.101
-
-$ wizlight off --ip 192.168.0.101
-Turning off 192.168.0.101
-
-$ wizlight state --ip 192.168.0.101
-{'mac': 'a8bs4090193d', 'rssi': -57, 'src': '', 'state': False, 'sceneId': 0, 'temp': 3000, 'dimming': 50}
-```
-
-Run `wizlight COMMAND --help` to see usage and options.
+Run `python -m pywizlight.cli COMMAND --help` for detailed command options.
 
 ## Discovery
 

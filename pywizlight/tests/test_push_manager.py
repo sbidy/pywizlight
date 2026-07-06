@@ -2,7 +2,7 @@
 
 import asyncio
 import logging
-from typing import AsyncGenerator, Optional, cast
+from typing import AsyncGenerator, List, Optional, cast
 from unittest.mock import patch
 
 import pytest
@@ -34,10 +34,10 @@ async def socket_push() -> AsyncGenerator[wizlight, None]:
 @pytest.mark.asyncio
 async def test_push_update_fail_no_source_ip(socket_push: wizlight) -> None:
     """Test push updates fails when we cannot get the sourrce ip."""
-    last_data = PilotParser({})
+    last_data: Optional[List[Optional[PilotParser]]] = None
     data_event = asyncio.Event()
 
-    def _on_push(data: PilotParser) -> None:
+    def _on_push(data: List[Optional[PilotParser]]) -> None:
         nonlocal last_data
         last_data = data
         data_event.set()
@@ -49,10 +49,10 @@ async def test_push_update_fail_no_source_ip(socket_push: wizlight) -> None:
 @pytest.mark.asyncio
 async def test_push_update_fail_port_in_use(socket_push: wizlight) -> None:
     """Test push updates fails when the port is in use."""
-    last_data = PilotParser({})
+    last_data: Optional[List[Optional[PilotParser]]] = None
     data_event = asyncio.Event()
 
-    def _on_push(data: PilotParser) -> None:
+    def _on_push(data: List[Optional[PilotParser]]) -> None:
         nonlocal last_data
         last_data = data
         data_event.set()
@@ -80,10 +80,10 @@ async def test_push_updates(socket_push: wizlight) -> None:
         white_channels=2,
         white_to_color_ratio=20,
     )
-    last_data = PilotParser({})
+    last_data: Optional[List[Optional[PilotParser]]] = None
     data_event = asyncio.Event()
 
-    def _on_push(data: PilotParser) -> None:
+    def _on_push(data: List[Optional[PilotParser]]) -> None:
         nonlocal last_data
         last_data = data
         data_event.set()
@@ -123,10 +123,10 @@ async def test_push_updates(socket_push: wizlight) -> None:
         ("127.0.0.1", push_port),
     )
     await asyncio.wait_for(data_event.wait(), timeout=1)
-    assert last_data.pilotResult == params
+    assert last_data and last_data[0] and last_data[0].pilotResult == params
     update = await socket_push.updateState()
-    assert update is not None
-    assert update.pilotResult == params
+    assert update is not None and update[0] is not None
+    assert update[0].pilotResult == params
     assert await socket_push.get_power() == 0.660
 
     diagnostics = socket_push.diagnostics

@@ -24,11 +24,11 @@ async def squire() -> AsyncGenerator[wizlight, None]:
 async def test_setting_ratio(squire: wizlight) -> None:
     """Test setting ratio."""
     await squire.set_ratio(50)
-    state = await squire.updateState()
-    assert state and state.get_ratio() == 50
+    states = await squire.updateState()
+    assert states and states[0] and states[0].get_ratio() == 50
     await squire.turn_on(PilotBuilder(ratio=20))
-    state = await squire.updateState()
-    assert state and state.get_ratio() == 20
+    states = await squire.updateState()
+    assert states and states[0] and states[0].get_ratio() == 20
     with pytest.raises(ValueError):
         await squire.set_ratio(500)
 
