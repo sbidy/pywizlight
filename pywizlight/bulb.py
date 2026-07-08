@@ -274,8 +274,7 @@ class PilotBuilder:
         percent = hex_to_percent(value)
         if percent > 101:
             raise ValueError("Max value can be 100% with 255.")
-        # hardware limitation - values less than 10% are not supported
-        self.pilot_params["dimming"] = max(10, percent)
+        self.pilot_params["dimming"] = max(1, percent)
 
     def _set_colortemp(self, kelvin: int) -> None:
         """Set the color temperature for the white led in the bulb."""
