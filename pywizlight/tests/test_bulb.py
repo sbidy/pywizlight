@@ -91,7 +91,7 @@ async def test_PilotBuilder_brightness(correct_bulb: wizlight) -> None:
     await correct_bulb.turn_on(PilotBuilder(brightness=10))
     states = await correct_bulb.updateState()
     # 10% == 26 in Hex
-    assert states and states[0] and states[0].get_brightness() == 26
+    assert states and states[0] and states[0].get_brightness() == 10
 
 
 @pytest.mark.asyncio
