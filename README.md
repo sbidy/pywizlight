@@ -23,7 +23,7 @@ https://docs.pro.wizconnected.com/#introduction
 pip install pywizlight
 ```
 
-**Note:** Requires Python version `>=3.7`.
+**Note:** Requires Python version `>=3.11`.
 
 ### Fedora/CentOS
 
