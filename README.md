@@ -13,7 +13,7 @@
 
 A Python connector for [WiZ](https://www.wizconnected.com/en/consumer/) devices.
 
-# Wiz Ligt API Documentation
+# Wiz Light API Documentation
 
 https://docs.pro.wizconnected.com/#introduction
 
