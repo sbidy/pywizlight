@@ -124,7 +124,7 @@ python -m pywizlight.cli status 192.168.1.10
 - `on` - Turn bulb on with optional settings (brightness, color temp, RGB, scene)
 - `off` - Turn bulb off
 - `color` - Set RGB color
-- `scene` - Set predefined scene (1-35)
+- `scene` - Set predefined scene
 - `brightness` - Set brightness level (0-255)
 - `status` - Get current bulb state
 
@@ -241,7 +241,7 @@ Commands:
   discover    Discover bulbs in the local network.
   off         Turn bulb off.
   on          Turn bulb on with optional color/brightness settings.
-  scene       Set bulb to a predefined scene (1-35).
+  scene       Set bulb to a predefined scene.
   status      Get bulb status and current settings.
 ```
 
@@ -279,7 +279,7 @@ The discovery works with a UDP Broadcast request and collects all bulbs in the n
 
 ## Bulb paramters (UDP RAW)
 
-- **sceneId** - calls one of the predefined scenes (int from 1 to 35) [List of names in code](https://github.com/sbidy/pywizlight/blob/master/pywizlight/scenes.py)
+- **sceneId** - calls one of the predefined scenes [List of names in code](https://github.com/sbidy/pywizlight/blob/master/pywizlight/scenes.py)
 - **speed** - sets the color changing speed in percent
 - **dimming** - sets the dimmer of the bulb in percent
 - **temp** - sets the color temperature in kelvins

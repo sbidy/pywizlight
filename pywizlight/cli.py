@@ -59,7 +59,7 @@ async def discover(broadcast: str) -> None:
 @click.option("--rgb", help="RGB color as 'r,g,b' (e.g., '255,0,0' for red)")
 @click.option("--rgbw", help="RGBW color as 'r,g,b,w' (e.g., '255,0,0,255')")
 @click.option("--rgbww", help="RGBWW color as 'r,g,b,c,w' (e.g., '255,0,0,255,255')")
-@click.option("--scene", "-s", type=int, help="Scene ID (1-35)")
+@click.option("--scene", "-s", type=int, help="Scene ID")
 @click.option("--device", "-d", type=int, help="Device 1 or 2")
 async def turn_on(
     ip: str,
@@ -216,7 +216,7 @@ async def status(ip: str, device: int) -> None:
 @click.option("--speed", "-s", type=int, default=128)
 @click.option("--device", "-d", type=int, help="Device 1 or 2")
 async def set_scene(ip: str, scene_id: int, speed: int, device: int) -> None:
-    """Set bulb to a predefined scene (1-35)."""
+    """Set bulb to a predefined scene."""
     bulb = wizlight(ip)
 
     try:
