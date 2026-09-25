@@ -46,6 +46,9 @@ MAX_TIME_BETWEEN_PUSH = PUSH_KEEP_ALIVE_INTERVAL + TIMEOUT
 
 NEVER_TIME = -120.0
 
+# Minimum dimming for bulbs that don't report minDimLevel in getModelConfig
+DEFAULT_MIN_DIMMING = 10
+
 
 RGB_ORDER = ["r", "g", "b"]
 RGB_COLORS = set(RGB_ORDER)
@@ -564,6 +567,7 @@ class wizlight:
         self.mac = mac
         self.bulbtype: Optional[BulbType] = None
         self.modelConfig: Optional[Dict] = None
+        self.model_config_supported: Optional[bool] = None
         self.whiteRange: Optional[List[float]] = None
         self.extwhiteRange: Optional[List[float]] = None
         self.fanSpeedRange: Optional[int] = None
@@ -861,7 +865,7 @@ class wizlight:
         msg = pilot_builder.set_pilot_message(state=True)
         if device is not None:
             msg["params"]["devices"] = device
-        await self.send(msg)
+        await self.send(await self._clamp_dimming(msg))
 
     async def set_state(self, pilot_builder: PilotBuilder = PilotBuilder()) -> None:
         """Set the state of the bulb with defined message. Doesn't turn on the light.
@@ -870,7 +874,27 @@ class wizlight:
         :type pilot_builder: [type], optional
         """
         # TODO: self.status could be None, in which case casting it to a bool might not be what we really want
-        await self.send(pilot_builder.set_state_message(bool(self.status)))
+        await self.send(
+            await self._clamp_dimming(
+                pilot_builder.set_state_message(bool(self.status))
+            )
+        )
+
+    async def get_min_dimming(self) -> int:
+        """Return the lowest dimming percentage the bulb supports."""
+        model_config = await self.getModelConfig()
+        model_result = model_config.get("result", {}) if model_config else {}
+        return int(model_result.get("minDimLevel", DEFAULT_MIN_DIMMING))
+
+    async def _clamp_dimming(self, msg: Dict) -> Dict:
+        """Raise dimming in a pilot message to the bulb's minimum."""
+        params = msg["params"]
+        if "dimming" not in params:
+            return msg
+        min_dimming = await self.get_min_dimming()
+        if params["dimming"] >= min_dimming:
+            return msg
+        return {**msg, "params": {**params, "dimming": min_dimming}}
 
     async def get_power(self) -> Optional[float]:
         """Get watts from the device."""
@@ -1020,11 +1044,13 @@ class wizlight:
         """Return the new model capabilities from the bulb.
         Only available in bulb FW >1.22!
         """
-        if self.modelConfig is None:
-            with contextlib.suppress(WizLightMethodNotFound):
+        if self.modelConfig is None and self.model_config_supported is not False:
+            try:
                 self.modelConfig = await self.send(
                     {"method": "getModelConfig", "params": {}}
                 )
+            except WizLightMethodNotFound:
+                self.model_config_supported = False
         return self.modelConfig
 
     async def getUserConfig(self) -> BulbResponse:
