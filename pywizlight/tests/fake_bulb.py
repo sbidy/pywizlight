@@ -181,6 +181,70 @@ MODULE_CONFIGS = {  # AKA getModelConfig
             "wizc2": {"mode": [0, 0, 0, 0, 0, 0, 0]},
         },
     },
+    ("ESP24_SHRGB_01", "1.38.0"): {
+        "method": "getModelConfig",
+        "env": "pro",
+        "result": {
+            "devTotal": 1,
+            "headTotal": 1,
+            "swHead": 0,
+            "ps": 2,
+            "hasGradient": 1,
+            "nightLightOff": 0,
+            "minDimLevel": 10,
+            "devices": 1,
+            "devType": 0,
+            "lightType": 1,
+            "pwmFreq": 1000,
+            "pwmRes": 11,
+            "pwmRange": [0, 100],
+            "pwmRanges": [0, 1000, 0, 1000, 0, 1000, 0, 1000, 0, 1000],
+            "wcr": 30,
+            "nowc": 2,
+            "cctRange": [2200, 2700, 6000, 6500],
+            "renderFactor": [255, 255, 140, 255, 10, 30, 40, 0, 0, 0],
+            "wizc1": {"mode": [0, 0, 0, 0, 0, 0, 4000], "opts": {"dim": 100}},
+            "wizc2": {"mode": [11, 0, 0, 0, 0, 0, 0], "opts": {"dim": 100}},
+            "drvIface": 0,
+        },
+    },
+    ("ESP25_SHRGB_01", "1.38.0"): {
+        "method": "getModelConfig",
+        "env": "pro",
+        "result": {
+            "devTotal": 1,
+            "headTotal": 1,
+            "swHead": 0,
+            "ps": 3,
+            "hasGradient": 1,
+            "nightLightOff": 0,
+            "wifiMaxTxPower": 18,
+            "minDimLevel": 1,
+            "devices": 1,
+            "devType": 0,
+            "lightType": 1,
+            "pwmFreq": 1000,
+            "pwmRes": 13,
+            "pwmRange": [0, 100],
+            "pwmRanges": [0, 1000, 0, 1000, 0, 1000, 0, 1000, 0, 1000],
+            "wcr": 60,
+            "nowc": 1,
+            "cctRange": [2200, 2700, 6500, 6500],
+            "renderFactor": [255, 140, 130, 255, 0, 0, 40, 150, 255, 230],
+            "wizc1": {"mode": [0, 0, 0, 0, 0, 0, 0]},
+            "wizc2": {"mode": [0, 0, 0, 0, 0, 0, 0]},
+            "drvIface": 4,
+            "i2cDrv": [
+                {
+                    "chip": "BP5758D",
+                    "addr": 255,
+                    "freq": 200,
+                    "curr": [20, 12, 11, 46, 44],
+                    "output": [2, 1, 3, 4, 5],
+                }
+            ],
+        },
+    },
 }
 
 SYSTEM_CONFIGS: Dict[Tuple[str, str], Any] = {  # AKA getSystemConfig
@@ -562,6 +626,34 @@ SYSTEM_CONFIGS: Dict[Tuple[str, str], Any] = {  # AKA getSystemConfig
             "ping": 0,
         },
     },
+    ("ESP24_SHRGB_01", "1.38.0"): {
+        "method": "getSystemConfig",
+        "env": "pro",
+        "result": {
+            "mac": "444f8ea9887a",
+            "homeId": "**REDACTED**",
+            "roomId": "**REDACTED**",
+            "rgn": "eu",
+            "moduleName": "ESP24_SHRGB_01",
+            "fwVersion": "1.38.0",
+            "groupId": 0,
+            "ping": 0,
+        },
+    },
+    ("ESP25_SHRGB_01", "1.38.0"): {
+        "method": "getSystemConfig",
+        "env": "pro",
+        "result": {
+            "mac": "cc4085af1f78",
+            "homeId": "**REDACTED**",
+            "roomId": "**REDACTED**",
+            "rgn": "eu",
+            "moduleName": "ESP25_SHRGB_01",
+            "fwVersion": "1.38.0",
+            "groupId": 0,
+            "ping": 0,
+        },
+    },
 }
 
 USER_CONFIGS: Dict[Tuple[str, str], Any] = {  # AKA getUserConfig
@@ -824,7 +916,7 @@ class BulbUDPRequestHandler:
             return
 
         method = str(json_data["method"])
-        if method == "setPilot":
+        if method in ("setPilot", "setState"):
             return_data = self.setPilot(json_data)
             self.transport.sendto(return_data, addr)
         elif method == "getPilot":
@@ -868,7 +960,16 @@ class BulbUDPRequestHandler:
         """Change the values in the state."""
         for name, value in json_data["params"].items():
             self.pilot_state["result"][name] = value
-        return b'{"method":"setPilot","env":"pro","result":{"success":true}}'
+        return bytes(
+            json.dumps(
+                {
+                    "method": json_data["method"],
+                    "env": "pro",
+                    "result": {"success": True},
+                }
+            ),
+            "utf-8",
+        )
 
 
 async def make_udp_fake_bulb_server(
