@@ -19,7 +19,12 @@ from pywizlight.protocol import WizProtocol
 from pywizlight.push_manager import PushManager
 from pywizlight.rgbcw import hs2rgbcw, rgb2rgbcw
 from pywizlight.scenes import SCENES, SCENES_BY_CLASS
-from pywizlight.utils import hex_to_percent, percent_to_hex, to_wiz_json
+from pywizlight.utils import (
+    hex_to_percent,
+    percent_to_hex,
+    sign_request,
+    to_wiz_json,
+)
 from pywizlight.vec import Vector
 
 _LOGGER = logging.getLogger(__name__)
@@ -556,10 +561,17 @@ class wizlight:
         ip: str,
         port: int = PORT,
         mac: Optional[str] = None,
+        signing_key: Optional[str] = None,
     ) -> None:
-        """Create instance with the IP address of the bulb."""
+        """Create instance with the IP address of the bulb.
+
+        signing_key is the udp_signing_key from the WiZ app's local
+        integration export. Newer firmware rejects unsigned setPilot
+        requests without it.
+        """
         self.ip = ip
         self.port = port
+        self.signing_key = bytes.fromhex(signing_key) if signing_key else None
         self.state: List[Optional[PilotParser]] = []
         self.mac = mac
         self.bulbtype: Optional[BulbType] = None
@@ -1060,6 +1072,8 @@ class wizlight:
     async def send(self, msg_dict: Dict) -> BulbResponse:
         """Serialize a dict to json and send it to device over UDP."""
         self.history.message(HISTORY_SEND, msg_dict)
+        if self.signing_key:
+            msg_dict = sign_request(msg_dict, self.signing_key)
         message = to_wiz_json(msg_dict)
         await self._ensure_connection()
         assert self.transport is not None

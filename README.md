@@ -158,6 +158,8 @@ async def main():
     light = wizlight("192.168.1.27")
     # Set up the light with a custom port
     #light = wizlight("your bulb's IP address", port=12345)
+    # Newer firmware needs the signing key from the WiZ app (see below)
+    #light = wizlight("192.168.1.27", signing_key="<udp_signing_key>")
 
     # The following calls need to be done inside an asyncio coroutine
     # to run them from normal synchronous code, you can wrap them with
@@ -291,6 +293,18 @@ The discovery works with a UDP Broadcast request and collects all bulbs in the n
 - **id** - the bulb id
 - **state** - whether it's on or off
 - **schdPsetId** - rhythm id of the room
+
+## Signed requests (newer firmware)
+
+Some newer firmware answers every request with `"env":"pro"` and a `hmac` field. On those devices reads still work, but `setPilot` without a signature fails with `-32602 Invalid params`, and a bad signature fails with `-32605 Security error`.
+
+The key comes from the WiZ app, which can export your home for local integration as a JSON file. Pass its `udp_signing_key` value (32 hex characters, one per home) as `signing_key`:
+
+```python
+light = wizlight("192.168.1.27", signing_key="<udp_signing_key>")
+```
+
+Each request then gets `sigTs` (unix time) added to `params`, plus `"env":"pro"` and `hmac`, which is base64 HMAC-SHA256 of the compact `params` JSON keyed with the hex-decoded key. The bulb rejects a `sigTs` about a minute old, so the host clock needs to be right.
 
 ## Async I/O
 
