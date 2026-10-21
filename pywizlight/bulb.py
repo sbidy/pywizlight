@@ -19,7 +19,12 @@ from pywizlight.protocol import WizProtocol
 from pywizlight.push_manager import PushManager
 from pywizlight.rgbcw import hs2rgbcw, rgb2rgbcw
 from pywizlight.scenes import SCENES, SCENES_BY_CLASS
-from pywizlight.utils import hex_to_percent, percent_to_hex, to_wiz_json
+from pywizlight.utils import (
+    get_source_ip,
+    hex_to_percent,
+    percent_to_hex,
+    to_wiz_json,
+)
 from pywizlight.vec import Vector
 
 _LOGGER = logging.getLogger(__name__)
@@ -610,9 +615,19 @@ class wizlight:
     # ------------------ Non properties -------------- #
 
     async def _ensure_connection(self) -> None:
-        """Ensure we are connected."""
+        """Ensure we are connected over the current route."""
         if self.transport:
-            return
+            if not self.transport.is_closing():
+                source_ip = get_source_ip(self.ip)
+                if (
+                    source_ip is None
+                    or self.transport.get_extra_info("sockname")[0] == source_ip
+                ):
+                    return
+                _LOGGER.debug(
+                    "%s: Source address changed to %s, reconnecting", self.ip, source_ip
+                )
+            self._close_connection()
         transport_proto = await self.loop.create_datagram_endpoint(
             lambda: WizProtocol(on_response=self._on_response, on_error=self._on_error),
             remote_addr=(self.ip, self.port),
@@ -625,6 +640,13 @@ class wizlight:
             _LOGGER.debug("Resolved %s:%s to %s:%s", self.ip, self.port, ip, port)
             self.ip, self.port = ip, port
 
+    def _close_connection(self) -> None:
+        """Close the transport so the next request reconnects."""
+        if self.transport:
+            self.transport.close()
+        self.transport = None
+        self.protocol = None
+
     def register(self) -> None:
         """Call register to keep alive push updates."""
         if self.push_running:
@@ -634,6 +656,8 @@ class wizlight:
 
     async def _async_send_register(self, message: dict) -> None:
         """Send the registration message."""
+        if source_ip := get_source_ip(self.ip):
+            message = {**message, "params": {**message["params"], "phoneIp": source_ip}}
         try:
             await self.send(message)
         except (WizLightTimeOutError, WizLightConnectionError) as ex:
@@ -1061,9 +1085,10 @@ class wizlight:
         """Serialize a dict to json and send it to device over UDP."""
         self.history.message(HISTORY_SEND, msg_dict)
         message = to_wiz_json(msg_dict)
-        await self._ensure_connection()
-        assert self.transport is not None
         async with self.lock:
+            await self._ensure_connection()
+            assert self.transport is not None
+            connection_failed = False
             self.response_method = msg_dict["method"]
             self.response_future = asyncio.Future()
             send_task = asyncio.create_task(
@@ -1076,8 +1101,10 @@ class wizlight:
                     asyncio.shield(self.response_future), timeout=TIMEOUT
                 )
             except OSError as ex:
+                connection_failed = True
                 raise WizLightConnectionError(str(ex)) from ex
             except asyncio.TimeoutError:
+                connection_failed = True
                 _LOGGER.debug(
                     "%s: Timed out waiting for response to %s after %s tries.",
                     self.ip,
@@ -1091,6 +1118,8 @@ class wizlight:
                     send_task.cancel()
                     with contextlib.suppress(asyncio.CancelledError):
                         await send_task
+                if connection_failed:
+                    self._close_connection()
         self.history.message(HISTORY_RECIEVE, resp)
         if "error" in resp:
             if resp["error"]["code"] == -32601:
@@ -1104,9 +1133,7 @@ class wizlight:
 
     def _async_close(self):
         self.push_running = False
-        if self.transport:
-            self.transport.close()
-            self.transport = None
+        self._close_connection()
         if self.push_cancel:
             self.push_cancel()
             self.push_cancel = None
