@@ -18,7 +18,7 @@ from pywizlight.models import DiscoveredBulb
 from pywizlight.protocol import WizProtocol
 from pywizlight.push_manager import PushManager
 from pywizlight.rgbcw import hs2rgbcw, rgb2rgbcw
-from pywizlight.scenes import SCENES, SCENES_BY_CLASS
+from pywizlight.scenes import SCENES, SCENES_BY_CLASS, SYNC_SCENES
 from pywizlight.utils import (
     hex_to_percent,
     percent_to_hex,
