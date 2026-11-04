@@ -1,6 +1,6 @@
 """Definition of the supported bulb effects."""
 
-from typing import Dict, Iterable, List, cast
+from typing import Dict, List
 
 from pywizlight.bulblibrary import BulbClass
 
@@ -47,12 +47,21 @@ SCENES = {
 }
 for i in range(1, 11):
     SCENES[255 + i] = f"Custom Mode {i}"
+SYNC_SCENES = {
+    201: "Cinematic",
+    202: "Vibrant",
+    203: "Rhythmic",
+    204: "Relaxation",
+}
+SCENES.update(SYNC_SCENES)
 SCENE_NAME_TO_ID = {scene_name: scene_id for (scene_id, scene_name) in SCENES.items()}
 TW_SCENES = [6, 9, 10, 11, 12, 13, 14, 15, 16, 18, 29, 30, 31, 32, 33, 35, 40]
 DW_SCENES = [9, 10, 14, 29, 31, 32, 34, 35]
 
 SCENES_BY_CLASS: Dict[BulbClass, List[str]] = {
-    BulbClass.RGB: list(cast(Iterable, SCENES.values())),
+    BulbClass.RGB: [
+        name for scene_id, name in SCENES.items() if scene_id not in SYNC_SCENES
+    ],
     BulbClass.TW: [SCENES[key] for key in TW_SCENES],
     BulbClass.DW: [SCENES[key] for key in DW_SCENES],
 }

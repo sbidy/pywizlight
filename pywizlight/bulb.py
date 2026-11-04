@@ -18,7 +18,7 @@ from pywizlight.models import DiscoveredBulb
 from pywizlight.protocol import WizProtocol
 from pywizlight.push_manager import PushManager
 from pywizlight.rgbcw import hs2rgbcw, rgb2rgbcw
-from pywizlight.scenes import SCENES, SCENES_BY_CLASS
+from pywizlight.scenes import SCENES, SCENES_BY_CLASS, SYNC_SCENES
 from pywizlight.utils import hex_to_percent, percent_to_hex, to_wiz_json
 from pywizlight.vec import Vector
 
@@ -818,7 +818,18 @@ class wizlight:
         if self.bulbtype is None:
             await self.get_bulbtype()
         assert self.bulbtype  # Should have gotten set by get_bulbtype
-        return SCENES_BY_CLASS.get(self.bulbtype.bulb_type, [])
+        scenes = SCENES_BY_CLASS.get(self.bulbtype.bulb_type, [])
+        model_result = self.modelConfig.get("result", {}) if self.modelConfig else {}
+        if isinstance(algorithms := model_result.get("syncboxAlgos"), dict):
+            return scenes + [
+                name
+                for scene_id, name in SYNC_SCENES.items()
+                if str(scene_id) in algorithms
+            ]
+        # Older sync-box firmware does not advertise individual algorithms.
+        if "syncboxIfaces" in model_result or "syncboxTvSize" in model_result:
+            return scenes + list(SYNC_SCENES.values())
+        return scenes
 
     async def turn_off(self, device: Optional[int] = None) -> None:
         """Turn the light off."""

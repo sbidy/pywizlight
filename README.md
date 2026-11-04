@@ -273,6 +273,18 @@ Bulb 192.168.1.10 status:
 
 Run `python -m pywizlight.cli COMMAND --help` for detailed command options.
 
+## HDMI sync box scenes
+
+WiZ HDMI sync boxes support Cinematic (201), Vibrant (202), Rhythmic (203),
+and Relaxation (204) through `PilotBuilder(scene=...)`. `PilotParser.get_scene()`
+reports the corresponding name when the box returns one of these scene IDs.
+
+`getSupportedScenes()` includes the sync modes advertised by `syncboxAlgos`
+in the device's model configuration. For firmware without that map, the presence
+of `syncboxIfaces` or `syncboxTvSize` enables the four modes. Ordinary RGB bulbs
+keep their existing scene list. Selecting a normal lighting scene returns the
+box to regular lighting.
+
 ## Discovery
 
 The discovery works with a UDP Broadcast request and collects all bulbs in the network.
