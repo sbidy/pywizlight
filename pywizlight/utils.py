@@ -1,8 +1,12 @@
+import base64
+import hashlib
+import hmac
 import json
 import logging
 import random
 import socket
-from typing import Optional, cast
+import time
+from typing import Any, Dict, Optional, cast
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -20,6 +24,28 @@ def percent_to_hex(percent: float) -> int:
 def to_wiz_json(dump_obj):
     """Convert an object to wiz json."""
     return json.dumps(dump_obj, separators=(",", ":"))
+
+
+def sign_request(
+    msg: Dict[str, Any], signing_key: bytes, timestamp: Optional[int] = None
+) -> Dict[str, Any]:
+    """Sign a request for firmware that answers with "env":"pro".
+
+    The HMAC-SHA256 covers the compact JSON of params, with sigTs (unix
+    seconds) added to params. The key is the hex-decoded udp_signing_key
+    from the WiZ app's local integration export.
+    """
+    params = dict(msg.get("params", {}))
+    params["sigTs"] = int(time.time()) if timestamp is None else timestamp
+    digest = hmac.new(
+        signing_key, to_wiz_json(params).encode("utf-8"), hashlib.sha256
+    ).digest()
+    return {
+        "method": msg["method"],
+        "env": "pro",
+        "params": params,
+        "hmac": base64.b64encode(digest).decode("ascii"),
+    }
 
 
 def create_udp_broadcast_socket(listen_port: int) -> socket.socket:
