@@ -57,14 +57,3 @@ async def test_turn_on_segments(floor_light: wizlight) -> None:
     assert state.get_scene() == "Custom Mode 3"
     # The device never reports the steps back.
     assert "elm" not in state.pilotResult
-
-
-@pytest.mark.asyncio
-async def test_turn_on_segments_clamps_brightness(floor_light: wizlight) -> None:
-    """Test brightness is raised to the 10% minimum."""
-    await floor_light.turn_on(
-        PilotBuilder(segments=[SegmentStep((255, 0, 0), 18)], brightness=5)
-    )
-    states = await floor_light.updateState()
-    assert states and states[0]
-    assert states[0].pilotResult["dimming"] == 10

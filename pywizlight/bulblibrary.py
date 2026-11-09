@@ -206,7 +206,6 @@ class BulbType:
         segment_count = None
         if (
             isinstance(sw_head, int)
-            and not isinstance(sw_head, bool)
             and sw_head > 1
             and bulb_type == BulbClass.RGB
             and not dual_head

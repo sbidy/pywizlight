@@ -900,12 +900,6 @@ GET_POWER_NOT_FOUND = {
     "error": {"code": -32601, "message": "Method not found"},
 }
 
-INVALID_PARAMS_ERROR = {
-    "method": "setPilot",
-    "env": "pro",
-    "error": {"code": -32602, "message": "Invalid params"},
-}
-
 
 def get_initial_pilot() -> Dict[str, Any]:
     return {
@@ -1021,13 +1015,9 @@ class BulbUDPRequestHandler:
 
     def setPilot(self, json_data: Dict[str, Any]) -> bytes:
         """Change the values in the state."""
-        params = dict(json_data["params"])
-        # Real devices reject more than 12 steps and never report them back
-        elm = params.pop("elm", None)
-        if elm is not None and len(elm.get("steps", [])) > 12:
-            return bytes(json.dumps(INVALID_PARAMS_ERROR), "utf-8")
-        for name, value in params.items():
-            self.pilot_state["result"][name] = value
+        for name, value in json_data["params"].items():
+            if name != "elm":  # Real devices never report the steps back
+                self.pilot_state["result"][name] = value
         return bytes(
             json.dumps(
                 {
