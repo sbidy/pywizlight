@@ -4,8 +4,9 @@ from typing import Optional
 
 import pytest
 
-from pywizlight import PilotBuilder, SegmentStep, steps_from_colors
+from pywizlight import PilotBuilder
 from pywizlight.bulblibrary import BulbType
+from pywizlight.segments import SegmentStep
 
 RED = (255, 0, 0)
 BLUE = (0, 0, 255)
@@ -35,16 +36,17 @@ def test_pilot_builder_segments() -> None:
     }
 
 
-def test_steps_from_colors() -> None:
+def test_segment_colors() -> None:
     """Test neighbors with the same color are merged into one step."""
-    assert steps_from_colors([RED] * 9 + [BLUE] * 9) == [
-        SegmentStep(RED, 9),
-        SegmentStep(BLUE, 9),
-    ]
+    builder = PilotBuilder(segment_colors=[RED] * 9 + [BLUE] * 9)
+    expected = PilotBuilder(segments=[SegmentStep(RED, 9), SegmentStep(BLUE, 9)])
+    assert builder.pilot_params == expected.pilot_params
     with pytest.raises(ValueError):
-        steps_from_colors([RED, BLUE] * 6 + [RED])  # 13 runs
+        PilotBuilder(segment_colors=[RED, BLUE] * 6 + [RED])  # 13 runs
     with pytest.raises(ValueError):
-        steps_from_colors([])
+        PilotBuilder(segment_colors=[])
+    with pytest.raises(ValueError):
+        PilotBuilder(segment_colors=[RED], segments=[SegmentStep(RED)])
 
 
 def test_invalid_segments() -> None:

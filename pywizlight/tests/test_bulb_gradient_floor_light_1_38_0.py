@@ -4,8 +4,9 @@ from typing import AsyncGenerator
 
 import pytest
 
-from pywizlight import PilotBuilder, SegmentStep, wizlight
+from pywizlight import PilotBuilder, wizlight
 from pywizlight.bulblibrary import BulbClass, BulbType, Features, KelvinRange
+from pywizlight.segments import SegmentStep
 from pywizlight.tests.fake_bulb import startup_bulb
 
 
