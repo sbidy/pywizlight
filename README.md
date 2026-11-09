@@ -287,6 +287,50 @@ of `syncboxIfaces` or `syncboxTvSize` enables the four modes. Ordinary RGB bulbs
 keep their existing scene list. Selecting a normal lighting scene returns the
 box to regular lighting.
 
+## Per-segment color
+
+Lights with individually addressable segments, such as the Gradient Floor Light
+and RGBIC light strips, can show a different color on each run of segments:
+
+```python
+from pywizlight import PilotBuilder, wizlight
+from pywizlight.segments import SegmentStep
+
+light = wizlight("192.168.1.27")
+bulb_type = await light.get_bulbtype()
+print(bulb_type.segment_count)  # 18 on the Gradient Floor Light, None on bulbs
+
+# Bottom third orange, middle purple, top green
+await light.turn_on(PilotBuilder(segments=[
+    SegmentStep((255, 132, 0), width=6),
+    SegmentStep((187, 0, 255), width=6),
+    SegmentStep((149, 255, 0), width=6, brightness=50),
+]))
+
+# Or one color per segment; neighbors with the same color are merged
+colors = [(255, 0, 0)] * 9 + [(0, 0, 255)] * 9
+await light.turn_on(PilotBuilder(segment_colors=colors))
+```
+
+WiZ does not document this. What follows was confirmed on an `ESP25_MHORGB_01`
+with firmware 1.38.0:
+
+- The request is `{"sceneId": 258, "elm": {"modifier": 100, "support": 17, "steps": [...]}}`,
+  where each step is `[0, R, G, B, 0, 0, 0, brightness, 0, 0, 0, 0, width]`.
+- Steps are laid down from the start of the light (the bottom of the floor
+  light). `width` counts segments; segments past the total stay dark.
+  `brightness` is per step, in percent, and 0 is dark.
+- The light accepts at most 12 steps and rejects more with `-32602`, so
+  `segment_colors` with more than 12 runs raises `ValueError`.
+- `getPilot` then reports scene 258 ("Custom Mode 3") but never the steps.
+  A brightness change keeps the segments. A color or color temperature replaces them.
+- `segment_count` is the `swHead` value from `getModelConfig`. Single-zone bulbs
+  report 0 or leave it out. Whether a cut strip reports its new length is not
+  yet known.
+- On an RGBIC strip, a custom mode slot holding a light mode saved in the WiZ
+  app was reported to play that mode and ignore the steps, so slot 258 has to
+  be left empty in the app.
+
 ## Discovery
 
 The discovery works with a UDP Broadcast request and collects all bulbs in the network.
@@ -305,6 +349,7 @@ The discovery works with a UDP Broadcast request and collects all bulbs in the n
 - **id** - the bulb id
 - **state** - whether it's on or off
 - **schdPsetId** - rhythm id of the room
+- **elm** - per-segment color steps, sent with a custom mode `sceneId` (see [Per-segment color](#per-segment-color))
 
 ## Signed requests (newer firmware)
 

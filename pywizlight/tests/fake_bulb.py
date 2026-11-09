@@ -245,6 +245,47 @@ MODULE_CONFIGS = {  # AKA getModelConfig
             ],
         },
     },
+    # WiZ Gradient Floor Light, 18 addressable segments
+    ("ESP25_MHORGB_01", "1.38.0"): {
+        "method": "getModelConfig",
+        "env": "pro",
+        "result": {
+            "devTotal": 1,
+            "headTotal": 36,
+            "swHead": 18,
+            "ps": 1,
+            "hasGradient": 1,
+            "nightLightOff": 0,
+            "wifiMaxTxPower": 19,
+            "minDimLevel": 10,
+            "devices": 1,
+            "devType": 0,
+            "lightType": 6,
+            "pwmFreq": 200,
+            "pwmRes": 11,
+            "pwmRange": [0, 100],
+            "pwmRanges": [0, 1000, 0, 1000, 0, 1000, 0, 1000, 0, 1000],
+            "wcr": 20,
+            "nowc": 1,
+            "cctRange": [2700, 2700, 5500, 5500],
+            "renderFactor": [255, 240, 255, 220, 250, 105, 0, 170, 255, 175],
+            "wizc1": {"mode": [4, 0, 0, 0, 0, 0, 0], "opts": {"dim": 100, "spd": 100}},
+            "wizc2": {"mode": [7, 0, 0, 0, 0, 0, 0], "opts": {"dim": 100, "spd": 100}},
+            "drvIface": 6,
+            "rzDrv": [
+                {
+                    "chip": "WS2811",
+                    "speed": 800,
+                    "output": [1, 2, 3, 0, 0],
+                    "curr": [0, 0, 0, 0, 0],
+                }
+            ],
+            "dimCurve": 1,
+            "hasPilotButton": 1,
+            "pilotBtns": 1,
+            "hasCctTable": 12,
+        },
+    },
 }
 
 SYSTEM_CONFIGS: Dict[Tuple[str, str], Any] = {  # AKA getSystemConfig
@@ -654,6 +695,22 @@ SYSTEM_CONFIGS: Dict[Tuple[str, str], Any] = {  # AKA getSystemConfig
             "ping": 0,
         },
     },
+    ("ESP25_MHORGB_01", "1.38.0"): {
+        "method": "getSystemConfig",
+        "env": "pro",
+        "result": {
+            "mac": "6c2990000000",
+            "homeId": "**REDACTED**",
+            "roomId": "**REDACTED**",
+            "rgn": "eu",
+            "moduleName": "ESP25_MHORGB_01",
+            "fwVersion": "1.38.0",
+            "groupId": 0,
+            "ping": 0,
+            "accUdpPropRate": 100,
+            "rdIdUidHash": "**REDACTED**",
+        },
+    },
 }
 
 USER_CONFIGS: Dict[Tuple[str, str], Any] = {  # AKA getUserConfig
@@ -959,7 +1016,8 @@ class BulbUDPRequestHandler:
     def setPilot(self, json_data: Dict[str, Any]) -> bytes:
         """Change the values in the state."""
         for name, value in json_data["params"].items():
-            self.pilot_state["result"][name] = value
+            if name != "elm":  # Real devices never report the steps back
+                self.pilot_state["result"][name] = value
         return bytes(
             json.dumps(
                 {

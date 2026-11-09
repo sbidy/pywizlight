@@ -122,6 +122,8 @@ class BulbType:
     white_channels: Optional[int]
     white_to_color_ratio: Optional[int]
     fan_speed_range: Optional[int] = None
+    segment_count: Optional[int] = None
+    """Number of individually addressable segments, or None for single-zone lights."""
 
     def as_dict(self):
         """Convert to a dict."""
@@ -138,6 +140,7 @@ class BulbType:
         white_to_color_ratio: Optional[int],
         fan_speed_range: Optional[int],
         type_id: Optional[int],
+        sw_head: Optional[int] = None,
     ) -> "BulbType":
         if module_name:
             try:
@@ -199,6 +202,16 @@ class BulbType:
             **_BASE_FEATURE_MAP[bulb_type], dual_head=dual_head, effect=effect
         )
 
+        # swHead is the number of addressable segments (18 on ESP25_MHORGB_01)
+        segment_count = None
+        if (
+            isinstance(sw_head, int)
+            and sw_head > 1
+            and bulb_type == BulbClass.RGB
+            and not dual_head
+        ):
+            segment_count = sw_head
+
         return BulbType(
             bulb_type=bulb_type,
             name=module_name,
@@ -208,4 +221,5 @@ class BulbType:
             white_channels=white_channels,
             white_to_color_ratio=white_to_color_ratio,
             fan_speed_range=fan_speed_range,
+            segment_count=segment_count,
         )
