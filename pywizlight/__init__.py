@@ -3,6 +3,7 @@ from pywizlight.bulb import PilotBuilder, PilotParser, wizlight
 from pywizlight import discovery
 from pywizlight.scenes import SCENES
 from pywizlight.bulblibrary import BulbType
+from pywizlight.segments import SegmentStep, steps_from_colors
 
 __all__ = [
     "BulbType",
@@ -10,5 +11,7 @@ __all__ = [
     "PilotBuilder",
     "PilotParser",
     "SCENES",
+    "SegmentStep",
+    "steps_from_colors",
     "wizlight",
 ]

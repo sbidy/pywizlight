@@ -5,7 +5,7 @@ import contextlib
 import json
 import logging
 import time
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union, cast
+from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple, Union, cast
 
 from pywizlight._version import __version__ as pywizlight_version
 from pywizlight.bulblibrary import BulbType
@@ -19,6 +19,7 @@ from pywizlight.protocol import WizProtocol
 from pywizlight.push_manager import PushManager
 from pywizlight.rgbcw import hs2rgbcw, rgb2rgbcw
 from pywizlight.scenes import SCENES, SCENES_BY_CLASS, SYNC_SCENES
+from pywizlight.segments import SEGMENT_SCENE_ID, SegmentStep, build_elm
 from pywizlight.utils import (
     hex_to_percent,
     percent_to_hex,
@@ -165,9 +166,17 @@ class PilotBuilder:
         state: Optional[bool] = None,
         ratio: Optional[int] = None,
         device: Optional[int] = None,
+        segments: Optional[Sequence[SegmentStep]] = None,
     ) -> None:
         """Set the parameter."""
         self.pilot_params: Dict[str, Any] = {}
+        if segments is not None:
+            colors = (rgb, rgbw, rgbww, hucolor, colortemp, warm_white, cold_white)
+            if scene is not None or any(value is not None for value in colors):
+                raise ValueError(
+                    "segments cannot be combined with a scene, color or color temperature"
+                )
+            self._set_segments(segments)
         if state is not None:
             self.pilot_params["state"] = state
         if speed is not None:
@@ -206,6 +215,11 @@ class PilotBuilder:
         if state is not None:
             self.pilot_params["state"] = state
         return {"method": "setState", "params": self.pilot_params}
+
+    def _set_segments(self, segments: Sequence[SegmentStep]) -> None:
+        """Set a color per run of segments on a device with addressable segments."""
+        self.pilot_params["sceneId"] = SEGMENT_SCENE_ID
+        self.pilot_params["elm"] = build_elm(segments)
 
     def _set_device(self, value: int) -> None:
         """Set the device id of the command."""
@@ -780,6 +794,7 @@ class wizlight:
             white_to_color_ratio,
             fan_speed_range,
             type_id,
+            sw_head=model_result.get("swHead"),
         )
         return self.bulbtype
 
