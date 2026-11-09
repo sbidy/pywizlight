@@ -202,9 +202,7 @@ class BulbType:
             **_BASE_FEATURE_MAP[bulb_type], dual_head=dual_head, effect=effect
         )
 
-        # Lights with addressable segments report how many they have as swHead
-        # in getModelConfig: 18 on the Gradient Floor Light (ESP25_MHORGB_01).
-        # Single-zone bulbs report 0 or leave it out.
+        # swHead is the number of addressable segments (18 on ESP25_MHORGB_01)
         segment_count = None
         if (
             isinstance(sw_head, int)

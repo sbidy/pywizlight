@@ -1022,8 +1022,7 @@ class BulbUDPRequestHandler:
     def setPilot(self, json_data: Dict[str, Any]) -> bytes:
         """Change the values in the state."""
         params = dict(json_data["params"])
-        # Like real devices, reject more than 12 segment steps and never
-        # report the steps back in getPilot.
+        # Real devices reject more than 12 steps and never report them back
         elm = params.pop("elm", None)
         if elm is not None and len(elm.get("steps", [])) > 12:
             return bytes(json.dumps(INVALID_PARAMS_ERROR), "utf-8")

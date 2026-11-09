@@ -1,22 +1,6 @@
-"""Per-segment color for WiZ devices with individually addressable segments.
+"""Per-segment color for lights with addressable segments.
 
-Devices such as the Gradient Floor Light and RGBIC light strips accept a list
-of color steps in a custom mode slot. WiZ does not document the format; this
-is what has been confirmed on an ESP25_MHORGB_01 running firmware 1.38.0:
-
-    {"method": "setPilot", "params": {"sceneId": 258, "elm": {
-        "modifier": 100, "support": 17,
-        "steps": [[0, R, G, B, 0, 0, 0, DIM, 0, 0, 0, 0, WIDTH], ...]}}}
-
-- Steps are laid down from the start of the device (the bottom of the floor
-  light), each covering WIDTH segments. Segments past the sum of the widths
-  stay dark.
-- DIM is the brightness of the step in percent. 0 is dark.
-- The device accepts at most 12 steps and answers 13 or more with -32602.
-- getPilot reports sceneId 258 afterwards but never returns the steps.
-- A plain dimming change keeps the steps; a color or temperature leaves them.
-- modifier 100 with support 17 shows the colors as given. What the other
-  values and the zero fields in each step mean is not known.
+WiZ does not document the format; see "Per-segment color" in the README.
 """
 
 import dataclasses
@@ -26,33 +10,24 @@ MAX_SEGMENT_STEPS = 12
 """The most steps a device accepts in one request."""
 
 SEGMENT_SCENE_ID = 258
-"""Custom mode slot the steps are written to ("Custom Mode 3").
-
-On an RGBIC strip, a slot holding a light mode saved in the WiZ app was
-reported to play that mode and ignore the steps, so this needs to be a slot
-the app has left empty.
-"""
+"""Custom mode slot the steps are written to ("Custom Mode 3")."""
 
 _ELM_MODIFIER_STATIC = 100
 _ELM_SUPPORT = 17
 
 
 def _is_int(value: Any) -> bool:
+    """Return True for an int that is not a bool."""
     return isinstance(value, int) and not isinstance(value, bool)
 
 
 @dataclasses.dataclass(frozen=True)
 class SegmentStep:
-    """A run of adjacent segments that show one color.
-
-    :param rgb: red, green and blue, each 0-255
-    :param width: how many segments the step covers, at least 1
-    :param brightness: brightness of the step in percent, 0-100
-    """
+    """A run of adjacent segments that show one color."""
 
     rgb: Tuple[int, int, int]
-    width: int = 1
-    brightness: int = 100
+    width: int = 1  # number of segments
+    brightness: int = 100  # percent
 
     def __post_init__(self) -> None:
         """Reject values the device cannot show."""
@@ -86,11 +61,7 @@ def build_elm(steps: Sequence[SegmentStep]) -> Dict[str, Any]:
 
 
 def steps_from_colors(colors: Sequence[Tuple[int, int, int]]) -> List[SegmentStep]:
-    """Turn one color per segment into steps, merging neighbors that match.
-
-    The device takes at most 12 steps, so a list with more than 12 runs of
-    different colors cannot be shown and raises ValueError.
-    """
+    """Turn one color per segment into steps, merging neighbors that match."""
     steps: List[SegmentStep] = []
     for color in colors:
         rgb = cast(Tuple[int, int, int], tuple(color))

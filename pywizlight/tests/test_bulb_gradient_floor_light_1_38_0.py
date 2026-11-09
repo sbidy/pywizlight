@@ -1,4 +1,4 @@
-"""Tests for the Gradient Floor Light, a light with 18 addressable segments."""
+"""Tests for the Bulb API with a Gradient Floor Light."""
 
 from typing import AsyncGenerator
 
@@ -22,7 +22,7 @@ async def floor_light() -> AsyncGenerator[wizlight, None]:
 
 @pytest.mark.asyncio
 async def test_model_description(floor_light: wizlight) -> None:
-    """The segment count comes from swHead in the model config."""
+    """Test fetching the model description for a gradient floor light."""
     assert await floor_light.get_bulbtype() == BulbType(
         features=Features(
             color=True, color_tmp=True, effect=True, brightness=True, dual_head=False
@@ -39,7 +39,7 @@ async def test_model_description(floor_light: wizlight) -> None:
 
 @pytest.mark.asyncio
 async def test_turn_on_segments(floor_light: wizlight) -> None:
-    """Segments put the light in the custom mode slot."""
+    """Test turning on with segments."""
     await floor_light.turn_on(
         PilotBuilder(
             segments=[
@@ -61,7 +61,7 @@ async def test_turn_on_segments(floor_light: wizlight) -> None:
 
 @pytest.mark.asyncio
 async def test_turn_on_segments_clamps_brightness(floor_light: wizlight) -> None:
-    """Master dimming is raised to the light's minimum of 10%."""
+    """Test brightness is raised to the 10% minimum."""
     await floor_light.turn_on(
         PilotBuilder(segments=[SegmentStep((255, 0, 0), 18)], brightness=5)
     )

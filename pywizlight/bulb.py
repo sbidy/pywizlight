@@ -217,7 +217,7 @@ class PilotBuilder:
         return {"method": "setState", "params": self.pilot_params}
 
     def _set_segments(self, segments: Sequence[SegmentStep]) -> None:
-        """Set a color per run of segments on a device with addressable segments."""
+        """Set the segment color steps."""
         self.pilot_params["sceneId"] = SEGMENT_SCENE_ID
         self.pilot_params["elm"] = build_elm(segments)
 

@@ -13,13 +13,13 @@ BLUE = (0, 0, 255)
 
 
 def test_step_layout() -> None:
-    """A step puts color, brightness and width where the device reads them."""
+    """Test the position of color, brightness and width in a step."""
     step = SegmentStep((255, 132, 0), width=6, brightness=40)
     assert step.as_elm_step() == [0, 255, 132, 0, 0, 0, 0, 40, 0, 0, 0, 0, 6]
 
 
 def test_step_defaults() -> None:
-    """A step covers one segment at full brightness by default."""
+    """Test the step defaults."""
     assert SegmentStep(RED).as_elm_step() == [0, 255, 0, 0, 0, 0, 0, 100, 0, 0, 0, 0, 1]
 
 
@@ -40,13 +40,13 @@ def test_step_defaults() -> None:
     ],
 )
 def test_step_rejects_bad_values(kwargs: Dict[str, Any]) -> None:
-    """Values the device cannot show raise ValueError."""
+    """Test values the device cannot show are rejected."""
     with pytest.raises(ValueError):
         SegmentStep(**kwargs)
 
 
 def test_build_elm() -> None:
-    """The elm object carries the static modifier and the steps in order."""
+    """Test building the elm object."""
     elm = build_elm([SegmentStep(RED, 9), SegmentStep(BLUE, 9)])
     assert elm == {
         "modifier": 100,
@@ -59,7 +59,7 @@ def test_build_elm() -> None:
 
 
 def test_build_elm_step_count() -> None:
-    """Between 1 and 12 steps are accepted."""
+    """Test the step count limits."""
     assert len(build_elm([SegmentStep(RED)] * MAX_SEGMENT_STEPS)["steps"]) == 12
     with pytest.raises(ValueError):
         build_elm([])
@@ -68,7 +68,7 @@ def test_build_elm_step_count() -> None:
 
 
 def test_steps_from_colors_merges_runs() -> None:
-    """Neighboring segments with the same color become one wider step."""
+    """Test neighbors with the same color are merged."""
     assert steps_from_colors([RED] * 9 + [BLUE] * 9) == [
         SegmentStep(RED, 9),
         SegmentStep(BLUE, 9),
@@ -76,14 +76,14 @@ def test_steps_from_colors_merges_runs() -> None:
 
 
 def test_steps_from_colors_accepts_lists() -> None:
-    """Colors can be lists, as they arrive from JSON."""
+    """Test colors given as lists."""
     assert steps_from_colors([[255, 0, 0], [255, 0, 0]]) == [  # type: ignore[list-item]
         SegmentStep(RED, 2)
     ]
 
 
 def test_steps_from_colors_limits() -> None:
-    """Twelve runs fit; a thirteenth or an empty list does not."""
+    """Test the limits of steps_from_colors."""
     alternating: Tuple[Tuple[int, int, int], ...] = (RED, BLUE) * 6
     assert len(steps_from_colors(alternating)) == 12
     with pytest.raises(ValueError):
@@ -95,7 +95,7 @@ def test_steps_from_colors_limits() -> None:
 
 
 def test_pilot_builder_segments() -> None:
-    """Segments are written to the custom mode slot with the elm object."""
+    """Test the setPilot message for segments."""
     message = PilotBuilder(segments=[SegmentStep(RED, 18)]).set_pilot_message(
         state=True
     )
@@ -114,7 +114,7 @@ def test_pilot_builder_segments() -> None:
 
 
 def test_pilot_builder_segments_with_brightness() -> None:
-    """Brightness still sets the master dimming."""
+    """Test brightness with segments."""
     builder = PilotBuilder(segments=[SegmentStep(RED, 18)], brightness=128)
     assert builder.pilot_params["dimming"] == 50
     assert builder.pilot_params["sceneId"] == SEGMENT_SCENE_ID
@@ -134,13 +134,13 @@ def test_pilot_builder_segments_with_brightness() -> None:
     ],
 )
 def test_pilot_builder_segments_exclusive(kwargs: Dict[str, Any]) -> None:
-    """Segments replace the color, so they cannot be mixed with one."""
+    """Test segments cannot be combined with a color or scene."""
     with pytest.raises(ValueError):
         PilotBuilder(segments=[SegmentStep(RED)], **kwargs)
 
 
 def test_pilot_builder_too_many_segments() -> None:
-    """More than 12 steps is rejected before anything is sent."""
+    """Test more than 12 steps are rejected."""
     with pytest.raises(ValueError):
         PilotBuilder(segments=[SegmentStep(RED)] * 13)
 
@@ -166,5 +166,5 @@ def _bulb_type(module_name: str, sw_head: Any) -> BulbType:
     ],
 )
 def test_segment_count(module_name: str, sw_head: Any, expected: Any) -> None:
-    """Only color lights reporting more than one head get a segment count."""
+    """Test the segment count from swHead."""
     assert _bulb_type(module_name, sw_head).segment_count == expected
